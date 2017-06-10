@@ -16,7 +16,8 @@
 @property (nonatomic, strong) MBERenderer *renderer;
 
 @property (assign) float time;
-@property (nonatomic, strong) MBECube *cube;
+
+@property (nonatomic, strong) NSMutableArray <MBECube *> *objects;
 
 @end
 
@@ -28,7 +29,25 @@
 
 	_device = MTLCreateSystemDefaultDevice();
 	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
-	_cube = [[MBECube alloc] initWithDevice:self.device];
+	_objects = [NSMutableArray array];
+
+	int N = 9;
+	int low = -1*N/2;
+	int high = N/2+1;
+
+	for (int i=low; i<high; i++) {
+		for (int j=low; j<high; j++) {
+			for (int k=low; k<high; k++) {
+
+				MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
+				cube.x = i * 1.3;
+				cube.y = j * 1.3;
+				cube.z = k * 1.3;
+
+				[self.objects addObject:cube];
+			}
+		}
+	}
 
 	return self;
 }
@@ -48,9 +67,11 @@
 	self.time = CACurrentMediaTime();
 	float duration = self.time - prevTime;
 
-	[self.cube updateWithTime:self.time duration:duration viewProjectionMatrix:self.renderer.viewProjectionMatrix];
+	for (MBECube *cube in self.objects) {
+		[cube updateWithTime:self.time duration:duration viewProjectionMatrix:self.renderer.viewProjectionMatrix];
+	}
 
-	[self.renderer renderObjects:@[self.cube] MTKView:view];
+	[self.renderer renderObjects:self.objects MTKView:view];
 }
 
 #pragma mark - Input Handlers
