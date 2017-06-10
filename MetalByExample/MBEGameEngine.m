@@ -59,6 +59,19 @@
 	[self.renderer drawableSizeWillChange:size];
 }
 
+/**
+TODO
+ 1. Objects should move with velocity
+ 2. Objects should move with accelleration (there should be a concept of gravity or force source)
+ 3. Select object by clicking on it
+ 4. Outline object using stencil
+ 5. Create another primitive shape class (sphere?)
+ 6. Create 3d rectangle with dynamic height
+ 6. Create scene of cubes and allow user to navigate through scene (specify scene using DSL grid)
+ 7. Enable jumping (will require rudimentally collision detection)
+
+ */
+
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
 	[self.renderer blockUntilNextRender];
