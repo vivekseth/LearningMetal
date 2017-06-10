@@ -104,7 +104,7 @@ typedef struct {
 {
 	self.rotationX += duration * (M_PI / 2);
 	self.rotationY += duration * (M_PI / 3);
-	float scaleFactor = sinf(5 * time) * 0.25 + 1;
+	float scaleFactor = 0.2;
 	const vector_float3 xAxis = { 1, 0, 0 };
 	const vector_float3 yAxis = { 0, 1, 0 };
 
@@ -112,7 +112,7 @@ typedef struct {
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
 	const matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, self.rotationX);
 	const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, self.rotationY);
-	const matrix_float4x4 scale = matrix_float4x4_uniform_scale(0.2);
+	const matrix_float4x4 scale = matrix_float4x4_uniform_scale(scaleFactor);
 	const matrix_float4x4 modelMatrix = matrix_multiply(positionMatrix, matrix_multiply(matrix_multiply(xRot, yRot), scale));
 
 	MBEUniforms uniforms;
