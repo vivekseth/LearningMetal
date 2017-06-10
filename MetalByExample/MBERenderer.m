@@ -9,27 +9,11 @@
 #import "MBERenderer.h"
 #import "MBEMathUtilities.h"
 
-typedef uint16_t MBEIndex;
-const MTLIndexType MBEIndexType = MTLIndexTypeUInt16;
-
-typedef struct {
-	vector_float4 position;
-	vector_float4 color;
-} MBEVertex;
-
-typedef struct {
-	matrix_float4x4 modelViewProjectionMatrix;
-} MBEUniforms;
-
 @interface MBERenderer ()
-
-@property (strong) id<MTLTexture> depthTexture;
 
 @property (readonly) id<MTLDevice> device;
 
-@property id<MTLBuffer> vertexBuffer;
-@property id<MTLBuffer> indexBuffer;
-@property id<MTLBuffer> uniformsBuffer;
+@property (strong) id<MTLTexture> depthTexture;
 
 @property (readonly) id<MTLCommandQueue> commandQueue;
 @property (readonly) id <MTLRenderPipelineState> renderPipelineState;
@@ -37,24 +21,20 @@ typedef struct {
 
 @property (strong) dispatch_semaphore_t displaySemaphore;
 
-@property (assign) float rotationX, rotationY, time;
-
 @end
 
 @implementation MBERenderer
 
-- (instancetype)initWithSize:(CGSize)size
+- (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device;
 {
 	self = [super init];
 
 	_displaySemaphore = dispatch_semaphore_create(1);
-	_device = MTLCreateSystemDefaultDevice();
+	_device = device;
 
 	[self makePipeline];
-	[self makeBuffers];
 	[self makeDepthTextureForDrawableSize:size];
-
-	self.time = CACurrentMediaTime();
+	[self makeTransformationMatrixForDrawableSize:size];
 
 	return self;
 }
@@ -84,39 +64,6 @@ typedef struct {
 	}
 }
 
-- (void)makeBuffers {
-	static const MBEVertex vertices[] =
-	{
-		{ .position = { -1,  1,  1, 1 }, .color = { 0, 1, 1, 1 } },
-		{ .position = { -1, -1,  1, 1 }, .color = { 0, 0, 1, 1 } },
-		{ .position = {  1, -1,  1, 1 }, .color = { 1, 0, 1, 1 } },
-		{ .position = {  1,  1,  1, 1 }, .color = { 1, 1, 1, 1 } },
-		{ .position = { -1,  1, -1, 1 }, .color = { 0, 1, 0, 1 } },
-		{ .position = { -1, -1, -1, 1 }, .color = { 0, 0, 0, 1 } },
-		{ .position = {  1, -1, -1, 1 }, .color = { 1, 0, 0, 1 } },
-		{ .position = {  1,  1, -1, 1 }, .color = { 1, 1, 0, 1 } }
-	};
-
-	static const MBEIndex indices[] =
-	{
-		3, 2, 6, 6, 7, 3,
-		4, 5, 1, 1, 0, 4,
-		4, 0, 3, 3, 7, 4,
-		1, 5, 6, 6, 2, 1,
-		0, 1, 2, 2, 3, 0,
-		7, 6, 5, 5, 4, 7
-	};
-
-	self.vertexBuffer = [self.device newBufferWithBytes:vertices length:sizeof(vertices) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.vertexBuffer setLabel:@"Vertices"];
-
-	self.indexBuffer = [self.device newBufferWithBytes:indices length:sizeof(indices) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.indexBuffer setLabel:@"Indices"];
-
-	self.uniformsBuffer = [self.device newBufferWithLength:sizeof(MBEUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.uniformsBuffer setLabel:@"Uniforms"];
-}
-
 - (void)makeDepthTextureForDrawableSize:(CGSize)drawableSize
 {
 	if ([self.depthTexture width] != drawableSize.width || [self.depthTexture height] != drawableSize.height)
@@ -132,19 +79,8 @@ typedef struct {
 	}
 }
 
-- (void)updateUniformsWithDrawableSize:(CGSize)drawableSize duration:(NSTimeInterval)duration
+- (void)makeTransformationMatrixForDrawableSize:(CGSize)drawableSize
 {
-	self.time += duration;
-	self.rotationX += duration * (M_PI / 2);
-	self.rotationY += duration * (M_PI / 3);
-	float scaleFactor = sinf(5 * self.time) * 0.25 + 1;
-	const vector_float3 xAxis = { 1, 0, 0 };
-	const vector_float3 yAxis = { 0, 1, 0 };
-	const matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, self.rotationX);
-	const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, self.rotationY);
-	const matrix_float4x4 scale = matrix_float4x4_uniform_scale(scaleFactor);
-	const matrix_float4x4 modelMatrix = matrix_multiply(matrix_multiply(xRot, yRot), scale);
-
 	const vector_float3 cameraTranslation = { 0, 0, -5 };
 	const matrix_float4x4 viewMatrix = matrix_float4x4_translation(cameraTranslation);
 
@@ -154,26 +90,24 @@ typedef struct {
 	const float far = 100;
 	const matrix_float4x4 projectionMatrix = matrix_float4x4_perspective(aspect, fov, near, far);
 
-	MBEUniforms uniforms;
-	uniforms.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix));
+	const matrix_float4x4 viewProjectionMatrix = matrix_multiply(projectionMatrix, viewMatrix);
 
-	memcpy([self.uniformsBuffer contents], &uniforms, sizeof(uniforms));
+	_viewProjectionMatrix = viewProjectionMatrix;
 }
 
-#pragma mark <MTKViewDelegate>
-
-- (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size
+- (void)drawableSizeWillChange:(CGSize)size
 {
 	[self makeDepthTextureForDrawableSize:size];
+	[self makeTransformationMatrixForDrawableSize:size];
 }
 
-- (void)drawInMTKView:(nonnull MTKView *)view
+- (void)blockUntilNextRender
 {
 	dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
+}
 
-	float duration = CACurrentMediaTime() - self.time;
-	[self updateUniformsWithDrawableSize:view.drawableSize duration:duration];
-
+- (void)renderObjects:(NSArray <MBECube *> *)objects MTKView:(MTKView *)view;
+{
 	id<CAMetalDrawable> drawable = [view currentDrawable];
 	id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
 
@@ -191,20 +125,26 @@ typedef struct {
 
 	id<MTLRenderCommandEncoder> renderCommandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:passDescriptor];
 
-	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
-
 	[renderCommandEncoder setDepthStencilState:self.depthStencilState];
-	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 	[renderCommandEncoder setCullMode:MTLCullModeBack];
+	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
-	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
-	[renderCommandEncoder setVertexBuffer:self.uniformsBuffer offset:0 atIndex:1];
+	// Draw objects
 
-	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
-									  indexType:MBEIndexType
-									indexBuffer:self.indexBuffer
-							  indexBufferOffset:0];
+	/*
+	// TODO(vivek): consider splitting objects into two classes. the model object and singleton renderer. The singleton renderer is responsible for setting render state whilst model objects are responsible for uploading whatever data they need to render.
+	 ideally this becomes;
+	 for object_renderer in object_types:
+		 object_renderer set state
+		 for object in objects of type:
+			 object draw
+	 */
+
+	for (MBECube *cube in objects) {
+		[cube encodeRenderCommand:renderCommandEncoder];
+	}
+
+	// end
 
 	[renderCommandEncoder endEncoding];
 

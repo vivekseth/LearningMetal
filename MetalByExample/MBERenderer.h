@@ -9,9 +9,18 @@
 #import <Foundation/Foundation.h>
 #import <MetalKit/MetalKit.h>
 #import <Cocoa/Cocoa.h>
+#import "MBECube.h"
 
-@interface MBERenderer : NSObject<MTKViewDelegate>
+@interface MBERenderer : NSObject
 
-- (instancetype)initWithSize:(CGSize)size;
+@property (nonatomic, readonly) matrix_float4x4 viewProjectionMatrix;
+
+- (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device;
+
+- (void)drawableSizeWillChange:(CGSize)size;
+
+- (void)blockUntilNextRender;
+
+- (void)renderObjects:(NSArray <MBECube *> *)objects MTKView:(MTKView *)view;
 
 @end

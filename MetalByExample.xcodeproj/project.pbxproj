@@ -19,6 +19,7 @@
 		585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 585BB6521EE918F500AEBDA1 /* GameViewController.m */; };
 		585BB6581EE918F500AEBDA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 585BB6571EE918F500AEBDA1 /* Assets.xcassets */; };
 		58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 58C486351EEA712400DC906C /* MBEMathUtilities.m */; };
+		58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,8 @@
 		585BB65C1EE918F500AEBDA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		58C486341EEA712400DC906C /* MBEMathUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBEMathUtilities.h; sourceTree = "<group>"; };
 		58C486351EEA712400DC906C /* MBEMathUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBEMathUtilities.m; sourceTree = "<group>"; };
+		58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEGameEngine.h; sourceTree = "<group>"; };
+		58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBEGameEngine.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +98,8 @@
 				582C55AB1EEBAE2800C2F815 /* MBECube.m */,
 				582C55AE1EEBAF4400C2F815 /* MBERenderer.h */,
 				582C55AF1EEBAF4400C2F815 /* MBERenderer.m */,
+				58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */,
+				58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */,
 				58C486341EEA712400DC906C /* MBEMathUtilities.h */,
 				58C486351EEA712400DC906C /* MBEMathUtilities.m */,
 				585213071EEBB3520026F4B9 /* Storyboard.storyboard */,
@@ -190,6 +195,7 @@
 				585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */,
 				582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */,
 				585BB64D1EE918F500AEBDA1 /* AppDelegate.m in Sources */,
+				58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */,
 				582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
