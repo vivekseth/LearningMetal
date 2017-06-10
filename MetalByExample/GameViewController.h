@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import <MetalKit/MetalKit.h>
 
-@interface GameViewController : NSViewController<MTKViewDelegate>
+@interface GameViewController : NSViewController
 
 
 @end
