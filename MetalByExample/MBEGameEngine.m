@@ -67,10 +67,15 @@
 	self.time = CACurrentMediaTime();
 	float duration = self.time - prevTime;
 
+	// 1. Handle User Input
+	// TODO
+
+	// 2. Update objects in Scene
 	for (MBECube *cube in self.objects) {
 		[cube updateWithTime:self.time duration:duration viewProjectionMatrix:self.renderer.viewProjectionMatrix];
 	}
 
+	// 3. Render objects to view
 	[self.renderer renderObjects:self.objects MTKView:view];
 }
 
