@@ -121,7 +121,7 @@ TODO
 		vector_float3 rotationAxis = {0, 1, 0};
 		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
 		vector_float4 xVector = {1, 0, 0, 1};
-		// vector_float4 yVector = {0, 1, 0, 1};
+		vector_float4 yVector = {0, 1, 0, 1};
 		vector_float4 zVector = {0, 0, 1, 1};
 
 		float factor = 0.5;
@@ -129,31 +129,24 @@ TODO
 			factor = 2.0;
 		}
 
+		float direction = 0.0;
+		if ([key isEqualToString:@"up"]) {
+			direction = 1.0;
+		}
+		else if ([key isEqualToString:@"down"]) {
+			direction = -1.0;
+		}
+
 		if ([self.pressedKeys containsObject:@"x"]) {
-			if ([key isEqualToString:@"up"]) {
-				pos += factor * matrix_multiply(rotationMatrix, xVector);
-			}
-			else if ([key isEqualToString:@"down"]) {
-				pos -= factor * matrix_multiply(rotationMatrix, xVector);
-			}
+			pos += direction * factor * matrix_multiply(rotationMatrix, xVector);
 		}
 
 		if ([self.pressedKeys containsObject:@"y"]) {
-			if ([key isEqualToString:@"up"]) {
-				pos.y -= factor;
-			}
-			else if ([key isEqualToString:@"down"]) {
-				pos.y += factor;
-			}
+			pos += -1 * direction * factor * yVector;
 		}
 
 		if ([self.pressedKeys containsObject:@"z"]) {
-			if ([key isEqualToString:@"up"]) {
-				pos += factor * matrix_multiply(rotationMatrix, zVector);
-			}
-			else if ([key isEqualToString:@"down"]) {
-				pos -= factor * matrix_multiply(rotationMatrix, zVector);
-			}
+			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
 		}
 
 		if ([key isEqualToString:@"left"]) {
