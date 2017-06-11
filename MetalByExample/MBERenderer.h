@@ -13,7 +13,7 @@
 
 @interface MBERenderer : NSObject
 
-@property (nonatomic, readonly) matrix_float4x4 viewProjectionMatrix;
+@property (nonatomic, readonly) matrix_float4x4 viewToProjectionMatrix;
 
 - (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device;
 

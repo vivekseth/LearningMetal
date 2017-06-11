@@ -34,7 +34,7 @@
 
 	[self makePipeline];
 	[self makeDepthTextureForDrawableSize:size];
-	[self makeTransformationMatrixForDrawableSize:size];
+	[self makeProjectionMatrixForDrawableSize:size];
 
 	return self;
 }
@@ -79,26 +79,19 @@
 	}
 }
 
-- (void)makeTransformationMatrixForDrawableSize:(CGSize)drawableSize
+- (void)makeProjectionMatrixForDrawableSize:(CGSize)drawableSize
 {
-	const vector_float3 cameraTranslation = { 0, 0, -5 };
-	const matrix_float4x4 viewMatrix = matrix_float4x4_translation(cameraTranslation);
-
 	const float aspect = drawableSize.width / drawableSize.height;
 	const float fov = (2 * M_PI) / 5;
 	const float near = 1;
 	const float far = 100;
-	const matrix_float4x4 projectionMatrix = matrix_float4x4_perspective(aspect, fov, near, far);
-
-	const matrix_float4x4 viewProjectionMatrix = matrix_multiply(projectionMatrix, viewMatrix);
-
-	_viewProjectionMatrix = viewProjectionMatrix;
+	_viewToProjectionMatrix = matrix_float4x4_perspective(aspect, fov, near, far);
 }
 
 - (void)drawableSizeWillChange:(CGSize)size
 {
 	[self makeDepthTextureForDrawableSize:size];
-	[self makeTransformationMatrixForDrawableSize:size];
+	[self makeProjectionMatrixForDrawableSize:size];
 }
 
 - (void)blockUntilNextRender
