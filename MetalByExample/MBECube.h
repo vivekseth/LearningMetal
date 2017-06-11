@@ -9,17 +9,10 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
+#import "MBEObject.h"
 
-@interface MBECube : NSObject
-
-@property (nonatomic) float x;
-@property (nonatomic) float y;
-@property (nonatomic) float z;
+@interface MBECube : NSObject<MBEObject>
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
-
-- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration viewProjectionMatrix:(matrix_float4x4)viewProjectionMatrix;
-
-- (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder;
 
 @end

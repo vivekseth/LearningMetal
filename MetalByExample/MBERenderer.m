@@ -106,7 +106,7 @@
 	dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
 }
 
-- (void)renderObjects:(NSArray <MBECube *> *)objects MTKView:(MTKView *)view;
+- (void)renderObjects:(NSArray <id<MBEObject>> *)objects MTKView:(MTKView *)view
 {
 	id<CAMetalDrawable> drawable = [view currentDrawable];
 	id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];

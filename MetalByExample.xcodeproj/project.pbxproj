@@ -20,6 +20,7 @@
 		585BB6581EE918F500AEBDA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 585BB6571EE918F500AEBDA1 /* Assets.xcassets */; };
 		58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 58C486351EEA712400DC906C /* MBEMathUtilities.m */; };
 		58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */; };
+		58ECB6D41EECAD8D006B88AB /* MBESphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 58ECB6D31EECAD8D006B88AB /* MBESphere.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,9 @@
 		58C486351EEA712400DC906C /* MBEMathUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBEMathUtilities.m; sourceTree = "<group>"; };
 		58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEGameEngine.h; sourceTree = "<group>"; };
 		58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBEGameEngine.m; sourceTree = "<group>"; };
+		58ECB6D21EECAD8D006B88AB /* MBESphere.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBESphere.h; sourceTree = "<group>"; };
+		58ECB6D31EECAD8D006B88AB /* MBESphere.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESphere.m; sourceTree = "<group>"; };
+		58ECB6D51EECADAC006B88AB /* MBEObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEObject.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,8 +98,11 @@
 				585BB64C1EE918F500AEBDA1 /* AppDelegate.m */,
 				585BB6511EE918F500AEBDA1 /* GameViewController.h */,
 				585BB6521EE918F500AEBDA1 /* GameViewController.m */,
+				58ECB6D51EECADAC006B88AB /* MBEObject.h */,
 				582C55AA1EEBAE2800C2F815 /* MBECube.h */,
 				582C55AB1EEBAE2800C2F815 /* MBECube.m */,
+				58ECB6D21EECAD8D006B88AB /* MBESphere.h */,
+				58ECB6D31EECAD8D006B88AB /* MBESphere.m */,
 				582C55AE1EEBAF4400C2F815 /* MBERenderer.h */,
 				582C55AF1EEBAF4400C2F815 /* MBERenderer.m */,
 				58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */,
@@ -196,6 +203,7 @@
 				582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */,
 				585BB64D1EE918F500AEBDA1 /* AppDelegate.m in Sources */,
 				58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */,
+				58ECB6D41EECAD8D006B88AB /* MBESphere.m in Sources */,
 				582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

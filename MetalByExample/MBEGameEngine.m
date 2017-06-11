@@ -8,7 +8,9 @@
 
 #import "MBEGameEngine.h"
 #import "MBERenderer.h"
+#import "MBEObject.h"
 #import "MBECube.h"
+#import "MBESphere.h"
 
 @interface MBEGameEngine ()
 
@@ -17,7 +19,7 @@
 
 @property (assign) float time;
 
-@property (nonatomic, strong) NSMutableArray <MBECube *> *objects;
+@property (nonatomic, strong) NSMutableArray <id<MBEObject>> *objects;
 
 @end
 
@@ -31,23 +33,26 @@
 	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
 	_objects = [NSMutableArray array];
 
-	int N = 9;
-	int low = -1*N/2;
-	int high = N/2+1;
+//	int N = 9;
+//	int low = -1*N/2;
+//	int high = N/2+1;
+//
+//	for (int i=low; i<high; i++) {
+//		for (int j=low; j<high; j++) {
+//			for (int k=low; k<high; k++) {
+//
+//				MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
+//				cube.x = i * 1.3;
+//				cube.y = j * 1.3;
+//				cube.z = k * 1.3;
+//
+//				[self.objects addObject:cube];
+//			}
+//		}
+//	}
 
-	for (int i=low; i<high; i++) {
-		for (int j=low; j<high; j++) {
-			for (int k=low; k<high; k++) {
-
-				MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
-				cube.x = i * 1.3;
-				cube.y = j * 1.3;
-				cube.z = k * 1.3;
-
-				[self.objects addObject:cube];
-			}
-		}
-	}
+	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+	[self.objects addObject:sphere];
 
 	return self;
 }
@@ -84,8 +89,8 @@ TODO
 	// TODO
 
 	// 2. Update objects in Scene
-	for (MBECube *cube in self.objects) {
-		[cube updateWithTime:self.time duration:duration viewProjectionMatrix:self.renderer.viewProjectionMatrix];
+	for (id<MBEObject> obj in self.objects) {
+		[obj updateWithTime:self.time duration:duration viewProjectionMatrix:self.renderer.viewProjectionMatrix];
 	}
 
 	// 3. Render objects to view

@@ -21,6 +21,6 @@
 
 - (void)blockUntilNextRender;
 
-- (void)renderObjects:(NSArray <MBECube *> *)objects MTKView:(MTKView *)view;
+- (void)renderObjects:(NSArray <id<MBEObject>> *)objects MTKView:(MTKView *)view;
 
 @end

@@ -9,21 +9,16 @@
 #import "MBECube.h"
 #import "MBEMathUtilities.h"
 
-typedef uint16_t MBEIndex;
-const MTLIndexType MBEIndexType = MTLIndexTypeUInt16;
-
 typedef struct {
 	vector_float4 position;
 	vector_float4 color;
-} MBEVertex;
+} MBECubeVertex;
 
 typedef struct {
 	matrix_float4x4 modelViewProjectionMatrix;
-} MBEUniforms;
+} MBECubeUniforms;
 
 @interface MBECube ()
-
-@property (readonly) id<MTLDevice> device; // iffy
 
 @property (readonly) id <MTLRenderPipelineState> renderPipelineState;
 
@@ -31,17 +26,19 @@ typedef struct {
 @property id<MTLBuffer> indexBuffer;
 @property id<MTLBuffer> uniformsBuffer;
 
-@property (assign) float rotationX, rotationY;
-
 @end
 
 @implementation MBECube
+
+@synthesize device;
+
+@synthesize x, y, z;
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
 	self = [super init];
 
-	_device = device;
+	self.device = device;
 
 	[self makePipeline];
 	[self makeBuffers];
@@ -50,7 +47,7 @@ typedef struct {
 }
 
 - (void)makeBuffers {
-	static const MBEVertex vertices[] =
+	static const MBECubeVertex vertices[] =
 	{
 		{ .position = { -1,  1,  1, 1 }, .color = { 0, 1, 1, 1 } },
 		{ .position = { -1, -1,  1, 1 }, .color = { 0, 0, 1, 1 } },
@@ -78,7 +75,7 @@ typedef struct {
 	self.indexBuffer = [self.device newBufferWithBytes:indices length:sizeof(indices) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.indexBuffer setLabel:@"Indices"];
 
-	self.uniformsBuffer = [self.device newBufferWithLength:sizeof(MBEUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	self.uniformsBuffer = [self.device newBufferWithLength:sizeof(MBECubeUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.uniformsBuffer setLabel:@"Uniforms"];
 }
 
@@ -100,22 +97,24 @@ typedef struct {
 	}
 }
 
+#pragma mark <MBEObject>
+
 - (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration viewProjectionMatrix:(matrix_float4x4)viewProjectionMatrix
 {
-	self.rotationX += duration * (M_PI / 2);
-	self.rotationY += duration * (M_PI / 3);
+	float rotationX = time * (M_PI / 2);
+	float rotationY = time * (M_PI / 3);
 	float scaleFactor = 0.2;
 	const vector_float3 xAxis = { 1, 0, 0 };
 	const vector_float3 yAxis = { 0, 1, 0 };
 
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-	const matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, self.rotationX);
-	const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, self.rotationY);
+	const matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, rotationX);
+	const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, rotationY);
 	const matrix_float4x4 scale = matrix_float4x4_uniform_scale(scaleFactor);
 	const matrix_float4x4 modelMatrix = matrix_multiply(positionMatrix, matrix_multiply(matrix_multiply(xRot, yRot), scale));
 
-	MBEUniforms uniforms;
+	MBECubeUniforms uniforms;
 	uniforms.modelViewProjectionMatrix = matrix_multiply(viewProjectionMatrix, modelMatrix);
 
 	memcpy([self.uniformsBuffer contents], &uniforms, sizeof(uniforms));
