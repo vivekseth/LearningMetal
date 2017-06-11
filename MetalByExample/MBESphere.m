@@ -17,6 +17,47 @@ typedef struct {
 	matrix_float4x4 modelViewProjectionMatrix;
 } MBESphereUniforms;
 
+typedef struct {
+	void *pointer;
+	size_t count;
+	size_t size;
+	size_t ref_count;
+} MBESafeArray;
+
+MBESafeArray MBESafeArrayCreate(size_t count, size_t size) {
+	assert(count >= 0);
+	MBESafeArray newArr;
+	newArr.pointer = calloc(count, size);
+	newArr.count = count;
+	newArr.size = size;
+	newArr.ref_count = 1;
+	return newArr;
+}
+
+void MBESafeArrayFree(MBESafeArray arr) {
+	arr.ref_count = arr.ref_count - 1;
+	if (arr.ref_count <= 0) {
+		free(arr.pointer);
+	}
+}
+
+void * MBESafeArrayGetPointer(MBESafeArray arr, size_t i) {
+	assert(i < arr.count);
+	return arr.pointer + i * arr.size;
+}
+
+MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
+	assert(i < arr.count);
+
+	MBESafeArray newArr;
+	newArr.pointer = arr.pointer + i * arr.size;
+	newArr.count = arr.count - i;
+	newArr.size = arr.size;
+	newArr.ref_count = arr.ref_count + 1;
+
+	return newArr;
+}
+
 @interface MBESphere ()
 
 @property (readonly) id <MTLRenderPipelineState> renderPipelineState;
@@ -44,12 +85,13 @@ typedef struct {
 	return self;
 }
 
-- (MBESphereVertex *)createNormalizeSphereVerticesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians outNumVertices:(NSUInteger *)outNumVertices;
+- (MBESafeArray)createNormalizeSphereVerticesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
 {
 	NSUInteger numVertices = 2 + meridians * parallels;
 	printf("P=%f, M=%f, numVerticies=%d\n", (float)parallels, (float)meridians, (int)numVertices);
 
-	MBESphereVertex *vertices = calloc(numVertices, sizeof(MBESphereVertex));
+	MBESafeArray verticesArr = MBESafeArrayCreate(numVertices, sizeof(MBESphereVertex));
+
 	MBESphereVertex firstPoint = {
 		.position = {0, 0, 1, 1},
 		.color = {1, 1, 1, 1}
@@ -59,8 +101,8 @@ typedef struct {
 		.color = {0, 0, 0, 1}
 	};
 
-	vertices[0] = firstPoint;
-	vertices[numVertices - 1] = lastPoint;
+	*((MBESphereVertex *)MBESafeArrayGetPointer(verticesArr, 0)) = firstPoint;
+	*((MBESphereVertex *)MBESafeArrayGetPointer(verticesArr, numVertices - 1)) = lastPoint;
 
 	for (int i=1; i<(parallels + 1); i++) {
 		// Slicing sphere along a meridian results in circle divided into parallels + 2 segments.
@@ -73,14 +115,15 @@ typedef struct {
 		CGFloat zOffset = cos(radians);
 
 		printf("buffer + index(%d)\n", (int)(1 + (i - 1)*meridians));
-		[self generateVerticesForRingWithRadius:radius zOffset:zOffset numDivisions:meridians buffer:(vertices + 1 + (i - 1)*meridians)];
+		MBESafeArray offsetArray = MBESafeArrayCreateOffsetArray(verticesArr, 1 + (i - 1)*meridians);
+		[self generateVerticesForRingWithRadius:radius zOffset:zOffset numDivisions:meridians array:offsetArray];
+		MBESafeArrayFree(offsetArray);
 	}
 
-	*outNumVertices = numVertices;
-	return vertices;
+	return verticesArr;
 }
 
-- (void)generateVerticesForRingWithRadius:(CGFloat)radius zOffset:(CGFloat)zOffset numDivisions:(NSUInteger)numDivisions buffer:(MBESphereVertex *)buffer
+- (void)generateVerticesForRingWithRadius:(CGFloat)radius zOffset:(CGFloat)zOffset numDivisions:(NSUInteger)numDivisions array:(MBESafeArray)array
 {
 	for (int i=0; i<numDivisions; i++) {
 		CGFloat radians = (float)i/(float)numDivisions * 2 * M_PI;
@@ -100,57 +143,67 @@ typedef struct {
 		};
 
 		printf("+ %d\n", (int)i);
-		buffer[i] = point;
+		*((MBESphereVertex *)MBESafeArrayGetPointer(array, i)) = point;
 	}
 }
 
-- (MBEIndex *)createNormalizeSphereIndicesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians outNumIndices:(NSUInteger *)outNumIndices;
+- (MBESafeArray)createNormalizeSphereIndicesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
 {
 	NSUInteger numTrianglesNearPoles = 2 * meridians;
 	NSUInteger numTrianglesForParallelRows = 2 * meridians * (parallels - 1);
 	NSUInteger numTrianges = numTrianglesNearPoles + numTrianglesForParallelRows;
 
 	NSUInteger numIndices = numTrianges * 3;
-	MBEIndex *indices = calloc(numIndices, sizeof(MBEIndex));
+	MBESafeArray indicesArr = MBESafeArrayCreate(numIndices, sizeof(MBEIndex));
+
 	NSUInteger indicesIndex = 0;
 
 	// calculate triangles near top pole
 	for (int i=0; i<meridians; i++) {
-		// TODO(vivek): make sure handedness matches
-		indices[indicesIndex + 1] = [self indexForSpherePointAtParallelIndex:0 meridianIndex:i   parallels:parallels meridians:meridians];
-		indices[indicesIndex + 0] = [self indexForSpherePointAtParallelIndex:1 meridianIndex:i   parallels:parallels meridians:meridians];
-		indices[indicesIndex + 2] = [self indexForSpherePointAtParallelIndex:1 meridianIndex:i+1 parallels:parallels meridians:meridians];
+		MBESafeArray offsetArr = MBESafeArrayCreateOffsetArray(indicesArr, indicesIndex);
+
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:0 meridianIndex:i   parallels:parallels meridians:meridians];
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:1 meridianIndex:i   parallels:parallels meridians:meridians];
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:1 meridianIndex:i+1 parallels:parallels meridians:meridians];
+
+		MBESafeArrayFree(offsetArr);
+
 		indicesIndex += 3;
 	}
 
 	// calculate triangles near bottom pole
 	for (int i=0; i<meridians; i++) {
-		// TODO(vivek): make sure handedness matches
-		indices[indicesIndex + 2] = [self indexForSpherePointAtParallelIndex:parallels+1 meridianIndex:i   parallels:parallels meridians:meridians];
-		indices[indicesIndex + 0] = [self indexForSpherePointAtParallelIndex:parallels   meridianIndex:i   parallels:parallels meridians:meridians];
-		indices[indicesIndex + 1] = [self indexForSpherePointAtParallelIndex:parallels   meridianIndex:i+1 parallels:parallels meridians:meridians];
+		MBESafeArray offsetArr = MBESafeArrayCreateOffsetArray(indicesArr, indicesIndex);
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:parallels+1 meridianIndex:i   parallels:parallels meridians:meridians];
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:parallels   meridianIndex:i   parallels:parallels meridians:meridians];
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:parallels   meridianIndex:i+1 parallels:parallels meridians:meridians];
+		MBESafeArrayFree(offsetArr);
 
 		indicesIndex += 3;
 	}
 
 	// Next calculate triangles for rows
-	for (int p=1; p<parallels+1; p++) {
+	for (int p=1; p<parallels; p++) {
 		for (int m=0; m<meridians; m++) {
-			// TODO(vivek): make sure handedness matches
-			indices[indicesIndex + 0] = [self indexForSpherePointAtParallelIndex:p meridianIndex:m parallels:parallels meridians:meridians];
-			indices[indicesIndex + 1] = [self indexForSpherePointAtParallelIndex:p meridianIndex:m+1 parallels:parallels meridians:meridians];
-			indices[indicesIndex + 2] = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m parallels:parallels meridians:meridians];
+			MBESafeArray offsetArr = MBESafeArrayCreateOffsetArray(indicesArr, indicesIndex);
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m parallels:parallels meridians:meridians];
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m+1 parallels:parallels meridians:meridians];
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m parallels:parallels meridians:meridians];
+			MBESafeArrayFree(offsetArr);
+
 			indicesIndex += 3;
 
-			indices[indicesIndex + 2] = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m+1 parallels:parallels meridians:meridians];
-			indices[indicesIndex + 1] = [self indexForSpherePointAtParallelIndex:p meridianIndex:m+1 parallels:parallels meridians:meridians];
-			indices[indicesIndex + 0] = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m parallels:parallels meridians:meridians];
+			offsetArr = MBESafeArrayCreateOffsetArray(indicesArr, indicesIndex);
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m+1 parallels:parallels meridians:meridians];
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m+1 parallels:parallels meridians:meridians];
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m parallels:parallels meridians:meridians];
+			MBESafeArrayFree(offsetArr);
+
 			indicesIndex += 3;
 		}
 	}
 
-	*outNumIndices = numIndices;
-	return indices;
+	return indicesArr;
 }
 
 - (NSUInteger)indexForSpherePointAtParallelIndex:(NSUInteger)parallelIndex meridianIndex:(NSUInteger)meridianIndex parallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
@@ -179,17 +232,15 @@ typedef struct {
 
 
 - (void)makeBuffersWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians {
-	NSUInteger numVertices = 0;
-	MBESphereVertex *vertices = [self createNormalizeSphereVerticesWithParallels:parallels meridians:meridians outNumVertices:&numVertices];
-	self.vertexBuffer = [self.device newBufferWithBytes:vertices length:numVertices * sizeof(MBESphereVertex) options:MTLResourceOptionCPUCacheModeDefault];
+	MBESafeArray vertices = [self createNormalizeSphereVerticesWithParallels:parallels meridians:meridians];
+	self.vertexBuffer = [self.device newBufferWithBytes:vertices.pointer length:vertices.count * vertices.size options:MTLResourceOptionCPUCacheModeDefault];
 	[self.vertexBuffer setLabel:@"Vertices"];
-	free(vertices);
+	MBESafeArrayFree(vertices);
 
-	NSUInteger numIndices = 0;
-	MBEIndex *indices = [self createNormalizeSphereIndicesWithParallels:parallels meridians:meridians outNumIndices:&numIndices];
-	self.indexBuffer = [self.device newBufferWithBytes:indices length:numIndices * sizeof(MBEIndex) options:MTLResourceOptionCPUCacheModeDefault];
+	MBESafeArray indices = [self createNormalizeSphereIndicesWithParallels:parallels meridians:meridians];
+	self.indexBuffer = [self.device newBufferWithBytes:indices.pointer length:indices.count * indices.size options:MTLResourceOptionCPUCacheModeDefault];
 	[self.indexBuffer setLabel:@"Indices"];
-	free(indices);
+	MBESafeArrayFree(indices);
 
 	self.uniformsBuffer = [self.device newBufferWithLength:sizeof(MBESphereUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.uniformsBuffer setLabel:@"Uniforms"];
