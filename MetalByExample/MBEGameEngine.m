@@ -45,9 +45,20 @@
 	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
 	_objects = [NSMutableArray array];
 
+	// Create scene
+	[self createSingleSphere];
+
+	[self updateWorldToViewMatrix];
+
+	return self;
+}
+
+- (void)createScene
+{
 	const vector_float4 cameraTranslation = {0, -5, -5, 1};
 	self.position = cameraTranslation;
-	[self updateWorldToViewMatrix];
+
+	_objects = [NSMutableArray array];
 
 	int N = 32;
 	int low = -1*N/2;
@@ -62,11 +73,17 @@
 			[self.objects addObject:cube];
 		}
 	}
-
-	return self;
 }
 
-// - (matrix_float4x4)worldToViewMatrixWith
+- (void)createSingleSphere
+{
+	const vector_float4 cameraTranslation = {0, 0, -8, 1.5};
+	self.position = cameraTranslation;
+
+	_objects = [NSMutableArray array];
+	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:10 meridians:10];
+	[self.objects addObject:sphere];
+}
 
 - (void)updateWorldToViewMatrix
 {
