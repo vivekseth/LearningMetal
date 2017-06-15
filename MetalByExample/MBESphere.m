@@ -281,22 +281,6 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 }
 
 - (void) updateWithTime:(CGFloat)time duration:(CGFloat)duration viewProjectionMatrix:(matrix_float4x4)viewProjectionMatrix {
-//	vector_float3 position = {self.x, self.y, self.z};
-//	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-//	const matrix_float4x4 modelMatrix = positionMatrix;
-//
-//	MBECubeUniforms uniforms;
-//	uniforms.modelViewProjectionMatrix = matrix_multiply(viewProjectionMatrix, modelMatrix);
-//
-//	memcpy([self.uniformsBuffer contents], &uniforms, sizeof(uniforms));
-
-
-//	float rotationX = time * (M_PI / 2);
-//	float rotationY = time * (M_PI / 3);
-//	float scaleFactor = 1.2;
-//	const vector_float3 xAxis = { 1, 0, 0 };
-//	const vector_float3 yAxis = { 0, 1, 0 };
-
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
 	const matrix_float4x4 modelMatrix = positionMatrix;

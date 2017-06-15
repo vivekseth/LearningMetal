@@ -99,6 +99,7 @@
 		585BB64A1EE918F500AEBDA1 /* MetalByExample */ = {
 			isa = PBXGroup;
 			children = (
+				583993DE1EE9220C009142CF /* Shaders.metal */,
 				585BB64B1EE918F500AEBDA1 /* AppDelegate.h */,
 				585BB64C1EE918F500AEBDA1 /* AppDelegate.m */,
 				585BB6511EE918F500AEBDA1 /* GameViewController.h */,
@@ -119,7 +120,6 @@
 				585213071EEBB3520026F4B9 /* Storyboard.storyboard */,
 				585BB65C1EE918F500AEBDA1 /* Info.plist */,
 				585BB6571EE918F500AEBDA1 /* Assets.xcassets */,
-				583993DE1EE9220C009142CF /* Shaders.metal */,
 				585BB64E1EE918F500AEBDA1 /* Supporting Files */,
 			);
 			path = MetalByExample;
