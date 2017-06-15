@@ -20,6 +20,7 @@ struct VertexOut
 	float4 position [[position]];
 	float4 color;
 	float3 normal;
+	float pointSize [[point_size]];
 };
 
 struct Uniforms
@@ -38,19 +39,21 @@ vertex VertexOut vertex_project(device Vertex *vertices [[buffer(0)]],
 	vertexOut.position = uniforms->modelViewProjectionMatrix * vertices[vid].position;
 	vertexOut.color = vertices[vid].color;
 	vertexOut.normal = normal;
+	vertexOut.pointSize = 30.0;
 
 	return vertexOut;
 }
 
-fragment float4 fragment_flatcolor(VertexOut vertexIn [[stage_in]])
+fragment float4 fragment_flatcolor(VertexOut vertexIn [[stage_in]],
+								   float2 pointCoord [[point_coord]])
 {
-	float3 lightDirection = float3(1, 1, 1);
-	float3 lightDiffuseColor = float3(1, 1, 1);
-	float3 materialDiffuseColor = float3(1, 0, 0);
+	float2 recenteredPointCoord = pointCoord - float2(0.5, 0.5);
 
-	float3 normal = normalize(vertexIn.normal);
-	float diffuseIntensity = saturate(dot(normal, lightDirection));
-	float3 diffuseTerm = lightDiffuseColor * materialDiffuseColor * diffuseIntensity;
 
-	return float4(diffuseTerm + 0.5 * materialDiffuseColor, 1);
+	float radius = sqrt(recenteredPointCoord.x * recenteredPointCoord.x + recenteredPointCoord.y * recenteredPointCoord.y);
+
+	float alpha = pow(2, -30 * radius);
+
+	float3 color = float3(0, 0, 0);
+	return float4(color, alpha);
 }

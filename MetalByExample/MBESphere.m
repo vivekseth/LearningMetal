@@ -256,6 +256,17 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
 	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
+	pipelineDescriptor.colorAttachments[0].blendingEnabled = YES;
+
+	pipelineDescriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
+	pipelineDescriptor.colorAttachments[0].alphaBlendOperation = MTLBlendOperationAdd;
+
+	pipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
+	pipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorSourceAlpha;
+
+	pipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+	pipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+
 	NSError *error = nil;
 	_renderPipelineState = [self.device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
 	if (!self.renderPipelineState)
@@ -273,7 +284,7 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
 	[renderCommandEncoder setVertexBuffer:self.uniformsBuffer offset:0 atIndex:1];
 
-	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypePoint
 									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
 									  indexType:MBEIndexType
 									indexBuffer:self.indexBuffer
