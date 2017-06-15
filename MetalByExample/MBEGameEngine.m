@@ -81,7 +81,7 @@
 	self.position = cameraTranslation;
 
 	_objects = [NSMutableArray array];
-	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:10 meridians:10];
+	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
 	[self.objects addObject:sphere];
 }
 
