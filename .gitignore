@@ -1,0 +1,7 @@
+# Don't commit OS X data.
+.DS_Store
+
+# Don't commit user-specific data.
+xcuserdata
+
+DerivedData
