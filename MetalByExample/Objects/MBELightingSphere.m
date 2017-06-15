@@ -269,11 +269,9 @@ typedef struct {
 
 - (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition lightSourcePosition:(vector_float4)lightSourcePosition
 {
-	const vector_float3 axis = {0, 1, 0};
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-	const matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(axis, time);
-	const matrix_float4x4 modelToWorld = matrix_multiply(rotationMatrix, positionMatrix);
+    const matrix_float4x4 modelToWorld = positionMatrix;
 
 	MBELightingSphereVertexUniforms uniforms;
 	uniforms.modelToWorld = modelToWorld;
