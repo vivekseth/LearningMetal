@@ -16,7 +16,6 @@
 @property (strong) id<MTLTexture> depthTexture;
 
 @property (readonly) id<MTLCommandQueue> commandQueue;
-@property (readonly) id <MTLRenderPipelineState> renderPipelineState;
 @property (strong) id<MTLDepthStencilState> depthStencilState;
 
 @property (strong) dispatch_semaphore_t displaySemaphore;
@@ -30,38 +29,23 @@
 	self = [super init];
 
 	_displaySemaphore = dispatch_semaphore_create(1);
-	_device = device;
 
-	[self makePipeline];
+	_device = device;
+	_commandQueue = [self.device newCommandQueue];
+
+	[self makeDepthStencilState];
 	[self makeDepthTextureForDrawableSize:size];
 	[self makeProjectionMatrixForDrawableSize:size];
 
 	return self;
 }
 
-- (void)makePipeline
+- (void)makeDepthStencilState
 {
-	_commandQueue = [self.device newCommandQueue];
-
 	MTLDepthStencilDescriptor *depthStencilDescriptor = [MTLDepthStencilDescriptor new];
 	depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionLess;
 	depthStencilDescriptor.depthWriteEnabled = YES;
 	self.depthStencilState = [self.device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
-
-	id<MTLLibrary> library = [self.device newDefaultLibrary];
-
-	MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
-	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"vertex_project"];
-	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"fragment_flatcolor"];
-	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-
-	NSError *error = nil;
-	_renderPipelineState = [self.device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
-	if (!self.renderPipelineState)
-	{
-		NSLog(@"Error occurred when creating render pipeline state: %@", error);
-	}
 }
 
 - (void)makeDepthTextureForDrawableSize:(CGSize)drawableSize
@@ -133,8 +117,8 @@
 			 object draw
 	 */
 
-	for (MBECube *cube in objects) {
-		[cube encodeRenderCommand:renderCommandEncoder];
+	for (id <MBEObject> obj in objects) {
+		[obj encodeRenderCommand:renderCommandEncoder];
 	}
 
 	// end

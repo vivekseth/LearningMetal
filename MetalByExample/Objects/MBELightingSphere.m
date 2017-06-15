@@ -1,75 +1,49 @@
 //
-//  MBESphere.m
+//  MBELightingSphere.m
 //  MetalByExample
 //
 //  Created by Vivek Seth on 6/10/17.
 //  Copyright © 2017 Vivek Seth. All rights reserved.
 //
 
-#import "MBESphere.h"
+#import "MBELightingSphere.h"
+#import "MBESafeArray.h"
 
 typedef struct {
 	vector_float4 position;
 	vector_float4 color;
-} MBESphereVertex;
+	vector_float3 normal;
+} MBELightingSphereVertex;
 
 typedef struct {
-	matrix_float4x4 modelViewProjectionMatrix;
-} MBESphereUniforms;
+	matrix_float4x4 modelToWorld;
+	matrix_float4x4 worldToView;
+	matrix_float4x4 viewToProjection;
+	matrix_float3x3 normalMatrix;
+} MBELightingSphereVertexUniforms;
 
 typedef struct {
-	void *pointer;
-	size_t count;
-	size_t size;
-	size_t ref_count;
-} MBESafeArray;
+	vector_float4 viewPosition;
+	vector_float4 objectColor;
+	vector_float4 lightPosition;
+	vector_float4 lightColor;
+} MBELightingSphereFragmentUniforms;
 
-MBESafeArray MBESafeArrayCreate(size_t count, size_t size) {
-	assert(count >= 0);
-	MBESafeArray newArr;
-	newArr.pointer = calloc(count, size);
-	newArr.count = count;
-	newArr.size = size;
-	newArr.ref_count = 1;
-	return newArr;
-}
 
-void MBESafeArrayFree(MBESafeArray arr) {
-	arr.ref_count = arr.ref_count - 1;
-	if (arr.ref_count <= 0) {
-		free(arr.pointer);
-	}
-}
 
-void * MBESafeArrayGetPointer(MBESafeArray arr, size_t i) {
-	assert(i < arr.count);
-	return arr.pointer + i * arr.size;
-}
-
-MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
-	assert(i < arr.count);
-
-	MBESafeArray newArr;
-	newArr.pointer = arr.pointer + i * arr.size;
-	newArr.count = arr.count - i;
-	newArr.size = arr.size;
-	newArr.ref_count = arr.ref_count + 1;
-
-	return newArr;
-}
-
-@interface MBESphere ()
+@interface MBELightingSphere ()
 
 @property (readonly) id <MTLRenderPipelineState> renderPipelineState;
 
 @property id<MTLBuffer> vertexBuffer;
 @property id<MTLBuffer> indexBuffer;
-@property id<MTLBuffer> uniformsBuffer;
+@property id<MTLBuffer> vertexUniformsBuffer;
+@property id<MTLBuffer> fragmentUniformsBuffer;
 
 @end
 
 
-@implementation MBESphere
+@implementation MBELightingSphere
 
 @synthesize device, x, y, z;
 
@@ -90,19 +64,21 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 	NSUInteger numVertices = 2 + meridians * parallels;
 	printf("P=%f, M=%f, numVerticies=%d\n", (float)parallels, (float)meridians, (int)numVertices);
 
-	MBESafeArray verticesArr = MBESafeArrayCreate(numVertices, sizeof(MBESphereVertex));
+	MBESafeArray verticesArr = MBESafeArrayCreate(numVertices, sizeof(MBELightingSphereVertex));
 
-	MBESphereVertex firstPoint = {
+	MBELightingSphereVertex firstPoint = {
 		.position = {0, 0, 1, 1},
-		.color = {1, 1, 1, 1}
+		.color = {1, 1, 1, 1},
+		.normal = {0, 0, 1}
 	};
-	MBESphereVertex lastPoint = {
+	MBELightingSphereVertex lastPoint = {
 		.position = {0, 0, -1, 1},
-		.color = {0, 0, 0, 1}
+		.color = {0, 0, 0, 1},
+		.normal = {0, 0, -1}
 	};
 
-	*((MBESphereVertex *)MBESafeArrayGetPointer(verticesArr, 0)) = firstPoint;
-	*((MBESphereVertex *)MBESafeArrayGetPointer(verticesArr, numVertices - 1)) = lastPoint;
+	*((MBELightingSphereVertex *)MBESafeArrayGetPointer(verticesArr, 0)) = firstPoint;
+	*((MBELightingSphereVertex *)MBESafeArrayGetPointer(verticesArr, numVertices - 1)) = lastPoint;
 
 	for (int i=1; i<(parallels + 1); i++) {
 		// Slicing sphere along a meridian results in circle divided into parallels + 2 segments.
@@ -137,13 +113,14 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 		CGFloat r, g, b;
 		[c getRed:&r green:&g blue:&b alpha:NULL];
 
-		MBESphereVertex point = {
+		MBELightingSphereVertex point = {
 			.position = {x, y, zOffset, 1},
-			.color = {r, g, b, 1}
+			.color = {r, g, b, 1},
+			.normal = {x, y, zOffset}
 		};
 
 		printf("+ %d\n", (int)i);
-		*((MBESphereVertex *)MBESafeArrayGetPointer(array, i)) = point;
+		*((MBELightingSphereVertex *)MBESafeArrayGetPointer(array, i)) = point;
 	}
 }
 
@@ -242,8 +219,11 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 	[self.indexBuffer setLabel:@"Indices"];
 	MBESafeArrayFree(indices);
 
-	self.uniformsBuffer = [self.device newBufferWithLength:sizeof(MBESphereUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.uniformsBuffer setLabel:@"Uniforms"];
+	self.vertexUniformsBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereVertexUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.vertexUniformsBuffer setLabel:@"vertexUniformsBuffer"];
+
+	self.fragmentUniformsBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.fragmentUniformsBuffer setLabel:@"fragmentUniformsBuffer"];
 }
 
 - (void)makePipeline
@@ -251,8 +231,8 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 	id<MTLLibrary> library = [self.device newDefaultLibrary];
 
 	MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
-	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"vertex_project"];
-	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"fragment_flatcolor"];
+	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"lighting_vertex_project"];
+	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"lighting_fragment"];
 	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
 	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
@@ -267,11 +247,13 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 
 #pragma mark <MBEObject>
 
-- (void) encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
+- (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
 	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
 
 	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
-	[renderCommandEncoder setVertexBuffer:self.uniformsBuffer offset:0 atIndex:1];
+	[renderCommandEncoder setVertexBuffer:self.vertexUniformsBuffer offset:0 atIndex:1];
+
+	[renderCommandEncoder setFragmentBuffer:self.fragmentUniformsBuffer offset:0 atIndex:0];
 
 	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
 									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
@@ -280,15 +262,43 @@ MBESafeArray MBESafeArrayCreateOffsetArray(MBESafeArray arr, size_t i) {
 							  indexBufferOffset:0];
 }
 
-- (void) updateWithTime:(CGFloat)time duration:(CGFloat)duration viewProjectionMatrix:(matrix_float4x4)viewProjectionMatrix {
+- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition
+{
+	[self updateWithTime:time duration:duration worldToView:worldToView viewToProjection:viewToProjection cameraPosition:(vector_float4){5, 5, 0, 1}];
+}
+
+- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition lightSourcePosition:(vector_float4)lightSourcePosition
+{
+	const vector_float3 axis = {0, 1, 0};
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-	const matrix_float4x4 modelMatrix = positionMatrix;
+	const matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(axis, time);
+	const matrix_float4x4 modelToWorld = matrix_multiply(rotationMatrix, positionMatrix);
 
-	MBESphereUniforms uniforms;
-	uniforms.modelViewProjectionMatrix = matrix_multiply(viewProjectionMatrix, modelMatrix);
+	MBELightingSphereVertexUniforms uniforms;
+	uniforms.modelToWorld = modelToWorld;
+	uniforms.worldToView = worldToView;
+	uniforms.viewToProjection = viewToProjection;
 
-	memcpy([self.uniformsBuffer contents], &uniforms, sizeof(uniforms));
+	matrix_float4x4 modelToView = matrix_multiply(worldToView, modelToWorld);
+
+	matrix_float3x3 initialNormalMatrix = {
+		.columns[0] = modelToView.columns[0].xyz,
+		.columns[1] = modelToView.columns[1].xyz,
+		.columns[2] = modelToView.columns[2].xyz,
+	};
+	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
+
+	memcpy([self.vertexUniformsBuffer contents], &uniforms, sizeof(uniforms));
+
+
+	MBELightingSphereFragmentUniforms fragmentUniforms;
+	fragmentUniforms.objectColor = (vector_float4){0.6, 0.6, 0.6, 1.0};
+	fragmentUniforms.lightColor = (vector_float4){1.0, 0.7, 1.0, 1.0};
+	fragmentUniforms.lightPosition = lightSourcePosition;
+	fragmentUniforms.viewPosition = cameraPosition;
+
+	memcpy([self.fragmentUniformsBuffer contents], &fragmentUniforms, sizeof(fragmentUniforms));
 }
 
 @end

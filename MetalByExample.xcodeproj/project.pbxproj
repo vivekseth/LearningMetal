@@ -18,6 +18,9 @@
 		585BB6501EE918F500AEBDA1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 585BB64F1EE918F500AEBDA1 /* main.m */; };
 		585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 585BB6521EE918F500AEBDA1 /* GameViewController.m */; };
 		585BB6581EE918F500AEBDA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 585BB6571EE918F500AEBDA1 /* Assets.xcassets */; };
+		58838AFC1EF2528900858BB0 /* Lighting.metal in Sources */ = {isa = PBXBuildFile; fileRef = 58838AFB1EF2528900858BB0 /* Lighting.metal */; };
+		58838B011EF2578400858BB0 /* MBESafeArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 58838B001EF2578400858BB0 /* MBESafeArray.m */; };
+		58838B021EF258E600858BB0 /* MBELightingSphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 58838AFD1EF256A800858BB0 /* MBELightingSphere.m */; };
 		58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 58C486351EEA712400DC906C /* MBEMathUtilities.m */; };
 		58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */; };
 		58ECB6D41EECAD8D006B88AB /* MBESphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 58ECB6D31EECAD8D006B88AB /* MBESphere.m */; };
@@ -42,6 +45,11 @@
 		585BB6521EE918F500AEBDA1 /* GameViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GameViewController.m; sourceTree = "<group>"; };
 		585BB6571EE918F500AEBDA1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		585BB65C1EE918F500AEBDA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		58838AFB1EF2528900858BB0 /* Lighting.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Lighting.metal; sourceTree = "<group>"; };
+		58838AFD1EF256A800858BB0 /* MBELightingSphere.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBELightingSphere.m; sourceTree = "<group>"; };
+		58838AFE1EF256A800858BB0 /* MBELightingSphere.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBELightingSphere.h; sourceTree = "<group>"; };
+		58838AFF1EF2578400858BB0 /* MBESafeArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBESafeArray.h; sourceTree = "<group>"; };
+		58838B001EF2578400858BB0 /* MBESafeArray.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESafeArray.m; sourceTree = "<group>"; };
 		58C486341EEA712400DC906C /* MBEMathUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBEMathUtilities.h; sourceTree = "<group>"; };
 		58C486351EEA712400DC906C /* MBEMathUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBEMathUtilities.m; sourceTree = "<group>"; };
 		58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEGameEngine.h; sourceTree = "<group>"; };
@@ -100,24 +108,14 @@
 			isa = PBXGroup;
 			children = (
 				583993DE1EE9220C009142CF /* Shaders.metal */,
-				585BB64B1EE918F500AEBDA1 /* AppDelegate.h */,
-				585BB64C1EE918F500AEBDA1 /* AppDelegate.m */,
-				585BB6511EE918F500AEBDA1 /* GameViewController.h */,
-				585BB6521EE918F500AEBDA1 /* GameViewController.m */,
-				58ECB6D51EECADAC006B88AB /* MBEObject.h */,
-				582C55AA1EEBAE2800C2F815 /* MBECube.h */,
-				582C55AB1EEBAE2800C2F815 /* MBECube.m */,
-				58ECB6D21EECAD8D006B88AB /* MBESphere.h */,
-				58ECB6D31EECAD8D006B88AB /* MBESphere.m */,
+				58838AFB1EF2528900858BB0 /* Lighting.metal */,
 				582C55AE1EEBAF4400C2F815 /* MBERenderer.h */,
 				582C55AF1EEBAF4400C2F815 /* MBERenderer.m */,
 				58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */,
 				58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */,
-				58C486341EEA712400DC906C /* MBEMathUtilities.h */,
-				58C486351EEA712400DC906C /* MBEMathUtilities.m */,
-				58ECB6D61EEDA5A8006B88AB /* MBEKeyboardUtilities.h */,
-				58ECB6D71EEDA5A8006B88AB /* MBEKeyboardUtilities.m */,
-				585213071EEBB3520026F4B9 /* Storyboard.storyboard */,
+				58A2DD6D1EF248F700A9592D /* Objects */,
+				58A2DD6F1EF2491700A9592D /* Utilities */,
+				58A2DD6E1EF2490700A9592D /* AppKit */,
 				585BB65C1EE918F500AEBDA1 /* Info.plist */,
 				585BB6571EE918F500AEBDA1 /* Assets.xcassets */,
 				585BB64E1EE918F500AEBDA1 /* Supporting Files */,
@@ -131,6 +129,45 @@
 				585BB64F1EE918F500AEBDA1 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		58A2DD6D1EF248F700A9592D /* Objects */ = {
+			isa = PBXGroup;
+			children = (
+				58ECB6D51EECADAC006B88AB /* MBEObject.h */,
+				582C55AA1EEBAE2800C2F815 /* MBECube.h */,
+				582C55AB1EEBAE2800C2F815 /* MBECube.m */,
+				58838AFE1EF256A800858BB0 /* MBELightingSphere.h */,
+				58838AFD1EF256A800858BB0 /* MBELightingSphere.m */,
+				58ECB6D21EECAD8D006B88AB /* MBESphere.h */,
+				58ECB6D31EECAD8D006B88AB /* MBESphere.m */,
+			);
+			path = Objects;
+			sourceTree = "<group>";
+		};
+		58A2DD6E1EF2490700A9592D /* AppKit */ = {
+			isa = PBXGroup;
+			children = (
+				585BB64B1EE918F500AEBDA1 /* AppDelegate.h */,
+				585BB64C1EE918F500AEBDA1 /* AppDelegate.m */,
+				585BB6511EE918F500AEBDA1 /* GameViewController.h */,
+				585BB6521EE918F500AEBDA1 /* GameViewController.m */,
+			);
+			path = AppKit;
+			sourceTree = "<group>";
+		};
+		58A2DD6F1EF2491700A9592D /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				58C486341EEA712400DC906C /* MBEMathUtilities.h */,
+				58C486351EEA712400DC906C /* MBEMathUtilities.m */,
+				58ECB6D61EEDA5A8006B88AB /* MBEKeyboardUtilities.h */,
+				58ECB6D71EEDA5A8006B88AB /* MBEKeyboardUtilities.m */,
+				585213071EEBB3520026F4B9 /* Storyboard.storyboard */,
+				58838AFF1EF2578400858BB0 /* MBESafeArray.h */,
+				58838B001EF2578400858BB0 /* MBESafeArray.m */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -207,11 +244,14 @@
 				585BB6501EE918F500AEBDA1 /* main.m in Sources */,
 				58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */,
 				585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */,
+				58838B021EF258E600858BB0 /* MBELightingSphere.m in Sources */,
 				582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */,
 				585BB64D1EE918F500AEBDA1 /* AppDelegate.m in Sources */,
 				58ECB6D81EEDA5A8006B88AB /* MBEKeyboardUtilities.m in Sources */,
+				58838B011EF2578400858BB0 /* MBESafeArray.m in Sources */,
 				58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */,
 				58ECB6D41EECAD8D006B88AB /* MBESphere.m in Sources */,
+				58838AFC1EF2528900858BB0 /* Lighting.metal in Sources */,
 				582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
