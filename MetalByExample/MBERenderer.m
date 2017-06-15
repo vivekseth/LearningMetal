@@ -118,9 +118,9 @@
 
 	id<MTLRenderCommandEncoder> renderCommandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:passDescriptor];
 
-//	[renderCommandEncoder setDepthStencilState:self.depthStencilState];
-//	[renderCommandEncoder setCullMode:MTLCullModeBack];
-//	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
+	[renderCommandEncoder setDepthStencilState:self.depthStencilState];
+	[renderCommandEncoder setCullMode:MTLCullModeBack];
+	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
 	// Draw objects
 
