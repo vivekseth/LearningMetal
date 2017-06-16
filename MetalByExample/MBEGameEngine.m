@@ -245,6 +245,8 @@ TODO
 		self.lightSource.y = pos.y;
 		self.lightSource.z = pos.z;
 
+        NSLog(@"ambient: %f, diffise: %f, specular: %f, factor: %f", (float)material.ambientStrength, (float)material.diffuseStrength, (float)material.specularStrength, (float)material.specularFactor);
+
         [(MBELightingSphere *)[self.objects objectAtIndex:0] setMaterial:material];
 
 		[self updateWorldToViewMatrix];
@@ -303,13 +305,13 @@ TODO
 - (void)flagsChanged:(NSEvent *)event
 {
 	self.modifierFlags = [self modifierFlagsSetFromEvent:event];
-	NSLog(@"%@", self.modifierFlags);
+	// NSLog(@"%@", self.modifierFlags);
 }
 
 - (void)keyUp:(NSEvent*)event
 {
 	[self.pressedKeys removeObject:[self normalizedStringFromKeyCode:event.keyCode]];
-	NSLog(@"%@", self.pressedKeys);
+	// NSLog(@"%@", self.pressedKeys);
 }
 
 - (void)keyDown:(NSEvent*)event
@@ -317,7 +319,7 @@ TODO
 	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
 	[self.pressedKeys addObject:key];
 	[self.keyEvents addObject:key];
-	NSLog(@"%@", self.pressedKeys);
+	// NSLog(@"%@", self.pressedKeys);
 }
 
 @end

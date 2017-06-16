@@ -75,10 +75,10 @@ typedef struct {
 
     MBELightingSphereFragmentMaterialUniforms fragmentMaterialUniforms;
     fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
-    fragmentMaterialUniforms.ambientStrength = 0.3;
-    fragmentMaterialUniforms.diffuseStrength = 0.3;
-    fragmentMaterialUniforms.specularStrength = 0.5;
-    fragmentMaterialUniforms.specularFactor = 32;
+    fragmentMaterialUniforms.ambientStrength = 0.150000;
+    fragmentMaterialUniforms.diffuseStrength = 0.800000;
+    fragmentMaterialUniforms.specularStrength = 0.350000;
+    fragmentMaterialUniforms.specularFactor = 10;
 
     self.material = fragmentMaterialUniforms;
 
@@ -304,7 +304,8 @@ typedef struct {
 {
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-    const matrix_float4x4 modelToWorld = positionMatrix;
+    const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(2.0);
+    const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
 
 	MBELightingSphereVertexUniforms uniforms;
 	uniforms.modelToWorld = modelToWorld;
