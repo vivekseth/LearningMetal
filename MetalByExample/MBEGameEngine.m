@@ -174,6 +174,8 @@ TODO
 	for (NSString *key in self.keyEvents) {
 		vector_float4 pos = {self.lightSource.x, self.lightSource.y, self.lightSource.z, 1};
 
+        MBELightingSphereFragmentMaterialUniforms material = [(MBELightingSphere *)[self.objects objectAtIndex:0] material];
+
 		vector_float3 rotationAxis = {0, 1, 0};
 		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
 		vector_float4 xVector = {1, 0, 0, 1};
@@ -205,6 +207,32 @@ TODO
 			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
 		}
 
+
+        /*typedef struct {
+         vector_float4 objectColor;
+         float ambientStrength;
+         float diffuseStrength;
+         float specularStrength;
+         float specularFactor;
+         } MBELightingSphereFragmentMaterialUniforms;*/
+
+        if ([self.pressedKeys containsObject:@"a"]) {
+            material.ambientStrength += direction * 0.05;
+        }
+
+        if ([self.pressedKeys containsObject:@"d"]) {
+            material.diffuseStrength += direction * 0.05;
+        }
+
+        if ([self.pressedKeys containsObject:@"s"]) {
+            material.specularStrength += direction * 0.05;
+        }
+
+        if ([self.pressedKeys containsObject:@"f"]) {
+            material.specularFactor += direction;
+        }
+
+
 		if ([key isEqualToString:@"left"]) {
 			self.rotY += 0.01 * factor * M_PI;
 		}
@@ -212,9 +240,12 @@ TODO
 			self.rotY -= 0.01 * factor * M_PI;
 		}
 
+
 		self.lightSource.x = pos.x;
 		self.lightSource.y = pos.y;
 		self.lightSource.z = pos.z;
+
+        [(MBELightingSphere *)[self.objects objectAtIndex:0] setMaterial:material];
 
 		[self updateWorldToViewMatrix];
 	}

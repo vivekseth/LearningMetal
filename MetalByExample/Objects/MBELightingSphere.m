@@ -43,14 +43,6 @@ typedef struct {
  */
 
 typedef struct {
-	vector_float4 objectColor;
-	float ambientStrength;
-	float diffuseStrength;
-	float specularStrength;
-	float specularFactor;
-} MBELightingSphereFragmentMaterialUniforms;
-
-typedef struct {
 	vector_float4 viewPosition;
 	vector_float4 lightPosition;
 	vector_float4 lightColor;
@@ -80,6 +72,15 @@ typedef struct {
 	self = [super init];
 
 	self.device = device;
+
+    MBELightingSphereFragmentMaterialUniforms fragmentMaterialUniforms;
+    fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
+    fragmentMaterialUniforms.ambientStrength = 0.3;
+    fragmentMaterialUniforms.diffuseStrength = 0.3;
+    fragmentMaterialUniforms.specularStrength = 0.5;
+    fragmentMaterialUniforms.specularFactor = 32;
+
+    self.material = fragmentMaterialUniforms;
 
 	[self makePipeline];
 	[self makeBuffersWithParallels:parallels meridians:meridians];
@@ -321,12 +322,7 @@ typedef struct {
 
 	memcpy([self.vertexUniformsBuffer contents], &uniforms, sizeof(uniforms));
 
-	MBELightingSphereFragmentMaterialUniforms fragmentMaterialUniforms;
-	fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
-	fragmentMaterialUniforms.ambientStrength = 0.3;
-	fragmentMaterialUniforms.diffuseStrength = 0.3;
-	fragmentMaterialUniforms.specularStrength = 0.5;
-	fragmentMaterialUniforms.specularFactor = 32;
+    MBELightingSphereFragmentMaterialUniforms fragmentMaterialUniforms = self.material;
 
 	memcpy([self.fragmentUniformsMaterialBuffer contents], &fragmentMaterialUniforms, sizeof(fragmentMaterialUniforms));
 
