@@ -22,12 +22,39 @@ typedef struct {
 	matrix_float3x3 normalMatrix;
 } MBELightingSphereVertexUniforms;
 
+/*
+
+ struct FragmentMaterialUniforms
+ {
+ float4 objectColor;
+ float ambientStrength;
+ float diffuseStrength;
+ float specularStrength;
+ float specularFactor;
+ };
+
+ struct FragmentLightUniforms
+ {
+ float4 viewPosition; // camera position
+ float4 lightPosition;
+ float4 lightColor;
+ };
+
+ */
+
+typedef struct {
+	vector_float4 objectColor;
+	float ambientStrength;
+	float diffuseStrength;
+	float specularStrength;
+	float specularFactor;
+} MBELightingSphereFragmentMaterialUniforms;
+
 typedef struct {
 	vector_float4 viewPosition;
-	vector_float4 objectColor;
 	vector_float4 lightPosition;
 	vector_float4 lightColor;
-} MBELightingSphereFragmentUniforms;
+} MBELightingSphereFragmentLightUniforms;
 
 
 
@@ -38,7 +65,8 @@ typedef struct {
 @property id<MTLBuffer> vertexBuffer;
 @property id<MTLBuffer> indexBuffer;
 @property id<MTLBuffer> vertexUniformsBuffer;
-@property id<MTLBuffer> fragmentUniformsBuffer;
+@property id<MTLBuffer> fragmentUniformsMaterialBuffer;
+@property id<MTLBuffer> fragmentUniformsLightBuffer;
 
 @end
 
@@ -222,8 +250,11 @@ typedef struct {
 	self.vertexUniformsBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereVertexUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.vertexUniformsBuffer setLabel:@"vertexUniformsBuffer"];
 
-	self.fragmentUniformsBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.fragmentUniformsBuffer setLabel:@"fragmentUniformsBuffer"];
+	self.fragmentUniformsMaterialBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.fragmentUniformsMaterialBuffer setLabel:@"fragmentUniformsMaterialBuffer"];
+
+	self.fragmentUniformsLightBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentLightUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.fragmentUniformsLightBuffer setLabel:@"fragmentUniformsLightBuffer"];
 }
 
 - (void)makePipeline
@@ -253,7 +284,8 @@ typedef struct {
 	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
 	[renderCommandEncoder setVertexBuffer:self.vertexUniformsBuffer offset:0 atIndex:1];
 
-	[renderCommandEncoder setFragmentBuffer:self.fragmentUniformsBuffer offset:0 atIndex:0];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentUniformsMaterialBuffer offset:0 atIndex:0];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentUniformsLightBuffer offset:0 atIndex:1];
 
 	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
 									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
@@ -289,14 +321,21 @@ typedef struct {
 
 	memcpy([self.vertexUniformsBuffer contents], &uniforms, sizeof(uniforms));
 
+	MBELightingSphereFragmentMaterialUniforms fragmentMaterialUniforms;
+	fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
+	fragmentMaterialUniforms.ambientStrength = 0.3;
+	fragmentMaterialUniforms.diffuseStrength = 0.3;
+	fragmentMaterialUniforms.specularStrength = 0.5;
+	fragmentMaterialUniforms.specularFactor = 32;
 
-	MBELightingSphereFragmentUniforms fragmentUniforms;
-	fragmentUniforms.objectColor = (vector_float4){0.6, 0.6, 0.6, 1.0};
-	fragmentUniforms.lightColor = (vector_float4){1.0, 0.7, 1.0, 1.0};
-	fragmentUniforms.lightPosition = lightSourcePosition;
-	fragmentUniforms.viewPosition = cameraPosition;
+	memcpy([self.fragmentUniformsMaterialBuffer contents], &fragmentMaterialUniforms, sizeof(fragmentMaterialUniforms));
 
-	memcpy([self.fragmentUniformsBuffer contents], &fragmentUniforms, sizeof(fragmentUniforms));
+	MBELightingSphereFragmentLightUniforms fragmentLightUniforms;
+	fragmentLightUniforms.lightColor = (vector_float4){1, 1, 1, 1};
+	fragmentLightUniforms.lightPosition = lightSourcePosition;
+	fragmentLightUniforms.viewPosition = cameraPosition;
+
+	memcpy([self.fragmentUniformsLightBuffer contents], &fragmentLightUniforms, sizeof(fragmentLightUniforms));
 }
 
 @end

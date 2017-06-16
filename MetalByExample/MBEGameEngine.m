@@ -148,7 +148,23 @@ TODO
 	float duration = self.time - prevTime;
 
 	// 1. Handle User Input
+	[self handleUserInput];
 
+	// 2. Update objects in Scene
+	[self.lightSource updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position];
+
+	for (id<MBEObject> obj in self.objects) {
+		
+		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position lightSourcePosition:(vector_float4){self.lightSource.x, self.lightSource.y, self.lightSource.z, 1.0}];
+	}
+
+	// 3. Render objects to view
+	NSArray *objects = [self.objects arrayByAddingObject:self.lightSource];
+	[self.renderer renderObjects:objects MTKView:view];
+}
+
+- (void)handleUserInput
+{
 	// quit if needed
 	if ([self.modifierFlags containsObject:@"command"] && [self.pressedKeys containsObject:@"q"]) {
 		[NSApp terminate:self];
@@ -203,20 +219,6 @@ TODO
 		[self updateWorldToViewMatrix];
 	}
 	[self.keyEvents removeAllObjects];
-
-	// 2. Update objects in Scene
-
-
-	[self.lightSource updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position];
-
-	for (id<MBEObject> obj in self.objects) {
-		
-		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position lightSourcePosition:(vector_float4){self.lightSource.x, self.lightSource.y, self.lightSource.z, 1.0}];
-	}
-
-	// 3. Render objects to view
-	NSArray *objects = [self.objects arrayByAddingObject:self.lightSource];
-	[self.renderer renderObjects:objects MTKView:view];
 }
 
 #pragma mark - Input Handlers
