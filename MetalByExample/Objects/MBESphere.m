@@ -229,16 +229,17 @@ typedef struct {
 #pragma mark <MBEObject>
 
 - (void) encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
-	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
-
-	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
-	[renderCommandEncoder setVertexBuffer:self.uniformsBuffer offset:0 atIndex:1];
-
-	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
-									  indexType:MBEIndexType
-									indexBuffer:self.indexBuffer
-							  indexBufferOffset:0];
+	assert(NO);
+//	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
+//
+//	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
+//	[renderCommandEncoder setVertexBuffer:self.uniformsBuffer offset:0 atIndex:1];
+//
+//	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+//									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
+//									  indexType:MBEIndexType
+//									indexBuffer:self.indexBuffer
+//							  indexBufferOffset:0];
 }
 
 - (void) updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition {

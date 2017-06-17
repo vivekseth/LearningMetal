@@ -6,17 +6,10 @@
 //  Copyright © 2017 Vivek Seth. All rights reserved.
 //
 
+#import <simd/simd.h>
 #import "MBECube.h"
 #import "MBEMathUtilities.h"
-
-typedef struct {
-	vector_float4 position;
-	vector_float4 color;
-} MBECubeVertex;
-
-typedef struct {
-	matrix_float4x4 modelViewProjectionMatrix;
-} MBECubeUniforms;
+#import "MBEShaderStructs.h"
 
 @interface MBECube ()
 
@@ -24,7 +17,7 @@ typedef struct {
 
 @property id<MTLBuffer> vertexBuffer;
 @property id<MTLBuffer> indexBuffer;
-@property id<MTLBuffer> uniformsBuffer;
+@property id<MTLBuffer> objectUniformsBuffer;
 
 @end
 
@@ -47,16 +40,16 @@ typedef struct {
 }
 
 - (void)makeBuffers {
-	static const MBECubeVertex vertices[] =
+	static const MBEVertexIn vertices[] =
 	{
-		{ .position = { -1,  1,  1, 1 }, .color = { 0, 1, 1, 1 } },
-		{ .position = { -1, -1,  1, 1 }, .color = { 0, 0, 1, 1 } },
-		{ .position = {  1, -1,  1, 1 }, .color = { 1, 0, 1, 1 } },
-		{ .position = {  1,  1,  1, 1 }, .color = { 1, 1, 1, 1 } },
-		{ .position = { -1,  1, -1, 1 }, .color = { 0, 1, 0, 1 } },
-		{ .position = { -1, -1, -1, 1 }, .color = { 0, 0, 0, 1 } },
-		{ .position = {  1, -1, -1, 1 }, .color = { 1, 0, 0, 1 } },
-		{ .position = {  1,  1, -1, 1 }, .color = { 1, 1, 0, 1 } }
+		{ .position = { -1,  1,  1, 1 }, .color = { 0, 1, 1, 1 }, .normal = {0, 0, 0} },
+		{ .position = { -1, -1,  1, 1 }, .color = { 0, 0, 1, 1 }, .normal = {0, 0, 0}},
+		{ .position = {  1, -1,  1, 1 }, .color = { 1, 0, 1, 1 }, .normal = {0, 0, 0}},
+		{ .position = {  1,  1,  1, 1 }, .color = { 1, 1, 1, 1 }, .normal = {0, 0, 0}},
+		{ .position = { -1,  1, -1, 1 }, .color = { 0, 1, 0, 1 }, .normal = {0, 0, 0}},
+		{ .position = { -1, -1, -1, 1 }, .color = { 0, 0, 0, 1 }, .normal = {0, 0, 0}},
+		{ .position = {  1, -1, -1, 1 }, .color = { 1, 0, 0, 1 }, .normal = {0, 0, 0}},
+		{ .position = {  1,  1, -1, 1 }, .color = { 1, 1, 0, 1 }, .normal = {0, 0, 0}}
 	};
 
 	static const MBEIndex indices[] =
@@ -75,8 +68,8 @@ typedef struct {
 	self.indexBuffer = [self.device newBufferWithBytes:indices length:sizeof(indices) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.indexBuffer setLabel:@"Indices"];
 
-	self.uniformsBuffer = [self.device newBufferWithLength:sizeof(MBECubeUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.uniformsBuffer setLabel:@"Uniforms"];
+	self.objectUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEVertexObjectUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.objectUniformsBuffer setLabel:@"objectUniformsBuffer"];
 }
 
 - (void)makePipeline
@@ -101,29 +94,32 @@ typedef struct {
 
 - (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder
 {
-	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
-
-	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
-	[renderCommandEncoder setVertexBuffer:self.uniformsBuffer offset:0 atIndex:1];
-
-	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
-									  indexType:MBEIndexType
-									indexBuffer:self.indexBuffer
-							  indexBufferOffset:0];
+	assert(NO);
+//	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
+//
+//	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
+//	[renderCommandEncoder setVertexBuffer:self.uniformsBuffer offset:0 atIndex:1];
+//
+//	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+//									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
+//									  indexType:MBEIndexType
+//									indexBuffer:self.indexBuffer
+//							  indexBufferOffset:0];
 }
 
-- (void) updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition {
-	matrix_float4x4 viewProjectionMatrix = matrix_multiply(viewToProjection, worldToView);
-	vector_float3 position = {self.x, self.y, self.z};
-	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-	const matrix_float4x4 modelMatrix = positionMatrix;
+- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView {
+	MBEVertexObjectUniforms uniforms;
+	uniforms.modelToWorld = matrix_float4x4_translation((vector_float3){self.x, self.y, self.z});
 
-	MBECubeUniforms uniforms;
-	uniforms.modelViewProjectionMatrix = matrix_multiply(viewProjectionMatrix, modelMatrix);
+	matrix_float4x4 modelToView = matrix_multiply(worldToView, uniforms.modelToWorld);
+	matrix_float3x3 initialNormalMatrix = {
+		.columns[0] = modelToView.columns[0].xyz,
+		.columns[1] = modelToView.columns[1].xyz,
+		.columns[2] = modelToView.columns[2].xyz,
+	};
+	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
 
-	memcpy([self.uniformsBuffer contents], &uniforms, sizeof(uniforms));
+	memcpy([self.objectUniformsBuffer contents], &uniforms, sizeof(uniforms));
 }
-
 
 @end

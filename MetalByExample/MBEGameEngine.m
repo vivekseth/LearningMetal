@@ -14,6 +14,7 @@
 #import "MBELightingSphere.h"
 #import "MBEKeyboardUtilities.h"
 #import "MBEPointLightSource.h"
+#import "MBECubePointLight.h"
 
 @interface MBEGameEngine ()
 
@@ -50,22 +51,23 @@
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 
-	// MBELightingSphere *sphere = [[MBELightingSphere alloc] init];
-
-	MBECube *light = [[MBECube alloc] initWithDevice:self.device];
+	MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:1.0 Q:1.0];
 	light.x = 5;
 	light.y = 5;
 	light.z = 0;
 	[self.lightSources addObject:light];
 
-	MBECube *light2 = [[MBECube alloc] initWithDevice:self.device];
+	MBECubePointLight *light2 = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:1.0 Q:1.0];
 	light2.x = -5;
 	light2.y = -5;
 	light2.z = 0;
-	[self.lightSources addObject:light];
+	[self.lightSources addObject:light2];
+
+	const vector_float4 cameraTranslation = {0, 0, -8, 1.5};
+	self.position = cameraTranslation;
 
 	// Create scene
-	[self createSingleLightingSphere];
+	// [self createSingleLightingSphere];
 
 	[self updateWorldToViewMatrix];
 
@@ -154,19 +156,21 @@ TODO
 	float duration = self.time - prevTime;
 
 	// 1. Handle User Input
-	[self handleUserInput];
+	// [self handleUserInput];
+
+	[self updateWorldToViewMatrix];
 
 	// 2. Update objects in Scene
 	for (id<MBEObject> light in self.lightSources) {
-		[light updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position];
+		[light updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
 	}
 
-	for (id<MBEObject> obj in self.objects) {
-		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position];
-	}
+//	for (id<MBEObject> obj in self.objects) {
+//		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
+//	}
 
 	// 3. Render objects to view
-	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:self.position MTKView:view];
+	[self.renderer renderObjects:@[] lightSources:self.lightSources viewPosition:self.position worldToView:self.worldToViewMatrix MTKView:view];
 }
 
 - (void)handleUserInput
@@ -254,8 +258,6 @@ TODO
         NSLog(@"ambient: %f, diffise: %f, specular: %f, factor: %f", (float)material.ambientStrength, (float)material.diffuseStrength, (float)material.specularStrength, (float)material.specularFactor);
 
         [(MBELightingSphere *)[self.objects objectAtIndex:0] setMaterial:material];
-
-		[self updateWorldToViewMatrix];
 	}
 	[self.keyEvents removeAllObjects];
 }

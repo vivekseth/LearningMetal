@@ -26,6 +26,10 @@
 
 @property id<MTLBuffer> fragmentLightUniformsBuffer;
 
+@property id<MTLBuffer> vertexSceneUniformsBuffer;
+
+@property (nonatomic, readonly) matrix_float4x4 viewToProjectionMatrix;
+
 @end
 
 @implementation MBERenderer
@@ -53,8 +57,8 @@
 	id<MTLLibrary> library = [self.device newDefaultLibrary];
 
 	MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
-	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"lighting_vertex_project"];
-	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"lighting_fragment"];
+	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"multiple_lights_vertex_projection"];
+	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"multiple_lights_fragment"];
 	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
 	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
@@ -67,8 +71,8 @@
 
 
 	pipelineDescriptor = [MTLRenderPipelineDescriptor new];
-	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"lighting_vertex_project"];
-	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"lighting_fragment"];
+	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"simple_vertex_projection"];
+	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"simple_fragment"];
 	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
 	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
@@ -84,6 +88,9 @@
 {
 	self.fragmentLightUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEFragmentLightUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.fragmentLightUniformsBuffer setLabel:@"fragmentLightUniformsBuffer"];
+
+	self.vertexSceneUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEVertexSceneUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.vertexSceneUniformsBuffer setLabel:@"vertexSceneUniformsBuffer"];
 }
 
 - (void)makeDepthStencilState
@@ -118,8 +125,7 @@
 	_viewToProjectionMatrix = matrix_float4x4_perspective(aspect, fov, near, far);
 }
 
-// TODO(vivek): need to get view Position.
-- (void)updateFragmentLightUniformsWithLightSources:(NSArray <id<MBEPointLightSource>> *)lightSources viewPosition:(vector_float4)viewPosition
+- (void)updateFragmentLightUniformsBufferWithLightSources:(NSArray <id<MBEPointLightSource>> *)lightSources viewPosition:(vector_float4)viewPosition
 {
 	MBEFragmentLightUniforms lightUniforms = {0};
 	lightUniforms.viewPosition = viewPosition;
@@ -142,6 +148,16 @@
 	memcpy([self.fragmentLightUniformsBuffer contents], &lightUniforms, sizeof(lightUniforms));
 }
 
+- (void)updateVertexSceneUniformsBufferWithWorldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection
+{
+	MBEVertexSceneUniforms sceneUniforms = {0};
+
+	sceneUniforms.worldToView = worldToView;
+	sceneUniforms.viewToProjection = viewToProjection;
+
+	memcpy([self.vertexSceneUniformsBuffer contents], &sceneUniforms, sizeof(sceneUniforms));
+}
+
 - (void)drawableSizeWillChange:(CGSize)size
 {
 	[self makeDepthTextureForDrawableSize:size];
@@ -156,8 +172,15 @@
 - (void)renderObjects:(NSArray <id<MBEObject>> *)objects
 		 lightSources:(NSArray <id<MBEPointLightSource>> *)lightSources
 		 viewPosition:(vector_float4)viewPosition
+		  worldToView:(matrix_float4x4)worldToView
 			  MTKView:(MTKView *)view
 {
+
+	// Update state
+	[self updateVertexSceneUniformsBufferWithWorldToView:worldToView viewToProjection:self.viewToProjectionMatrix];
+	[self updateFragmentLightUniformsBufferWithLightSources:lightSources viewPosition:viewPosition];
+
+	// Begin Rendering...
 	id<CAMetalDrawable> drawable = [view currentDrawable];
 	id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
 
@@ -179,29 +202,28 @@
 	[renderCommandEncoder setCullMode:MTLCullModeBack];
 	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
-	// Render lights
+	// TODO(vivek): I'm assuming that this state persists across pipelines.
+	[renderCommandEncoder setVertexBuffer:self.vertexSceneUniformsBuffer offset:0 atIndex:0];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:0];
 
+//	// Render objects
+//	[renderCommandEncoder setRenderPipelineState:self.objectRenderPipelineState];
+//	for (id <MBEObject> obj in objects) {
+//		[obj encodeRenderCommand:renderCommandEncoder];
+//	}
+
+	// Render lights
+	[renderCommandEncoder setRenderPipelineState:self.pointLightRenderPipelineState];
 	for (id <MBEPointLightSource> lightSource in lightSources) {
 		[lightSource encodeRenderCommand:renderCommandEncoder];
 	}
 
-	// Render objects
-
-	[renderCommandEncoder setRenderPipelineState:self.objectRenderPipelineState];
-	[self updateFragmentLightUniformsWithLightSources:lightSources viewPosition:viewPosition];
-	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:0];
-	for (id <MBEObject> obj in objects) {
-		[obj encodeRenderCommand:renderCommandEncoder];
-	}
-
+	// End Rendering and send draw command.
 	[renderCommandEncoder endEncoding];
-
 	[commandBuffer presentDrawable:drawable];
-
 	[commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
 		dispatch_semaphore_signal(self.displaySemaphore);
 	}];
-
 	[commandBuffer commit];
 }
 

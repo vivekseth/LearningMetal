@@ -29,10 +29,10 @@ float4 lightForPointLight(MBEFragmentPointLight pointLight,
 
 
 
-vertex MBEVertexOut multiple_lights_vertex_projection(device MBEVertexIn *vertices [[buffer(0)]],
-										 constant MBEVertexSceneUniforms &sceneUniforms [[buffer(1)]],
-										 constant MBEVertexObjectUniforms &objectUniforms [[buffer(2)]],
-										 uint vid [[vertex_id]])
+vertex MBEVertexOut multiple_lights_vertex_projection(constant MBEVertexSceneUniforms &sceneUniforms [[buffer(0)]],
+													  constant MBEVertexObjectUniforms &objectUniforms [[buffer(1)]],
+													  device MBEVertexIn *vertices [[buffer(2)]],
+													  uint vid [[vertex_id]])
 {
 	MBEVertexIn in = vertices[vid];
 
@@ -70,9 +70,9 @@ float4 lightForPointLight(MBEFragmentPointLight pointLight,
 	return light;
 }
 
-fragment float4 multiple_lights_fragment(MBEVertexOut vertexIn [[stage_in]],
-								  constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(0)]],
-								  constant MBEFragmentLightUniforms &lightUniforms [[buffer(1)]])
+fragment float4 multiple_lights_fragment(constant MBEFragmentLightUniforms &lightUniforms [[buffer(0)]],
+										 constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(1)]],
+										 MBEVertexOut vertexIn [[stage_in]])
 {
 	float4 light = float4(0);
 
