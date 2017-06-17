@@ -9,34 +9,15 @@
 #import "MBELightingSphere.h"
 #import "MBESafeArray.h"
 
-typedef struct {
-	vector_float4 position;
-	vector_float4 color;
-	vector_float3 normal;
-} MBELightingSphereVertex;
-
-typedef struct {
-	matrix_float4x4 modelToWorld;
-	matrix_float4x4 worldToView;
-	matrix_float4x4 viewToProjection;
-	matrix_float3x3 normalMatrix;
-} MBELightingSphereVertexUniforms;
-
-typedef struct {
-	vector_float4 viewPosition;
-	vector_float4 lightPosition;
-	vector_float4 lightColor;
-} MBELightingSphereFragmentLightUniforms;
-
 @interface MBELightingSphere ()
 
 @property (readonly) id <MTLRenderPipelineState> renderPipelineState;
 
 @property id<MTLBuffer> vertexBuffer;
 @property id<MTLBuffer> indexBuffer;
-@property id<MTLBuffer> vertexUniformsBuffer;
-@property id<MTLBuffer> fragmentUniformsMaterialBuffer;
-@property id<MTLBuffer> fragmentUniformsLightBuffer;
+
+@property id<MTLBuffer> vertexObjectUniformsBuffer;
+@property id<MTLBuffer> fragmentMaterialUniformsBuffer;
 
 @end
 
@@ -51,14 +32,14 @@ typedef struct {
 
 	self.device = device;
 
-    MBELightingSphereFragmentMaterialUniforms fragmentMaterialUniforms;
-    fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
-    fragmentMaterialUniforms.ambientStrength = 0.150000;
-    fragmentMaterialUniforms.diffuseStrength = 0.800000;
-    fragmentMaterialUniforms.specularStrength = 0.350000;
-    fragmentMaterialUniforms.specularFactor = 10;
+//    MBELightingSphereFragmentMaterialUniforms fragmentMaterialUniforms;
+//    fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
+//    fragmentMaterialUniforms.ambientStrength = 0.150000;
+//    fragmentMaterialUniforms.diffuseStrength = 0.800000;
+//    fragmentMaterialUniforms.specularStrength = 0.350000;
+//    fragmentMaterialUniforms.specularFactor = 10;
 
-    self.material = fragmentMaterialUniforms;
+//     self.material = fragmentMaterialUniforms;
 
 	[self makePipeline];
 	[self makeBuffersWithParallels:parallels meridians:meridians];
@@ -71,21 +52,21 @@ typedef struct {
 	NSUInteger numVertices = 2 + meridians * parallels;
 	printf("P=%f, M=%f, numVerticies=%d\n", (float)parallels, (float)meridians, (int)numVertices);
 
-	MBESafeArray verticesArr = MBESafeArrayCreate(numVertices, sizeof(MBELightingSphereVertex));
+	MBESafeArray verticesArr = MBESafeArrayCreate(numVertices, sizeof(MBEVertexIn));
 
-	MBELightingSphereVertex firstPoint = {
+	MBEVertexIn firstPoint = {
 		.position = {0, 0, 1, 1},
 		.color = {1, 1, 1, 1},
 		.normal = {0, 0, 1}
 	};
-	MBELightingSphereVertex lastPoint = {
+	MBEVertexIn lastPoint = {
 		.position = {0, 0, -1, 1},
 		.color = {0, 0, 0, 1},
 		.normal = {0, 0, -1}
 	};
 
-	*((MBELightingSphereVertex *)MBESafeArrayGetPointer(verticesArr, 0)) = firstPoint;
-	*((MBELightingSphereVertex *)MBESafeArrayGetPointer(verticesArr, numVertices - 1)) = lastPoint;
+	*((MBEVertexIn *)MBESafeArrayGetPointer(verticesArr, 0)) = firstPoint;
+	*((MBEVertexIn *)MBESafeArrayGetPointer(verticesArr, numVertices - 1)) = lastPoint;
 
 	for (int i=1; i<(parallels + 1); i++) {
 		// Slicing sphere along a meridian results in circle divided into parallels + 2 segments.
@@ -120,14 +101,14 @@ typedef struct {
 		CGFloat r, g, b;
 		[c getRed:&r green:&g blue:&b alpha:NULL];
 
-		MBELightingSphereVertex point = {
+		MBEVertexIn point = {
 			.position = {x, y, zOffset, 1},
 			.color = {r, g, b, 1},
 			.normal = {x, y, zOffset}
 		};
 
 		printf("+ %d\n", (int)i);
-		*((MBELightingSphereVertex *)MBESafeArrayGetPointer(array, i)) = point;
+		*((MBEVertexIn *)MBESafeArrayGetPointer(array, i)) = point;
 	}
 }
 
@@ -226,14 +207,31 @@ typedef struct {
 	[self.indexBuffer setLabel:@"Indices"];
 	MBESafeArrayFree(indices);
 
-	self.vertexUniformsBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereVertexUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.vertexUniformsBuffer setLabel:@"vertexUniformsBuffer"];
 
-	self.fragmentUniformsMaterialBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.fragmentUniformsMaterialBuffer setLabel:@"fragmentUniformsMaterialBuffer"];
+	self.vertexObjectUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEVertexObjectUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.vertexObjectUniformsBuffer setLabel:@"vertexObjectUniformsBuffer"];
 
-	self.fragmentUniformsLightBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentLightUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.fragmentUniformsLightBuffer setLabel:@"fragmentUniformsLightBuffer"];
+
+	// TODO(vivek): allow users to modify this.
+	MBEFragmentMaterialUniforms fragmentMaterialUniforms;
+	fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
+	fragmentMaterialUniforms.ambientStrength = 0.150000;
+	fragmentMaterialUniforms.diffuseStrength = 0.800000;
+	fragmentMaterialUniforms.specularStrength = 0.350000;
+	fragmentMaterialUniforms.specularFactor = 10;
+
+	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
+
+
+//	self.vertexUniformsBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereVertexUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+//	[self.vertexUniformsBuffer setLabel:@"vertexUniformsBuffer"];
+//
+//	self.fragmentUniformsMaterialBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+//	[self.fragmentUniformsMaterialBuffer setLabel:@"fragmentUniformsMaterialBuffer"];
+//
+//	self.fragmentUniformsLightBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentLightUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+//	[self.fragmentUniformsLightBuffer setLabel:@"fragmentUniformsLightBuffer"];
 }
 
 - (void)makePipeline
@@ -258,35 +256,25 @@ typedef struct {
 #pragma mark <MBEObject>
 
 - (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
-	assert(NO);
-//	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
-//	[renderCommandEncoder setVertexBuffer:self.vertexUniformsBuffer offset:0 atIndex:1];
-//
-//	[renderCommandEncoder setFragmentBuffer:self.fragmentUniformsMaterialBuffer offset:0 atIndex:1];
-//
-//	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-//									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
-//									  indexType:MBEIndexType
-//									indexBuffer:self.indexBuffer
-//							  indexBufferOffset:0];
+	[renderCommandEncoder setVertexBuffer:self.vertexObjectUniformsBuffer offset:0 atIndex:1];
+	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:2];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentMaterialUniformsBuffer offset:0 atIndex:1];
+	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
+									  indexType:MBEIndexType
+									indexBuffer:self.indexBuffer
+							  indexBufferOffset:0];
 }
 
-- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition
-{
-	[self updateWithTime:time duration:duration worldToView:worldToView viewToProjection:viewToProjection cameraPosition:(vector_float4){5, 5, 0, 1}];
-}
-
-- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition lightSourcePosition:(vector_float4)lightSourcePosition
+- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView
 {
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
     const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(2.0);
     const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
 
-	MBELightingSphereVertexUniforms uniforms;
+	MBEVertexObjectUniforms uniforms;
 	uniforms.modelToWorld = modelToWorld;
-	uniforms.worldToView = worldToView;
-	uniforms.viewToProjection = viewToProjection;
 
 	matrix_float4x4 modelToView = matrix_multiply(worldToView, modelToWorld);
 
@@ -297,18 +285,7 @@ typedef struct {
 	};
 	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
 
-	memcpy([self.vertexUniformsBuffer contents], &uniforms, sizeof(uniforms));
-
-    MBELightingSphereFragmentMaterialUniforms fragmentMaterialUniforms = self.material;
-
-	memcpy([self.fragmentUniformsMaterialBuffer contents], &fragmentMaterialUniforms, sizeof(fragmentMaterialUniforms));
-
-	MBELightingSphereFragmentLightUniforms fragmentLightUniforms;
-	fragmentLightUniforms.lightColor = (vector_float4){1, 1, 1, 1};
-	fragmentLightUniforms.lightPosition = lightSourcePosition;
-	fragmentLightUniforms.viewPosition = cameraPosition;
-
-	memcpy([self.fragmentUniformsLightBuffer contents], &fragmentLightUniforms, sizeof(fragmentLightUniforms));
+	memcpy([self.vertexObjectUniformsBuffer contents], &uniforms, sizeof(uniforms));
 }
 
 @end

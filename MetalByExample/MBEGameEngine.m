@@ -51,23 +51,35 @@
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 
-	MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:1.0 Q:1.0];
-	light.x = 5;
-	light.y = 5;
-	light.z = 0;
-	[self.lightSources addObject:light];
+	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 0, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	redLight.x = 5;
+	redLight.y = 5;
+	redLight.z = 0;
+	[self.lightSources addObject:redLight];
 
-	MBECubePointLight *light2 = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:1.0 Q:1.0];
-	light2.x = -5;
-	light2.y = -5;
-	light2.z = 0;
-	[self.lightSources addObject:light2];
+	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){0, 0, 1, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	blueLight.x = -5;
+	blueLight.y = -5;
+	blueLight.z = 0;
+	[self.lightSources addObject:blueLight];
+
+	MBECubePointLight *greenLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){0, 1, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	greenLight.x = 5;
+	greenLight.y = -5;
+	greenLight.z = 0;
+	[self.lightSources addObject:greenLight];
+
+	MBECubePointLight *yellowLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	yellowLight.x = -5;
+	yellowLight.y = 5;
+	yellowLight.z = 0;
+	[self.lightSources addObject:yellowLight];
 
 	const vector_float4 cameraTranslation = {0, 0, -8, 1.5};
 	self.position = cameraTranslation;
 
 	// Create scene
-	// [self createSingleLightingSphere];
+	[self createSingleLightingSphere];
 
 	[self updateWorldToViewMatrix];
 
@@ -165,102 +177,102 @@ TODO
 		[light updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
 	}
 
-//	for (id<MBEObject> obj in self.objects) {
-//		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
-//	}
+	for (id<MBEObject> obj in self.objects) {
+		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
+	}
 
 	// 3. Render objects to view
-	[self.renderer renderObjects:@[] lightSources:self.lightSources viewPosition:self.position worldToView:self.worldToViewMatrix MTKView:view];
+	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:self.position worldToView:self.worldToViewMatrix MTKView:view];
 }
 
-- (void)handleUserInput
-{
-	// quit if needed
-	if ([self.modifierFlags containsObject:@"command"] && [self.pressedKeys containsObject:@"q"]) {
-		[NSApp terminate:self];
-	}
-
-	// consume all remaining key events.
-	for (NSString *key in self.keyEvents) {
-		// vector_float4 pos = {self.lightSource.x, self.lightSource.y, self.lightSource.z, 1};
-
-        MBELightingSphereFragmentMaterialUniforms material = [(MBELightingSphere *)[self.objects objectAtIndex:0] material];
-
-//		vector_float3 rotationAxis = {0, 1, 0};
-//		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
-//		vector_float4 xVector = {1, 0, 0, 1};
-//		vector_float4 yVector = {0, 1, 0, 1};
-//		vector_float4 zVector = {0, 0, 1, 1};
-
-		float factor = 0.5;
-		if ([self.modifierFlags containsObject:@"shift"]) {
-			factor = 2.0;
-		}
-
-		float direction = 0.0;
-		if ([key isEqualToString:@"up"]) {
-			direction = 1.0;
-		}
-		else if ([key isEqualToString:@"down"]) {
-			direction = -1.0;
-		}
-
-//		if ([self.pressedKeys containsObject:@"x"]) {
-//			pos += direction * factor * matrix_multiply(rotationMatrix, xVector);
+//- (void)handleUserInput
+//{
+//	// quit if needed
+//	if ([self.modifierFlags containsObject:@"command"] && [self.pressedKeys containsObject:@"q"]) {
+//		[NSApp terminate:self];
+//	}
+//
+//	// consume all remaining key events.
+//	for (NSString *key in self.keyEvents) {
+//		// vector_float4 pos = {self.lightSource.x, self.lightSource.y, self.lightSource.z, 1};
+//
+//        MBELightingSphereFragmentMaterialUniforms material = [(MBELightingSphere *)[self.objects objectAtIndex:0] material];
+//
+////		vector_float3 rotationAxis = {0, 1, 0};
+////		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
+////		vector_float4 xVector = {1, 0, 0, 1};
+////		vector_float4 yVector = {0, 1, 0, 1};
+////		vector_float4 zVector = {0, 0, 1, 1};
+//
+//		float factor = 0.5;
+//		if ([self.modifierFlags containsObject:@"shift"]) {
+//			factor = 2.0;
 //		}
 //
-//		if ([self.pressedKeys containsObject:@"y"]) {
-//			pos += -1 * direction * factor * yVector;
+//		float direction = 0.0;
+//		if ([key isEqualToString:@"up"]) {
+//			direction = 1.0;
+//		}
+//		else if ([key isEqualToString:@"down"]) {
+//			direction = -1.0;
 //		}
 //
-//		if ([self.pressedKeys containsObject:@"z"]) {
-//			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
+////		if ([self.pressedKeys containsObject:@"x"]) {
+////			pos += direction * factor * matrix_multiply(rotationMatrix, xVector);
+////		}
+////
+////		if ([self.pressedKeys containsObject:@"y"]) {
+////			pos += -1 * direction * factor * yVector;
+////		}
+////
+////		if ([self.pressedKeys containsObject:@"z"]) {
+////			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
+////		}
+//
+//
+//        /*typedef struct {
+//         vector_float4 objectColor;
+//         float ambientStrength;
+//         float diffuseStrength;
+//         float specularStrength;
+//         float specularFactor;
+//         } MBELightingSphereFragmentMaterialUniforms;*/
+//
+//        if ([self.pressedKeys containsObject:@"a"]) {
+//            material.ambientStrength += direction * 0.05;
+//        }
+//
+//        if ([self.pressedKeys containsObject:@"d"]) {
+//            material.diffuseStrength += direction * 0.05;
+//        }
+//
+//        if ([self.pressedKeys containsObject:@"s"]) {
+//            material.specularStrength += direction * 0.05;
+//        }
+//
+//        if ([self.pressedKeys containsObject:@"f"]) {
+//            material.specularFactor += direction;
+//        }
+//
+//
+//		if ([key isEqualToString:@"left"]) {
+//			self.rotY += 0.01 * factor * M_PI;
 //		}
-
-
-        /*typedef struct {
-         vector_float4 objectColor;
-         float ambientStrength;
-         float diffuseStrength;
-         float specularStrength;
-         float specularFactor;
-         } MBELightingSphereFragmentMaterialUniforms;*/
-
-        if ([self.pressedKeys containsObject:@"a"]) {
-            material.ambientStrength += direction * 0.05;
-        }
-
-        if ([self.pressedKeys containsObject:@"d"]) {
-            material.diffuseStrength += direction * 0.05;
-        }
-
-        if ([self.pressedKeys containsObject:@"s"]) {
-            material.specularStrength += direction * 0.05;
-        }
-
-        if ([self.pressedKeys containsObject:@"f"]) {
-            material.specularFactor += direction;
-        }
-
-
-		if ([key isEqualToString:@"left"]) {
-			self.rotY += 0.01 * factor * M_PI;
-		}
-		else if ([key isEqualToString:@"right"]) {
-			self.rotY -= 0.01 * factor * M_PI;
-		}
-
-
-//		self.lightSource.x = pos.x;
-//		self.lightSource.y = pos.y;
-//		self.lightSource.z = pos.z;
-
-        NSLog(@"ambient: %f, diffise: %f, specular: %f, factor: %f", (float)material.ambientStrength, (float)material.diffuseStrength, (float)material.specularStrength, (float)material.specularFactor);
-
-        [(MBELightingSphere *)[self.objects objectAtIndex:0] setMaterial:material];
-	}
-	[self.keyEvents removeAllObjects];
-}
+//		else if ([key isEqualToString:@"right"]) {
+//			self.rotY -= 0.01 * factor * M_PI;
+//		}
+//
+//
+////		self.lightSource.x = pos.x;
+////		self.lightSource.y = pos.y;
+////		self.lightSource.z = pos.z;
+//
+//        NSLog(@"ambient: %f, diffise: %f, specular: %f, factor: %f", (float)material.ambientStrength, (float)material.diffuseStrength, (float)material.specularStrength, (float)material.specularFactor);
+//
+//        [(MBELightingSphere *)[self.objects objectAtIndex:0] setMaterial:material];
+//	}
+//	[self.keyEvents removeAllObjects];
+//}
 
 #pragma mark - Input Handlers
 

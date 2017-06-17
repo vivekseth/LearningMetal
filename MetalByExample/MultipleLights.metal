@@ -12,6 +12,8 @@
 
 using namespace metal;
 
+/// Declarations
+
 struct MBEVertexOut
 {
 	float4 position [[position]];
@@ -25,9 +27,7 @@ float4 lightForPointLight(MBEFragmentPointLight pointLight,
 						  float4 viewPosition,
 						  MBEVertexOut vert);
 
-
-
-
+/// Definitions
 
 vertex MBEVertexOut multiple_lights_vertex_projection(constant MBEVertexSceneUniforms &sceneUniforms [[buffer(0)]],
 													  constant MBEVertexObjectUniforms &objectUniforms [[buffer(1)]],
@@ -43,6 +43,23 @@ vertex MBEVertexOut multiple_lights_vertex_projection(constant MBEVertexSceneUni
 	out.color = in.color;
 	return out;
 }
+
+fragment float4 multiple_lights_fragment(constant MBEFragmentLightUniforms &lightUniforms [[buffer(0)]],
+										 constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(1)]],
+										 MBEVertexOut vertexIn [[stage_in]])
+{
+	float4 light = float4(0);
+
+	// Accumulate light from pointLights. 
+	for (int i=0; i<lightUniforms.numPointLights; i++) {
+		MBEFragmentPointLight pointLight = lightUniforms.pointLights[i];
+		light += lightForPointLight(pointLight, materialUniforms, lightUniforms.viewPosition, vertexIn);
+	}
+
+	return light * materialUniforms.objectColor;
+}
+
+/// Utility
 
 float4 lightForPointLight(MBEFragmentPointLight pointLight,
 						  MBEFragmentMaterialUniforms materialUniforms,
@@ -66,23 +83,6 @@ float4 lightForPointLight(MBEFragmentPointLight pointLight,
 	float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), materialUniforms.specularFactor);
 	float3 specular = float3(materialUniforms.specularStrength * spec * pointLight.color);
 
-	float4 light = float4(diffuse + ambient + specular, 1.0);
+	float4 light = pointLight.strength * float4(diffuse + ambient + specular, 1.0);
 	return light;
 }
-
-fragment float4 multiple_lights_fragment(constant MBEFragmentLightUniforms &lightUniforms [[buffer(0)]],
-										 constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(1)]],
-										 MBEVertexOut vertexIn [[stage_in]])
-{
-	float4 light = float4(0);
-
-	// Accumulate light from pointLights. 
-	for (int i=0; i<lightUniforms.numPointLights; i++) {
-		MBEFragmentPointLight pointLight = lightUniforms.pointLights[i];
-		light += lightForPointLight(pointLight, materialUniforms, lightUniforms.viewPosition, vertexIn);
-	}
-
-	return light * materialUniforms.objectColor;
-}
-
-

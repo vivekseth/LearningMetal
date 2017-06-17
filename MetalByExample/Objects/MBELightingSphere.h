@@ -10,18 +10,11 @@
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
 #import "MBEObject.h"
-
-typedef struct {
-    vector_float4 objectColor;
-    float ambientStrength;
-    float diffuseStrength;
-    float specularStrength;
-    float specularFactor;
-} MBELightingSphereFragmentMaterialUniforms;
+#import "MBEShaderStructs.h"
 
 @interface MBELightingSphere : NSObject<MBEObject>
 
-@property (nonatomic) MBELightingSphereFragmentMaterialUniforms material;
+// @property (nonatomic) MBEFragmentMaterialUniforms material;
 
 - (instancetype) initWithDevice:(id<MTLDevice>)device parallels:(NSUInteger)parallels meridians:(NSUInteger)meridians;
 

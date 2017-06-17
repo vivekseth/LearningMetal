@@ -132,7 +132,7 @@
 	lightUniforms.numPointLights = (int)lightSources.count;
 
 	for (int i=0; i<lightSources.count; i++) {
-		id<MBEPointLightSource> lightSource = lightSources[0];
+		id<MBEPointLightSource> lightSource = lightSources[i];
 
 		MBEFragmentPointLight pointLight = {0};
 		pointLight.position = (vector_float4){lightSource.x, lightSource.y, lightSource.z, 1};
@@ -207,10 +207,10 @@
 	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:0];
 
 //	// Render objects
-//	[renderCommandEncoder setRenderPipelineState:self.objectRenderPipelineState];
-//	for (id <MBEObject> obj in objects) {
-//		[obj encodeRenderCommand:renderCommandEncoder];
-//	}
+	[renderCommandEncoder setRenderPipelineState:self.objectRenderPipelineState];
+	for (id <MBEObject> obj in objects) {
+		[obj encodeRenderCommand:renderCommandEncoder];
+	}
 
 	// Render lights
 	[renderCommandEncoder setRenderPipelineState:self.pointLightRenderPipelineState];
