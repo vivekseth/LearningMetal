@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5821F5781EF3A05E0097D95A /* MBEActionRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5821F5771EF3A05E0097D95A /* MBEActionRecognizer.m */; };
+		5821F57B1EF3A3F90097D95A /* MBEKeyHoldRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5821F57A1EF3A3F90097D95A /* MBEKeyHoldRecognizer.m */; };
 		582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AB1EEBAE2800C2F815 /* MBECube.m */; };
 		582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AF1EEBAF4400C2F815 /* MBERenderer.m */; };
 		583993DF1EE9220C009142CF /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 583993DE1EE9220C009142CF /* Shaders.metal */; };
@@ -28,6 +30,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5821F5761EF3A05E0097D95A /* MBEActionRecognizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEActionRecognizer.h; sourceTree = "<group>"; };
+		5821F5771EF3A05E0097D95A /* MBEActionRecognizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBEActionRecognizer.m; sourceTree = "<group>"; };
+		5821F5791EF3A3F90097D95A /* MBEKeyHoldRecognizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEKeyHoldRecognizer.h; sourceTree = "<group>"; };
+		5821F57A1EF3A3F90097D95A /* MBEKeyHoldRecognizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBEKeyHoldRecognizer.m; sourceTree = "<group>"; };
 		582C55AA1EEBAE2800C2F815 /* MBECube.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECube.h; sourceTree = "<group>"; };
 		582C55AB1EEBAE2800C2F815 /* MBECube.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECube.m; sourceTree = "<group>"; };
 		582C55AE1EEBAF4400C2F815 /* MBERenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBERenderer.h; sourceTree = "<group>"; };
@@ -113,6 +119,10 @@
 				582C55AF1EEBAF4400C2F815 /* MBERenderer.m */,
 				58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */,
 				58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */,
+				5821F5761EF3A05E0097D95A /* MBEActionRecognizer.h */,
+				5821F5771EF3A05E0097D95A /* MBEActionRecognizer.m */,
+				5821F5791EF3A3F90097D95A /* MBEKeyHoldRecognizer.h */,
+				5821F57A1EF3A3F90097D95A /* MBEKeyHoldRecognizer.m */,
 				58A2DD6D1EF248F700A9592D /* Objects */,
 				58A2DD6F1EF2491700A9592D /* Utilities */,
 				58A2DD6E1EF2490700A9592D /* AppKit */,
@@ -240,8 +250,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5821F57B1EF3A3F90097D95A /* MBEKeyHoldRecognizer.m in Sources */,
 				583993DF1EE9220C009142CF /* Shaders.metal in Sources */,
 				585BB6501EE918F500AEBDA1 /* main.m in Sources */,
+				5821F5781EF3A05E0097D95A /* MBEActionRecognizer.m in Sources */,
 				58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */,
 				585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */,
 				58838B021EF258E600858BB0 /* MBELightingSphere.m in Sources */,

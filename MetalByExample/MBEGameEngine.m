@@ -13,6 +13,8 @@
 #import "MBESphere.h"
 #import "MBELightingSphere.h"
 #import "MBEKeyboardUtilities.h"
+#import "MBEActionRecognizer.h"
+#import "MBEKeyHoldRecognizer.h"
 
 @interface MBEGameEngine ()
 
@@ -33,6 +35,10 @@
 @property (nonatomic, strong) NSSet *modifierFlags;
 @property (nonatomic, strong) NSMutableArray *keyEvents;
 
+@property (nonatomic, strong) NSMutableArray *eventQueue;
+
+@property (nonatomic, strong) MBEKeyHoldRecognizer *keyHoldRecognizer;
+
 @end
 
 @implementation MBEGameEngine
@@ -47,6 +53,9 @@
 	_device = MTLCreateSystemDefaultDevice();
 	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
 	_objects = [NSMutableArray array];
+
+	_keyHoldRecognizer = [[MBEKeyHoldRecognizer alloc] init];
+	self.keyHoldRecognizer.key = @"a";
 
 	// MBELightingSphere *sphere = [[MBELightingSphere alloc] init];
 
@@ -141,7 +150,7 @@ TODO
 
 - (void)drawInMTKView:(nonnull MTKView *)view
 {
-	[self.renderer blockUntilNextRender];
+	// [self.renderer blockUntilNextRender];
 
 	float prevTime = self.time;
 	self.time = CACurrentMediaTime();
@@ -154,17 +163,18 @@ TODO
 	[self.lightSource updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position];
 
 	for (id<MBEObject> obj in self.objects) {
-		
 		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position lightSourcePosition:(vector_float4){self.lightSource.x, self.lightSource.y, self.lightSource.z, 1.0}];
 	}
 
 	// 3. Render objects to view
-	NSArray *objects = [self.objects arrayByAddingObject:self.lightSource];
-	[self.renderer renderObjects:objects MTKView:view];
+//	NSArray *objects = [self.objects arrayByAddingObject:self.lightSource];
+//	[self.renderer renderObjects:objects MTKView:view];
 }
 
 - (void)handleUserInput
 {
+	[self.keyHoldRecognizer update];
+
 	// quit if needed
 	if ([self.modifierFlags containsObject:@"command"] && [self.pressedKeys containsObject:@"q"]) {
 		[NSApp terminate:self];
@@ -223,70 +233,45 @@ TODO
 
 #pragma mark - Input Handlers
 
-- (NSString *)normalizedStringFromKeyCode:(NSUInteger)keyCode
-{
-	switch (keyCode) {
-		case 56: return @"shift";
-		case 59: return @"left_control";
-		case 58: return @"left_option";
-		case 55: return @"left_command";
-		case 54: return @"right_command";
-		case 61: return @"right_option";
-		case 60: return @"right_shift";
-		case 63: return @"function";
-
-		case 123: return @"left";
-		case 124: return @"right";
-		case 125: return @"down";
-		case 126: return @"up";
-		default: return MBECreateStringForKey(keyCode);
-	}
-}
-
-- (NSSet *)modifierFlagsSetFromEvent:(NSEvent *)event
-{
-	NSMutableSet *set = [NSMutableSet set];
-	if (event.modifierFlags & NSEventModifierFlagShift) {
-		[set addObject:@"shift"];
-	}
-	if (event.modifierFlags & NSEventModifierFlagControl) {
-		[set addObject:@"control"];
-	}
-	if (event.modifierFlags & NSEventModifierFlagOption) {
-		[set addObject:@"option"];
-	}
-	if (event.modifierFlags & NSEventModifierFlagCommand) {
-		[set addObject:@"command"];
-	}
-	if (event.modifierFlags & NSEventModifierFlagFunction) {
-		[set addObject:@"function"];
-	}
-
-	return [NSSet setWithSet:set];
-}
-
 - (BOOL)acceptsFirstResponder {
 	return YES;
 }
 
-- (void)flagsChanged:(NSEvent *)event
+//- (void)flagsChanged:(NSEvent *)event
+//{
+//	self.modifierFlags = [self.class modifierFlagsSetFromEvent:event];
+//	NSLog(@"%@", self.modifierFlags);
+//}
+
+- (void)registerHoldRecognizerForKey:(NSString *)key block:(void (^)(void))block
 {
-	self.modifierFlags = [self modifierFlagsSetFromEvent:event];
-	NSLog(@"%@", self.modifierFlags);
+
 }
+
+- (void)detectLongPressForKey:(NSString *)key time:(NSTimeInterval)time block:(void (^)(void))block
+{
+
+}
+
+
+
 
 - (void)keyUp:(NSEvent*)event
 {
-	[self.pressedKeys removeObject:[self normalizedStringFromKeyCode:event.keyCode]];
-	NSLog(@"%@", self.pressedKeys);
+	// NSLog(@"%@, %@", self.pressedKeys, [self.class modifierFlagsSetFromEvent:event]);
+	// [self.pressedKeys removeObject:[self.class normalizedStringFromKeyCode:event.keyCode]];
+
+	[self.keyHoldRecognizer keyUp:event];
 }
 
 - (void)keyDown:(NSEvent*)event
 {
-	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
-	[self.pressedKeys addObject:key];
-	[self.keyEvents addObject:key];
-	NSLog(@"%@", self.pressedKeys);
+	// NSString *key = [self.class normalizedStringFromKeyCode:event.keyCode];
+	// [self.pressedKeys addObject:key];
+	// [self.keyEvents addObject:key];
+	// NSLog(@"%@, %@", self.pressedKeys, [self.class modifierFlagsSetFromEvent:event]);
+
+	[self.keyHoldRecognizer keyDown:event];
 }
 
 @end

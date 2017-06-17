@@ -79,3 +79,48 @@ CGKeyCode MBEKeyCodeForChar(const char c)
 	return code;
 }
 
+@implementation MBEKeyboardUtilities
+
++ (NSString *)normalizedStringFromKeyCode:(NSUInteger)keyCode
+{
+	switch (keyCode) {
+		case 56: return @"shift";
+		case 59: return @"left_control";
+		case 58: return @"left_option";
+		case 55: return @"left_command";
+		case 54: return @"right_command";
+		case 61: return @"right_option";
+		case 60: return @"right_shift";
+		case 63: return @"function";
+
+		case 123: return @"left";
+		case 124: return @"right";
+		case 125: return @"down";
+		case 126: return @"up";
+		default: return MBECreateStringForKey(keyCode);
+	}
+}
+
++ (NSSet *)modifierFlagsSetFromEvent:(NSEvent *)event
+{
+	NSMutableSet *set = [NSMutableSet set];
+	if (event.modifierFlags & NSEventModifierFlagShift) {
+		[set addObject:@"shift"];
+	}
+	if (event.modifierFlags & NSEventModifierFlagControl) {
+		[set addObject:@"control"];
+	}
+	if (event.modifierFlags & NSEventModifierFlagOption) {
+		[set addObject:@"option"];
+	}
+	if (event.modifierFlags & NSEventModifierFlagCommand) {
+		[set addObject:@"command"];
+	}
+	if (event.modifierFlags & NSEventModifierFlagFunction) {
+		[set addObject:@"function"];
+	}
+
+	return [NSSet setWithSet:set];
+}
+
+@end
