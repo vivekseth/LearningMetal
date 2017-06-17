@@ -50,35 +50,8 @@
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 
-	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 0, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
-	redLight.x = 5;
-	redLight.y = 5;
-	redLight.z = 0;
-	[self.lightSources addObject:redLight];
-
-	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){0, 0, 1, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
-	blueLight.x = -5;
-	blueLight.y = -5;
-	blueLight.z = 0;
-	[self.lightSources addObject:blueLight];
-
-	MBECubePointLight *greenLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){0, 1, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
-	greenLight.x = 5;
-	greenLight.y = -5;
-	greenLight.z = 0;
-	[self.lightSources addObject:greenLight];
-
-	MBECubePointLight *yellowLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
-	yellowLight.x = -5;
-	yellowLight.y = 5;
-	yellowLight.z = 0;
-	[self.lightSources addObject:yellowLight];
-
-	const vector_float4 cameraTranslation = {0, 0, -8, 1.5};
-	self.position = cameraTranslation;
-
 	// Create scene
-	[self createSingleSphere];
+	[self mutliPointLightDemo];
 
 	[self updateWorldToViewMatrix];
 
@@ -109,8 +82,42 @@
 
 - (void)createSingleSphere
 {
-	const vector_float4 cameraTranslation = {0, 0, -8, 1.5};
+	const vector_float4 cameraTranslation = {0, 0, -8, 1};
 	self.position = cameraTranslation;
+
+	_objects = [NSMutableArray array];
+	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+	[self.objects addObject:sphere];
+}
+
+- (void)mutliPointLightDemo
+{
+	const vector_float4 cameraTranslation = {0, 0, -8, 1};
+	self.position = cameraTranslation;
+
+	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 0, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	redLight.x = 5;
+	redLight.y = 5;
+	redLight.z = 0;
+	[self.lightSources addObject:redLight];
+
+	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){0, 0, 1, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	blueLight.x = -5;
+	blueLight.y = -5;
+	blueLight.z = 0;
+	[self.lightSources addObject:blueLight];
+
+	MBECubePointLight *greenLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){0, 1, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	greenLight.x = 5;
+	greenLight.y = -5;
+	greenLight.z = 0;
+	[self.lightSources addObject:greenLight];
+
+	MBECubePointLight *yellowLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	yellowLight.x = -5;
+	yellowLight.y = 5;
+	yellowLight.z = 0;
+	[self.lightSources addObject:yellowLight];
 
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
