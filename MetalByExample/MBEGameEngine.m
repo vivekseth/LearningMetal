@@ -11,7 +11,6 @@
 #import "MBEObject.h"
 #import "MBECube.h"
 #import "MBESphere.h"
-#import "MBELightingSphere.h"
 #import "MBEKeyboardUtilities.h"
 #import "MBEPointLightSource.h"
 #import "MBECubePointLight.h"
@@ -79,7 +78,7 @@
 	self.position = cameraTranslation;
 
 	// Create scene
-	[self createSingleLightingSphere];
+	[self createSingleSphere];
 
 	[self updateWorldToViewMatrix];
 
@@ -115,16 +114,6 @@
 
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
-	[self.objects addObject:sphere];
-}
-
-- (void)createSingleLightingSphere
-{
-	const vector_float4 cameraTranslation = {0, 0, -8, 1.5};
-	self.position = cameraTranslation;
-
-	_objects = [NSMutableArray array];
-	MBELightingSphere *sphere = [[MBELightingSphere alloc] initWithDevice:self.device parallels:20 meridians:20];
 	[self.objects addObject:sphere];
 }
 
