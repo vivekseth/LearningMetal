@@ -102,9 +102,30 @@
 							  indexBufferOffset:0];
 }
 
-- (void) updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView {
+- (void) updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView
+{
+	float rotationX = duration * (M_PI / 2);
+	float rotationY = duration * (M_PI / 3);
+
+	vector_float3 xAxis = { 1, 0, 0 };
+	vector_float3 yAxis = { 0, 0, 1 };
+
+	matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, rotationX);
+	matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, rotationY);
+	matrix_float4x4 rotationMatrix = matrix_multiply(xRot, yRot);
+
+
+
 	MBEVertexObjectUniforms uniforms;
-	uniforms.modelToWorld = matrix_float4x4_translation((vector_float3){self.x, self.y, self.z});
+	matrix_float4x4 translateMatrix = matrix_float4x4_translation((vector_float3){self.x, self.y, self.z});
+	matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(0.2);
+	uniforms.modelToWorld = matrix_multiply(rotationMatrix, matrix_multiply(translateMatrix, scaleMatrix));
+	vector_float4 newPosition = matrix_multiply(rotationMatrix, (vector_float4){self.x, self.y, self.z, 1.0});
+	self.x = newPosition.x;
+	self.y = newPosition.y;
+	self.z = newPosition.z;
+
+
 
 	matrix_float4x4 modelToView = matrix_multiply(worldToView, uniforms.modelToWorld);
 	matrix_float3x3 initialNormalMatrix = {

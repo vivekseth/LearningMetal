@@ -66,6 +66,9 @@ float4 lightForPointLight(MBEFragmentPointLight pointLight,
 						  float4 viewPosition,
 						  MBEVertexOut vert)
 {
+	float d = length(pointLight.position - vert.fragPos);
+	float attenuation = 1.0 / (pointLight.K + pointLight.L * d + pointLight.Q * (d * d));
+
 	// ambient
 	float3 ambient = materialUniforms.ambientStrength * float3(pointLight.color);
 
@@ -83,6 +86,6 @@ float4 lightForPointLight(MBEFragmentPointLight pointLight,
 	float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), materialUniforms.specularFactor);
 	float3 specular = float3(materialUniforms.specularStrength * spec * pointLight.color);
 
-	float4 light = pointLight.strength * float4(diffuse + ambient + specular, 1.0);
+	float4 light = attenuation * pointLight.strength * float4(diffuse + ambient + specular, 1.0);
 	return light;
 }

@@ -215,10 +215,10 @@
 	// TODO(vivek): allow users to modify this.
 	MBEFragmentMaterialUniforms fragmentMaterialUniforms;
 	fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
-	fragmentMaterialUniforms.ambientStrength = 0.150000;
-	fragmentMaterialUniforms.diffuseStrength = 0.800000;
-	fragmentMaterialUniforms.specularStrength = 0.350000;
-	fragmentMaterialUniforms.specularFactor = 10;
+	fragmentMaterialUniforms.ambientStrength = 0.3;
+	fragmentMaterialUniforms.diffuseStrength = 0.7;
+	fragmentMaterialUniforms.specularStrength = 0.4;
+	fragmentMaterialUniforms.specularFactor = 32;
 
 	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];

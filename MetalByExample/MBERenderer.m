@@ -187,7 +187,7 @@
 	MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
 
 	passDescriptor.colorAttachments[0].texture = [drawable texture];
-	passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.95, 0.95, 0.95, 1);
+	passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.35, 0.35, 0.35, 1);
 	passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
 	passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
 

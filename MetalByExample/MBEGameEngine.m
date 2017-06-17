@@ -95,32 +95,32 @@
 	const vector_float4 cameraTranslation = {0, 0, -8, 1};
 	self.position = cameraTranslation;
 
-	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 0, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 	redLight.x = 5;
 	redLight.y = 5;
 	redLight.z = 0;
 	[self.lightSources addObject:redLight];
 
-	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){0, 0, 1, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 	blueLight.x = -5;
 	blueLight.y = -5;
 	blueLight.z = 0;
 	[self.lightSources addObject:blueLight];
 
-	MBECubePointLight *greenLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){0, 1, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	MBECubePointLight *greenLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 	greenLight.x = 5;
 	greenLight.y = -5;
 	greenLight.z = 0;
 	[self.lightSources addObject:greenLight];
 
-	MBECubePointLight *yellowLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 0, 1} strength:0.7 K:1.0 L:1.0 Q:1.0];
+	MBECubePointLight *yellowLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 	yellowLight.x = -5;
 	yellowLight.y = 5;
 	yellowLight.z = 0;
 	[self.lightSources addObject:yellowLight];
 
 	_objects = [NSMutableArray array];
-	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:30 meridians:30];
 	[self.objects addObject:sphere];
 }
 
@@ -174,6 +174,10 @@ TODO
 	}
 
 	for (id<MBEObject> obj in self.objects) {
+		obj.x = cos(self.time * 2);
+		obj.z = sin(self.time * 2);
+
+
 		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
 	}
 
