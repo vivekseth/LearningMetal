@@ -7,9 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		58029D591EF5AEF8005D5147 /* Simple.metal in Sources */ = {isa = PBXBuildFile; fileRef = 58029D581EF5AEF8005D5147 /* Simple.metal */; };
+		58029D5E1EF5B5B3005D5147 /* MBECubePointLight.m in Sources */ = {isa = PBXBuildFile; fileRef = 58029D5D1EF5B5B3005D5147 /* MBECubePointLight.m */; };
 		582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AB1EEBAE2800C2F815 /* MBECube.m */; };
 		582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AF1EEBAF4400C2F815 /* MBERenderer.m */; };
 		583993DF1EE9220C009142CF /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 583993DE1EE9220C009142CF /* Shaders.metal */; };
+		584F3FA61EF5036800CC3BB4 /* MultipleLights.metal in Sources */ = {isa = PBXBuildFile; fileRef = 584F3FA51EF5036800CC3BB4 /* MultipleLights.metal */; };
 		585213081EEBB3520026F4B9 /* Storyboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 585213071EEBB3520026F4B9 /* Storyboard.storyboard */; };
 		585BB6451EE918F500AEBDA1 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 585BB6441EE918F500AEBDA1 /* Metal.framework */; };
 		585BB6471EE918F500AEBDA1 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 585BB6461EE918F500AEBDA1 /* MetalKit.framework */; };
@@ -20,19 +23,22 @@
 		585BB6581EE918F500AEBDA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 585BB6571EE918F500AEBDA1 /* Assets.xcassets */; };
 		58838AFC1EF2528900858BB0 /* Lighting.metal in Sources */ = {isa = PBXBuildFile; fileRef = 58838AFB1EF2528900858BB0 /* Lighting.metal */; };
 		58838B011EF2578400858BB0 /* MBESafeArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 58838B001EF2578400858BB0 /* MBESafeArray.m */; };
-		58838B021EF258E600858BB0 /* MBELightingSphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 58838AFD1EF256A800858BB0 /* MBELightingSphere.m */; };
+		58838B021EF258E600858BB0 /* MBESphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 58838AFD1EF256A800858BB0 /* MBESphere.m */; };
 		58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 58C486351EEA712400DC906C /* MBEMathUtilities.m */; };
 		58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */; };
-		58ECB6D41EECAD8D006B88AB /* MBESphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 58ECB6D31EECAD8D006B88AB /* MBESphere.m */; };
 		58ECB6D81EEDA5A8006B88AB /* MBEKeyboardUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 58ECB6D71EEDA5A8006B88AB /* MBEKeyboardUtilities.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		58029D581EF5AEF8005D5147 /* Simple.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Simple.metal; sourceTree = "<group>"; };
+		58029D5C1EF5B5B3005D5147 /* MBECubePointLight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECubePointLight.h; sourceTree = "<group>"; };
+		58029D5D1EF5B5B3005D5147 /* MBECubePointLight.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECubePointLight.m; sourceTree = "<group>"; };
 		582C55AA1EEBAE2800C2F815 /* MBECube.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECube.h; sourceTree = "<group>"; };
 		582C55AB1EEBAE2800C2F815 /* MBECube.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECube.m; sourceTree = "<group>"; };
 		582C55AE1EEBAF4400C2F815 /* MBERenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBERenderer.h; sourceTree = "<group>"; };
 		582C55AF1EEBAF4400C2F815 /* MBERenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBERenderer.m; sourceTree = "<group>"; };
 		583993DE1EE9220C009142CF /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		584F3FA51EF5036800CC3BB4 /* MultipleLights.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MultipleLights.metal; sourceTree = "<group>"; };
 		585213071EEBB3520026F4B9 /* Storyboard.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Storyboard.storyboard; sourceTree = "<group>"; };
 		585BB6411EE918F500AEBDA1 /* MetalByExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalByExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		585BB6441EE918F500AEBDA1 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
@@ -45,17 +51,17 @@
 		585BB6521EE918F500AEBDA1 /* GameViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GameViewController.m; sourceTree = "<group>"; };
 		585BB6571EE918F500AEBDA1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		585BB65C1EE918F500AEBDA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		58830D921EF4F55300BF11CF /* MBEShaderStructs.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = MBEShaderStructs.h; sourceTree = "<group>"; };
+		58830D951EF4FD5200BF11CF /* MBEPointLightSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEPointLightSource.h; sourceTree = "<group>"; };
 		58838AFB1EF2528900858BB0 /* Lighting.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Lighting.metal; sourceTree = "<group>"; };
-		58838AFD1EF256A800858BB0 /* MBELightingSphere.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBELightingSphere.m; sourceTree = "<group>"; };
-		58838AFE1EF256A800858BB0 /* MBELightingSphere.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBELightingSphere.h; sourceTree = "<group>"; };
+		58838AFD1EF256A800858BB0 /* MBESphere.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESphere.m; sourceTree = "<group>"; };
+		58838AFE1EF256A800858BB0 /* MBESphere.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBESphere.h; sourceTree = "<group>"; };
 		58838AFF1EF2578400858BB0 /* MBESafeArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBESafeArray.h; sourceTree = "<group>"; };
 		58838B001EF2578400858BB0 /* MBESafeArray.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESafeArray.m; sourceTree = "<group>"; };
 		58C486341EEA712400DC906C /* MBEMathUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBEMathUtilities.h; sourceTree = "<group>"; };
 		58C486351EEA712400DC906C /* MBEMathUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBEMathUtilities.m; sourceTree = "<group>"; };
 		58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEGameEngine.h; sourceTree = "<group>"; };
 		58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBEGameEngine.m; sourceTree = "<group>"; };
-		58ECB6D21EECAD8D006B88AB /* MBESphere.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBESphere.h; sourceTree = "<group>"; };
-		58ECB6D31EECAD8D006B88AB /* MBESphere.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESphere.m; sourceTree = "<group>"; };
 		58ECB6D51EECADAC006B88AB /* MBEObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEObject.h; sourceTree = "<group>"; };
 		58ECB6D61EEDA5A8006B88AB /* MBEKeyboardUtilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEKeyboardUtilities.h; sourceTree = "<group>"; };
 		58ECB6D71EEDA5A8006B88AB /* MBEKeyboardUtilities.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBEKeyboardUtilities.m; sourceTree = "<group>"; };
@@ -109,6 +115,8 @@
 			children = (
 				583993DE1EE9220C009142CF /* Shaders.metal */,
 				58838AFB1EF2528900858BB0 /* Lighting.metal */,
+				584F3FA51EF5036800CC3BB4 /* MultipleLights.metal */,
+				58029D581EF5AEF8005D5147 /* Simple.metal */,
 				582C55AE1EEBAF4400C2F815 /* MBERenderer.h */,
 				582C55AF1EEBAF4400C2F815 /* MBERenderer.m */,
 				58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */,
@@ -135,12 +143,13 @@
 			isa = PBXGroup;
 			children = (
 				58ECB6D51EECADAC006B88AB /* MBEObject.h */,
+				58830D951EF4FD5200BF11CF /* MBEPointLightSource.h */,
 				582C55AA1EEBAE2800C2F815 /* MBECube.h */,
 				582C55AB1EEBAE2800C2F815 /* MBECube.m */,
-				58838AFE1EF256A800858BB0 /* MBELightingSphere.h */,
-				58838AFD1EF256A800858BB0 /* MBELightingSphere.m */,
-				58ECB6D21EECAD8D006B88AB /* MBESphere.h */,
-				58ECB6D31EECAD8D006B88AB /* MBESphere.m */,
+				58838AFE1EF256A800858BB0 /* MBESphere.h */,
+				58838AFD1EF256A800858BB0 /* MBESphere.m */,
+				58029D5C1EF5B5B3005D5147 /* MBECubePointLight.h */,
+				58029D5D1EF5B5B3005D5147 /* MBECubePointLight.m */,
 			);
 			path = Objects;
 			sourceTree = "<group>";
@@ -159,6 +168,7 @@
 		58A2DD6F1EF2491700A9592D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				58830D921EF4F55300BF11CF /* MBEShaderStructs.h */,
 				58C486341EEA712400DC906C /* MBEMathUtilities.h */,
 				58C486351EEA712400DC906C /* MBEMathUtilities.m */,
 				58ECB6D61EEDA5A8006B88AB /* MBEKeyboardUtilities.h */,
@@ -243,14 +253,16 @@
 				583993DF1EE9220C009142CF /* Shaders.metal in Sources */,
 				585BB6501EE918F500AEBDA1 /* main.m in Sources */,
 				58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */,
+				58029D5E1EF5B5B3005D5147 /* MBECubePointLight.m in Sources */,
 				585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */,
-				58838B021EF258E600858BB0 /* MBELightingSphere.m in Sources */,
+				584F3FA61EF5036800CC3BB4 /* MultipleLights.metal in Sources */,
+				58838B021EF258E600858BB0 /* MBESphere.m in Sources */,
 				582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */,
 				585BB64D1EE918F500AEBDA1 /* AppDelegate.m in Sources */,
 				58ECB6D81EEDA5A8006B88AB /* MBEKeyboardUtilities.m in Sources */,
 				58838B011EF2578400858BB0 /* MBESafeArray.m in Sources */,
+				58029D591EF5AEF8005D5147 /* Simple.metal in Sources */,
 				58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */,
-				58ECB6D41EECAD8D006B88AB /* MBESphere.m in Sources */,
 				58838AFC1EF2528900858BB0 /* Lighting.metal in Sources */,
 				582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */,
 			);

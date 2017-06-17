@@ -10,8 +10,11 @@
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
 #import "MBEObject.h"
+#import "MBEShaderStructs.h"
 
 @interface MBESphere : NSObject<MBEObject>
+
+// @property (nonatomic) MBEFragmentMaterialUniforms material;
 
 - (instancetype) initWithDevice:(id<MTLDevice>)device parallels:(NSUInteger)parallels meridians:(NSUInteger)meridians;
 

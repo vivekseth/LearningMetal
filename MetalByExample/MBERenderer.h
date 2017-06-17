@@ -9,11 +9,10 @@
 #import <Foundation/Foundation.h>
 #import <MetalKit/MetalKit.h>
 #import <Cocoa/Cocoa.h>
-#import "MBECube.h"
+#import "MBEObject.h"
+#import "MBEPointLightSource.h"
 
 @interface MBERenderer : NSObject
-
-@property (nonatomic, readonly) matrix_float4x4 viewToProjectionMatrix;
 
 - (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device;
 
@@ -21,6 +20,10 @@
 
 - (void)blockUntilNextRender;
 
-- (void)renderObjects:(NSArray <id<MBEObject>> *)objects MTKView:(MTKView *)view;
+- (void)renderObjects:(NSArray <id<MBEObject>> *)objects
+		 lightSources:(NSArray <id<MBEPointLightSource>> *)lightSources
+		 viewPosition:(vector_float4)viewPosition
+		  worldToView:(matrix_float4x4)worldToView
+			  MTKView:(MTKView *)view;
 
 @end
