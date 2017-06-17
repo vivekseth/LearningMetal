@@ -6,8 +6,6 @@
 //  Copyright © 2017 Vivek Seth. All rights reserved.
 //
 
-//#import <Foundation/Foundation.h>
-
 #import <simd/simd.h>
 
 typedef struct {
