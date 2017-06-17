@@ -13,6 +13,7 @@
 #import "MBESphere.h"
 #import "MBELightingSphere.h"
 #import "MBEKeyboardUtilities.h"
+#import "MBEPointLightSource.h"
 
 @interface MBEGameEngine ()
 
@@ -26,7 +27,7 @@
 @property (assign) float time;
 @property (nonatomic) matrix_float4x4 worldToViewMatrix;
 
-@property (nonatomic, strong) id<MBEObject> lightSource;
+@property (nonatomic, strong) NSMutableArray <id<MBEPointLightSource>> *lightSources;
 @property (nonatomic, strong) NSMutableArray <id<MBEObject>> *objects;
 
 @property (nonatomic, strong) NSMutableSet *pressedKeys;
@@ -47,16 +48,21 @@
 	_device = MTLCreateSystemDefaultDevice();
 	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
 	_objects = [NSMutableArray array];
+	_lightSources = [NSMutableArray array];
 
 	// MBELightingSphere *sphere = [[MBELightingSphere alloc] init];
 
-	self.lightSource = [[MBECube alloc] initWithDevice:self.device];
-	self.lightSource.x = 5;
-	self.lightSource.y = 5;
-	self.lightSource.z = 0;
+	MBECube *light = [[MBECube alloc] initWithDevice:self.device];
+	light.x = 5;
+	light.y = 5;
+	light.z = 0;
+	[self.lightSources addObject:light];
 
-//	const vector_float4 cameraTranslation = {0, 0, -8, 1.0};
-//	self.position = cameraTranslation;
+	MBECube *light2 = [[MBECube alloc] initWithDevice:self.device];
+	light2.x = -5;
+	light2.y = -5;
+	light2.z = 0;
+	[self.lightSources addObject:light];
 
 	// Create scene
 	[self createSingleLightingSphere];
@@ -151,16 +157,16 @@ TODO
 	[self handleUserInput];
 
 	// 2. Update objects in Scene
-	[self.lightSource updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position];
+	for (id<MBEObject> light in self.lightSources) {
+		[light updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position];
+	}
 
 	for (id<MBEObject> obj in self.objects) {
-		
-		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position lightSourcePosition:(vector_float4){self.lightSource.x, self.lightSource.y, self.lightSource.z, 1.0}];
+		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix viewToProjection:self.renderer.viewToProjectionMatrix cameraPosition:self.position];
 	}
 
 	// 3. Render objects to view
-	NSArray *objects = [self.objects arrayByAddingObject:self.lightSource];
-	[self.renderer renderObjects:objects MTKView:view];
+	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:self.position MTKView:view];
 }
 
 - (void)handleUserInput
@@ -172,15 +178,15 @@ TODO
 
 	// consume all remaining key events.
 	for (NSString *key in self.keyEvents) {
-		vector_float4 pos = {self.lightSource.x, self.lightSource.y, self.lightSource.z, 1};
+		// vector_float4 pos = {self.lightSource.x, self.lightSource.y, self.lightSource.z, 1};
 
         MBELightingSphereFragmentMaterialUniforms material = [(MBELightingSphere *)[self.objects objectAtIndex:0] material];
 
-		vector_float3 rotationAxis = {0, 1, 0};
-		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
-		vector_float4 xVector = {1, 0, 0, 1};
-		vector_float4 yVector = {0, 1, 0, 1};
-		vector_float4 zVector = {0, 0, 1, 1};
+//		vector_float3 rotationAxis = {0, 1, 0};
+//		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
+//		vector_float4 xVector = {1, 0, 0, 1};
+//		vector_float4 yVector = {0, 1, 0, 1};
+//		vector_float4 zVector = {0, 0, 1, 1};
 
 		float factor = 0.5;
 		if ([self.modifierFlags containsObject:@"shift"]) {
@@ -195,17 +201,17 @@ TODO
 			direction = -1.0;
 		}
 
-		if ([self.pressedKeys containsObject:@"x"]) {
-			pos += direction * factor * matrix_multiply(rotationMatrix, xVector);
-		}
-
-		if ([self.pressedKeys containsObject:@"y"]) {
-			pos += -1 * direction * factor * yVector;
-		}
-
-		if ([self.pressedKeys containsObject:@"z"]) {
-			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
-		}
+//		if ([self.pressedKeys containsObject:@"x"]) {
+//			pos += direction * factor * matrix_multiply(rotationMatrix, xVector);
+//		}
+//
+//		if ([self.pressedKeys containsObject:@"y"]) {
+//			pos += -1 * direction * factor * yVector;
+//		}
+//
+//		if ([self.pressedKeys containsObject:@"z"]) {
+//			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
+//		}
 
 
         /*typedef struct {
@@ -241,9 +247,9 @@ TODO
 		}
 
 
-		self.lightSource.x = pos.x;
-		self.lightSource.y = pos.y;
-		self.lightSource.z = pos.z;
+//		self.lightSource.x = pos.x;
+//		self.lightSource.y = pos.y;
+//		self.lightSource.z = pos.z;
 
         NSLog(@"ambient: %f, diffise: %f, specular: %f, factor: %f", (float)material.ambientStrength, (float)material.diffuseStrength, (float)material.specularStrength, (float)material.specularFactor);
 

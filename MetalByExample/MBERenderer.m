@@ -8,10 +8,14 @@
 
 #import "MBERenderer.h"
 #import "MBEMathUtilities.h"
+#import "MBEShaderStructs.h"
 
 @interface MBERenderer ()
 
 @property (readonly) id<MTLDevice> device;
+
+@property (readonly) id <MTLRenderPipelineState> pointLightRenderPipelineState;
+@property (readonly) id <MTLRenderPipelineState> objectRenderPipelineState;
 
 @property (strong) id<MTLTexture> depthTexture;
 
@@ -19,6 +23,8 @@
 @property (strong) id<MTLDepthStencilState> depthStencilState;
 
 @property (strong) dispatch_semaphore_t displaySemaphore;
+
+@property id<MTLBuffer> fragmentLightUniformsBuffer;
 
 @end
 
@@ -33,11 +39,51 @@
 	_device = device;
 	_commandQueue = [self.device newCommandQueue];
 
+	[self makePipelines];
+	[self makeBuffers];
 	[self makeDepthStencilState];
 	[self makeDepthTextureForDrawableSize:size];
 	[self makeProjectionMatrixForDrawableSize:size];
 
 	return self;
+}
+
+- (void)makePipelines
+{
+	id<MTLLibrary> library = [self.device newDefaultLibrary];
+
+	MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
+	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"lighting_vertex_project"];
+	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"lighting_fragment"];
+	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+
+	NSError *error = nil;
+	_objectRenderPipelineState = [self.device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
+	if (!self.objectRenderPipelineState)
+	{
+		NSLog(@"Error occurred when creating render pipeline state: %@", error);
+	}
+
+
+	pipelineDescriptor = [MTLRenderPipelineDescriptor new];
+	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"lighting_vertex_project"];
+	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"lighting_fragment"];
+	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+
+	error = nil;
+	_pointLightRenderPipelineState = [self.device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
+	if (!self.pointLightRenderPipelineState)
+	{
+		NSLog(@"Error occurred when creating render pipeline state: %@", error);
+	}
+}
+
+- (void)makeBuffers
+{
+	self.fragmentLightUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEFragmentLightUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.fragmentLightUniformsBuffer setLabel:@"fragmentLightUniformsBuffer"];
 }
 
 - (void)makeDepthStencilState
@@ -72,6 +118,30 @@
 	_viewToProjectionMatrix = matrix_float4x4_perspective(aspect, fov, near, far);
 }
 
+// TODO(vivek): need to get view Position.
+- (void)updateFragmentLightUniformsWithLightSources:(NSArray <id<MBEPointLightSource>> *)lightSources viewPosition:(vector_float4)viewPosition
+{
+	MBEFragmentLightUniforms lightUniforms = {0};
+	lightUniforms.viewPosition = viewPosition;
+	lightUniforms.numPointLights = lightSources.count;
+
+	for (int i=0; i<lightSources.count; i++) {
+		id<MBEPointLightSource> lightSource = lightSources[0];
+
+		MBEFragmentPointLight pointLight = {0};
+		pointLight.position = (vector_float4){lightSource.x, lightSource.y, lightSource.z, 1};
+		pointLight.color = lightSource.color;
+		pointLight.strength = lightSource.strength;
+		pointLight.constant = lightSource.constant;
+		pointLight.linear = lightSource.linear;
+		pointLight.quadratic = lightSource.quadratic;
+
+		lightUniforms.pointLights[i] = pointLight;
+	}
+
+	memcpy([self.fragmentLightUniformsBuffer contents], &lightUniforms, sizeof(lightUniforms));
+}
+
 - (void)drawableSizeWillChange:(CGSize)size
 {
 	[self makeDepthTextureForDrawableSize:size];
@@ -83,7 +153,10 @@
 	dispatch_semaphore_wait(self.displaySemaphore, DISPATCH_TIME_FOREVER);
 }
 
-- (void)renderObjects:(NSArray <id<MBEObject>> *)objects MTKView:(MTKView *)view
+- (void)renderObjects:(NSArray <id<MBEObject>> *)objects
+		 lightSources:(NSArray <id<MBEPointLightSource>> *)lightSources
+		 viewPosition:(vector_float4)viewPosition
+			  MTKView:(MTKView *)view
 {
 	id<CAMetalDrawable> drawable = [view currentDrawable];
 	id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
@@ -106,22 +179,20 @@
 	[renderCommandEncoder setCullMode:MTLCullModeBack];
 	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
-	// Draw objects
+	// Render lights
 
-	/*
-	// TODO(vivek): consider splitting objects into two classes. the model object and singleton renderer. The singleton renderer is responsible for setting render state whilst model objects are responsible for uploading whatever data they need to render.
-	 ideally this becomes;
-	 for object_renderer in object_types:
-		 object_renderer set state
-		 for object in objects of type:
-			 object draw
-	 */
+	for (id <MBEPointLightSource> lightSource in lightSources) {
+		[lightSource encodeRenderCommand:renderCommandEncoder];
+	}
 
+	// Render objects
+
+	[renderCommandEncoder setRenderPipelineState:self.objectRenderPipelineState];
+	[self updateFragmentLightUniformsWithLightSources:lightSources viewPosition:viewPosition];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:0];
 	for (id <MBEObject> obj in objects) {
 		[obj encodeRenderCommand:renderCommandEncoder];
 	}
-
-	// end
 
 	[renderCommandEncoder endEncoding];
 

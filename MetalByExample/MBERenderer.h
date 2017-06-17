@@ -9,7 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <MetalKit/MetalKit.h>
 #import <Cocoa/Cocoa.h>
-#import "MBECube.h"
+#import "MBEObject.h"
+#import "MBEPointLightSource.h"
 
 @interface MBERenderer : NSObject
 
@@ -21,6 +22,9 @@
 
 - (void)blockUntilNextRender;
 
-- (void)renderObjects:(NSArray <id<MBEObject>> *)objects MTKView:(MTKView *)view;
+- (void)renderObjects:(NSArray <id<MBEObject>> *)objects
+		 lightSources:(NSArray <id<MBEPointLightSource>> *)lightSources
+		 viewPosition:(vector_float4)viewPosition
+			  MTKView:(MTKView *)view;
 
 @end

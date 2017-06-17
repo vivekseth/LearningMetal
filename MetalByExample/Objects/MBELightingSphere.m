@@ -280,13 +280,10 @@ typedef struct {
 #pragma mark <MBEObject>
 
 - (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
-	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
-
 	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
 	[renderCommandEncoder setVertexBuffer:self.vertexUniformsBuffer offset:0 atIndex:1];
 
-	[renderCommandEncoder setFragmentBuffer:self.fragmentUniformsMaterialBuffer offset:0 atIndex:0];
-	[renderCommandEncoder setFragmentBuffer:self.fragmentUniformsLightBuffer offset:0 atIndex:1];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentUniformsMaterialBuffer offset:0 atIndex:1];
 
 	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
 									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
