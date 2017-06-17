@@ -202,11 +202,10 @@
 	[renderCommandEncoder setCullMode:MTLCullModeBack];
 	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
-	// TODO(vivek): I'm assuming that this state persists across pipelines.
 	[renderCommandEncoder setVertexBuffer:self.vertexSceneUniformsBuffer offset:0 atIndex:0];
 	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:0];
 
-//	// Render objects
+	// Render objects
 	[renderCommandEncoder setRenderPipelineState:self.objectRenderPipelineState];
 	for (id <MBEObject> obj in objects) {
 		[obj encodeRenderCommand:renderCommandEncoder];
@@ -218,7 +217,7 @@
 		[lightSource encodeRenderCommand:renderCommandEncoder];
 	}
 
-	// End Rendering and send draw command.
+	// End Rendering and send draw command(s)
 	[renderCommandEncoder endEncoding];
 	[commandBuffer presentDrawable:drawable];
 	[commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {

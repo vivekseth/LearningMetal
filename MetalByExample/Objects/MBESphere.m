@@ -229,6 +229,7 @@ typedef struct {
 #pragma mark <MBEObject>
 
 - (void) encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
+	// TODO(vivek): fix this!
 	assert(NO);
 //	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
 //
@@ -243,16 +244,18 @@ typedef struct {
 }
 
 - (void) updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition {
-	matrix_float4x4 viewProjectionMatrix = matrix_multiply(viewToProjection, worldToView);
-
-	vector_float3 position = {self.x, self.y, self.z};
-	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-	const matrix_float4x4 modelMatrix = positionMatrix;
-
-	MBESphereUniforms uniforms;
-	uniforms.modelViewProjectionMatrix = matrix_multiply(viewProjectionMatrix, modelMatrix);
-
-	memcpy([self.uniformsBuffer contents], &uniforms, sizeof(uniforms));
+	// TODO(vivek): fix this!
+	assert(NO);
+//	matrix_float4x4 viewProjectionMatrix = matrix_multiply(viewToProjection, worldToView);
+//
+//	vector_float3 position = {self.x, self.y, self.z};
+//	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
+//	const matrix_float4x4 modelMatrix = positionMatrix;
+//
+//	MBESphereUniforms uniforms;
+//	uniforms.modelViewProjectionMatrix = matrix_multiply(viewProjectionMatrix, modelMatrix);
+//
+//	memcpy([self.uniformsBuffer contents], &uniforms, sizeof(uniforms));
 
 }
 

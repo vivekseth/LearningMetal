@@ -29,10 +29,4 @@ static const MTLIndexType MBEIndexType = MTLIndexTypeUInt16;
 
 - (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder;
 
-@optional
-
-- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition;
-
-- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection cameraPosition:(vector_float4)cameraPosition lightSourcePosition:(vector_float4)lightSourcePosition;
-
 @end

@@ -94,6 +94,7 @@
 
 - (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder
 {
+	// TODO(vivek): fix this!
 	assert(NO);
 //	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
 //
@@ -108,18 +109,20 @@
 }
 
 - (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView {
-	MBEVertexObjectUniforms uniforms;
-	uniforms.modelToWorld = matrix_float4x4_translation((vector_float3){self.x, self.y, self.z});
-
-	matrix_float4x4 modelToView = matrix_multiply(worldToView, uniforms.modelToWorld);
-	matrix_float3x3 initialNormalMatrix = {
-		.columns[0] = modelToView.columns[0].xyz,
-		.columns[1] = modelToView.columns[1].xyz,
-		.columns[2] = modelToView.columns[2].xyz,
-	};
-	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
-
-	memcpy([self.objectUniformsBuffer contents], &uniforms, sizeof(uniforms));
+	// TODO(vivek): fix this!
+	assert(NO);
+//	MBEVertexObjectUniforms uniforms;
+//	uniforms.modelToWorld = matrix_float4x4_translation((vector_float3){self.x, self.y, self.z});
+//
+//	matrix_float4x4 modelToView = matrix_multiply(worldToView, uniforms.modelToWorld);
+//	matrix_float3x3 initialNormalMatrix = {
+//		.columns[0] = modelToView.columns[0].xyz,
+//		.columns[1] = modelToView.columns[1].xyz,
+//		.columns[2] = modelToView.columns[2].xyz,
+//	};
+//	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
+//
+//	memcpy([self.objectUniformsBuffer contents], &uniforms, sizeof(uniforms));
 }
 
 @end
