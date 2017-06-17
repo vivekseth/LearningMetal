@@ -14,8 +14,8 @@
 
 @property (nonatomic) vector_float4 color;
 @property (nonatomic) float strength;
-@property (nonatomic) float constant;
-@property (nonatomic) float linear;
-@property (nonatomic) float quadratic;
+@property (nonatomic) float K;
+@property (nonatomic) float L;
+@property (nonatomic) float Q;
 
 @end

@@ -7,16 +7,12 @@
 //
 
 #include <metal_stdlib>
+
+#import "Utilities/MBEShaderStructs.h"
+
 using namespace metal;
 
-struct VertexIn
-{
-	float4 position [[position]];
-	float4 color;
-	float3 normal;
-};
-
-struct VertexOut
+struct MBEVertexOut
 {
 	float4 position [[position]];
 	float4 color;
@@ -24,63 +20,23 @@ struct VertexOut
 	float4 fragPos;
 };
 
-struct VertexSceneUniforms
-{
-	float4x4 worldToView;
-	float4x4 viewToProjection;
-};
-
-struct VertexObjectUniforms
-{
-	float4x4 modelToWorld;
-	float3x3 normalMatrix;
-};
-
-struct FragmentMaterialUniforms
-{
-	float4 objectColor;
-	float ambientStrength;
-	float diffuseStrength;
-	float specularStrength;
-	float specularFactor;
-};
-
-#define MBE_MAX_POINT_LIGHTS 10
-
-struct FragmentPointLight
-{
-	float4 position;
-	float4 color;
-	float strength;
-	float K;
-	float L;
-	float Q;
-};
-
-struct FragmentLightUniforms
-{
-	float4 viewPosition;
-	int8_t numPointLights;
-	FragmentPointLight pointLights[MBE_MAX_POINT_LIGHTS];
-};
-
-float4 lightForPointLight(FragmentPointLight pointLight,
-						  FragmentMaterialUniforms materialUniforms,
+float4 lightForPointLight(MBEFragmentPointLight pointLight,
+						  MBEFragmentMaterialUniforms materialUniforms,
 						  float4 viewPosition,
-						  VertexOut vert);
+						  MBEVertexOut vert);
 
 
 
 
 
-vertex VertexOut multiple_lights_vertex_projection(device VertexIn *vertices [[buffer(0)]],
-										 constant VertexSceneUniforms &sceneUniforms [[buffer(1)]],
-										 constant VertexObjectUniforms &objectUniforms [[buffer(2)]],
+vertex MBEVertexOut multiple_lights_vertex_projection(device MBEVertexIn *vertices [[buffer(0)]],
+										 constant MBEVertexSceneUniforms &sceneUniforms [[buffer(1)]],
+										 constant MBEVertexObjectUniforms &objectUniforms [[buffer(2)]],
 										 uint vid [[vertex_id]])
 {
-	VertexIn in = vertices[vid];
+	MBEVertexIn in = vertices[vid];
 
-	VertexOut out;
+	MBEVertexOut out;
 	out.fragPos = objectUniforms.modelToWorld * in.position;
 	out.position = sceneUniforms.viewToProjection * sceneUniforms.worldToView * objectUniforms.modelToWorld * in.position;
 	out.normal = objectUniforms.normalMatrix * in.normal;
@@ -88,10 +44,10 @@ vertex VertexOut multiple_lights_vertex_projection(device VertexIn *vertices [[b
 	return out;
 }
 
-float4 lightForPointLight(FragmentPointLight pointLight,
-						  FragmentMaterialUniforms materialUniforms,
+float4 lightForPointLight(MBEFragmentPointLight pointLight,
+						  MBEFragmentMaterialUniforms materialUniforms,
 						  float4 viewPosition,
-						  VertexOut vert)
+						  MBEVertexOut vert)
 {
 	// ambient
 	float3 ambient = materialUniforms.ambientStrength * float3(pointLight.color);
@@ -114,15 +70,15 @@ float4 lightForPointLight(FragmentPointLight pointLight,
 	return light;
 }
 
-fragment float4 multiple_lights_fragment(VertexOut vertexIn [[stage_in]],
-								  constant FragmentMaterialUniforms &materialUniforms [[buffer(0)]],
-								  constant FragmentLightUniforms &lightUniforms [[buffer(1)]])
+fragment float4 multiple_lights_fragment(MBEVertexOut vertexIn [[stage_in]],
+								  constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(0)]],
+								  constant MBEFragmentLightUniforms &lightUniforms [[buffer(1)]])
 {
 	float4 light = float4(0);
 
 	// Accumulate light from pointLights. 
 	for (int i=0; i<lightUniforms.numPointLights; i++) {
-		FragmentPointLight pointLight = lightUniforms.pointLights[i];
+		MBEFragmentPointLight pointLight = lightUniforms.pointLights[i];
 		light += lightForPointLight(pointLight, materialUniforms, lightUniforms.viewPosition, vertexIn);
 	}
 

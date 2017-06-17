@@ -6,14 +6,15 @@
 //  Copyright © 2017 Vivek Seth. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+//#import <Foundation/Foundation.h>
+
 #import <simd/simd.h>
 
 typedef struct {
 	vector_float4 position;
 	vector_float4 color;
 	vector_float3 normal;
-} MBEVertex;
+} MBEVertexIn;
 
 typedef struct {
 	matrix_float4x4 modelToWorld;
@@ -56,10 +57,7 @@ typedef struct {
 
 	// MBEFragmentDirectionalLight directionalLight;
 
-	u_int8_t numPointLights;
+	int numPointLights;
 	MBEFragmentPointLight pointLights[MBE_MAX_POINT_LIGHTS];
 } MBEFragmentLightUniforms;
-
-
-
 

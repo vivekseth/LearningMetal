@@ -123,7 +123,7 @@
 {
 	MBEFragmentLightUniforms lightUniforms = {0};
 	lightUniforms.viewPosition = viewPosition;
-	lightUniforms.numPointLights = lightSources.count;
+	lightUniforms.numPointLights = (int)lightSources.count;
 
 	for (int i=0; i<lightSources.count; i++) {
 		id<MBEPointLightSource> lightSource = lightSources[0];
@@ -132,9 +132,9 @@
 		pointLight.position = (vector_float4){lightSource.x, lightSource.y, lightSource.z, 1};
 		pointLight.color = lightSource.color;
 		pointLight.strength = lightSource.strength;
-		pointLight.constant = lightSource.constant;
-		pointLight.linear = lightSource.linear;
-		pointLight.quadratic = lightSource.quadratic;
+		pointLight.K = lightSource.K;
+		pointLight.L = lightSource.L;
+		pointLight.Q = lightSource.Q;
 
 		lightUniforms.pointLights[i] = pointLight;
 	}
