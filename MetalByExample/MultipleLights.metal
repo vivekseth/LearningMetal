@@ -19,7 +19,7 @@ struct MBEVertexOut
 	float4 position [[position]];
 	float4 color;
 	float3 normal;
-	float4 fragPos;
+	float4 worldSpacePosition;
 };
 
 float4 lightForPointLight(MBEFragmentPointLight pointLight,
@@ -34,12 +34,16 @@ vertex MBEVertexOut multiple_lights_vertex_projection(constant MBEVertexSceneUni
 													  device MBEVertexIn *vertices [[buffer(2)]],
 													  uint vid [[vertex_id]])
 {
+//	float3x3 normalToView = float3x3(sceneUniforms.worldToView[0].xyz,
+//									 sceneUniforms.worldToView[0].xyz,
+//									 sceneUniforms.worldToView[0].xyz);
+
 	MBEVertexIn in = vertices[vid];
 
 	MBEVertexOut out;
-	out.fragPos = objectUniforms.modelToWorld * in.position;
+	out.worldSpacePosition = objectUniforms.modelToWorld * in.position;
 	out.position = sceneUniforms.viewToProjection * sceneUniforms.worldToView * objectUniforms.modelToWorld * in.position;
-	out.normal = objectUniforms.normalMatrix * in.normal;
+	out.normal = objectUniforms.normalToView * in.normal;
 	out.color = in.color;
 	return out;
 }
@@ -48,15 +52,45 @@ fragment float4 multiple_lights_fragment(constant MBEFragmentLightUniforms &ligh
 										 constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(1)]],
 										 MBEVertexOut vertexIn [[stage_in]])
 {
-	float4 light = float4(0);
+	// return float4(float4);
 
-	// Accumulate light from pointLights. 
-	for (int i=0; i<lightUniforms.numPointLights; i++) {
-		MBEFragmentPointLight pointLight = lightUniforms.pointLights[i];
-		light += lightForPointLight(pointLight, materialUniforms, lightUniforms.viewPosition, vertexIn);
+	if (vertexIn.normal.z <= 0) {
+		return float4(0);
 	}
+	else {
+		return float4(1);
+	}
+//
+//	if (vertexIn.normal.z > 0.8) {
+//		return float4(0.8);
+//	}
+//	else {
+//		return float4(1);
+//	}
 
-	return light * materialUniforms.objectColor;
+//	int N = 5;
+//	float f = ((float)1.0/(float)N);
+//	for (int i=0; i<N; i++)
+//	{
+//		float diff = f * (N - i);
+//		if (vertexIn.normal.z > diff) {
+//			return diff + f;
+//		}
+//	}
+//
+//	return float4(0.0);
+
+
+
+//	float4 light = float4(0);
+//
+//	// Accumulate light from pointLights.
+//	for (int i=0; i<lightUniforms.numPointLights; i++) {
+//		MBEFragmentPointLight pointLight = lightUniforms.pointLights[i];
+//		light += lightForPointLight(pointLight, materialUniforms, lightUniforms.viewPosition, vertexIn);
+//	}
+//
+//	return light * materialUniforms.objectColor;
 }
 
 /// Utility
@@ -66,25 +100,29 @@ float4 lightForPointLight(MBEFragmentPointLight pointLight,
 						  float4 viewPosition,
 						  MBEVertexOut vert)
 {
-	float d = length(pointLight.position - vert.fragPos);
-	float attenuation = 1.0 / (pointLight.K + pointLight.L * d + pointLight.Q * (d * d));
+	// float d = length(pointLight.position - vert.worldSpacePosition);
+	float attenuation = 1.0;// / (pointLight.K + pointLight.L * d + pointLight.Q * (d * d));
 
 	// ambient
-	float3 ambient = materialUniforms.ambientStrength * float3(pointLight.color);
+	// float3 ambient = materialUniforms.ambientStrength * float3(pointLight.color);
 
 	// diffuse
 	float3 norm = normalize(vert.normal);
-	float3 lightDir = float3(normalize(pointLight.position - vert.fragPos));
+	float3 lightDir = float3(normalize(pointLight.position - vert.worldSpacePosition));
 	// HACK! not sure why i need this.
-	lightDir.z = -1 * lightDir.z;
+	// lightDir.z = -1 * lightDir.z;
+
 	float diff = max(dot(norm, lightDir), 0.0);
 	float3 diffuse = materialUniforms.diffuseStrength * diff * float3(pointLight.color);
 
 	// specular
-	float3 viewDirection = float3(normalize(viewPosition - vert.fragPos));
-	float3 reflectDirection = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), materialUniforms.specularFactor);
-	float3 specular = float3(materialUniforms.specularStrength * spec * pointLight.color);
+//	float3 viewDirection = float3(normalize(viewPosition - vert.worldSpacePosition));
+//	float3 reflectDirection = reflect(-lightDir, norm);
+//	float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), materialUniforms.specularFactor);
+//	float3 specular = float3(materialUniforms.specularStrength * spec * pointLight.color);
+
+	float3 ambient = float3(0);
+	float3 specular = float3(0);
 
 	float4 light = attenuation * pointLight.strength * float4(diffuse + ambient + specular, 1.0);
 	return light;

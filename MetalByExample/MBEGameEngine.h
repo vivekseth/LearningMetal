@@ -12,6 +12,6 @@
 
 @interface MBEGameEngine : NSResponder<MTKViewDelegate>
 
-- (instancetype)initWithSize:(CGSize)size;
+- (instancetype)initWithView:(MTKView *)view size:(CGSize)size;
 
 @end

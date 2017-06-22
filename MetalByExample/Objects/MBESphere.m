@@ -270,20 +270,21 @@
 {
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-    const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(2.0);
-    const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
+    const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(1.0);
+	const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
 
 	MBEVertexObjectUniforms uniforms;
 	uniforms.modelToWorld = modelToWorld;
 
 	matrix_float4x4 modelToView = matrix_multiply(worldToView, modelToWorld);
+	matrix_float4x4 initialNormalMatrix = matrix_float4x4_uniform_scale(1.0); // simd_transpose(simd_inverse(modelToView));
 
-	matrix_float3x3 initialNormalMatrix = {
-		.columns[0] = modelToView.columns[0].xyz,
-		.columns[1] = modelToView.columns[1].xyz,
-		.columns[2] = modelToView.columns[2].xyz,
+	matrix_float3x3 normalMatrix = {
+		.columns[0] = initialNormalMatrix.columns[0].xyz,
+		.columns[1] = initialNormalMatrix.columns[1].xyz,
+		.columns[2] = initialNormalMatrix.columns[2].xyz,
 	};
-	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
+	uniforms.normalToView = normalMatrix;
 
 	memcpy([self.vertexObjectUniformsBuffer contents], &uniforms, sizeof(uniforms));
 }

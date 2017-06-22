@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
 	matrix_float4x4 modelToWorld;
-	matrix_float3x3 normalMatrix;
+	matrix_float3x3 normalToView;
 } MBEVertexObjectUniforms;
 
 typedef struct {
