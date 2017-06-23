@@ -19,6 +19,7 @@ struct MBEVertexOut
 	float4 position [[position]];
 	float4 color;
 	float3 normal;
+	float4 worldSpacePosition;
 	float4 viewSpacePosition;
 };
 
@@ -44,11 +45,11 @@ vertex MBEVertexOut multiple_lights_vertex_projection(constant MBESceneUniforms 
 	MBEVertexIn in = vertices[vid];
 
 	MBEVertexOut out;
+	out.worldSpacePosition = objectUniforms.modelToWorld * in.position;
 	out.viewSpacePosition = sceneUniforms.worldToView * objectUniforms.modelToWorld * in.position;
 	out.position = sceneUniforms.viewToProjection * sceneUniforms.worldToView * objectUniforms.modelToWorld * in.position;
 	out.normal = objectUniforms.normalMatrix * in.normal;
 	out.color = in.color;
-	// out.worldToView = sceneUniforms.worldToView;
 	return out;
 }
 
@@ -76,7 +77,13 @@ float4 lightForPointLight2(MBESceneUniforms sceneUniforms,
 						  float4 viewPosition,
 						  MBEVertexOut vert)
 {
-	return float4(1.0);
+	float4 worldSpaceLightPosition = pointLight.position;
+	float4 worldSpaceFragPosition = vert.worldSpacePosition;
+	float4 worldSpaceRelativeLightPosition = worldSpaceLightPosition - worldSpaceFragPosition;
+	float4 viewSpaceRelaiveLightPosition = sceneUniforms.worldToView * worldSpaceRelativeLightPosition;
+	float angle = dot(normalize(vert.normal), normalize(viewSpaceRelaiveLightPosition.xyz));
+	float intensity = max(0.0, angle);
+	return intensity * float4(1.0);
 }
 
 float4 lightForPointLight(MBESceneUniforms sceneUniforms,

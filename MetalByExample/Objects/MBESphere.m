@@ -278,12 +278,12 @@
 
 	matrix_float4x4 modelToView = matrix_multiply(worldToView, modelToWorld);
 
-	matrix_float3x3 initialNormalMatrix = {
+	matrix_float3x3 modelToView3x3 = {
 		.columns[0] = modelToView.columns[0].xyz,
 		.columns[1] = modelToView.columns[1].xyz,
 		.columns[2] = modelToView.columns[2].xyz,
 	};
-	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
+	uniforms.normalMatrix = simd_transpose(simd_inverse(modelToView3x3));
 
 	memcpy([self.vertexObjectUniformsBuffer contents], &uniforms, sizeof(uniforms));
 }

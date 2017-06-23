@@ -135,9 +135,6 @@
 		id<MBEPointLightSource> lightSource = lightSources[i];
 
 		MBEFragmentPointLight pointLight = {0};
-
-		// TODO(VIVEK): ** THIS IS THE PROBLEM ** Lights are not in the right coordinate space. I think they should end up in View Space, but are sent in World Space. 
-
 		pointLight.position = (vector_float4){lightSource.x, lightSource.y, lightSource.z, 1};
 		pointLight.color = lightSource.color;
 		pointLight.strength = lightSource.strength;

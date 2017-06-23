@@ -22,7 +22,14 @@
 
 // Camera
 @property (nonatomic) float rotY;
-@property (nonatomic) vector_float4 position;
+
+//vector_float3 eye = {0};
+//vector_float3 at = {0};
+//vector_float3 up = {0};
+
+@property (nonatomic) vector_float3 eye;
+@property (nonatomic) vector_float3 at;
+@property (nonatomic) vector_float3 up;
 
 @property (assign) float time;
 @property (nonatomic) matrix_float4x4 worldToViewMatrix;
@@ -60,8 +67,8 @@
 
 - (void)createScene
 {
-	const vector_float4 cameraTranslation = {0, -5, -5, 1};
-	self.position = cameraTranslation;
+	// const vector_float4 cameraTranslation = {0, -5, -5, 1};
+	// self.position = cameraTranslation;
 
 	_objects = [NSMutableArray array];
 
@@ -82,8 +89,8 @@
 
 - (void)createSingleSphere
 {
-	const vector_float4 cameraTranslation = {0, 0, -8, 1};
-	self.position = cameraTranslation;
+	// const vector_float4 cameraTranslation = {0, 0, 8, 1};
+	// self.position = cameraTranslation;
 
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
@@ -92,13 +99,14 @@
 
 - (void)mutliPointLightDemo
 {
-	const vector_float4 cameraTranslation = {0, 0, -8, 1};
-	self.position = cameraTranslation;
+	self.eye = (vector_float3){0, 0, 8};
+	self.at = (vector_float3){0, 0, 0};
+	self.up = (vector_float3){0, 1, 0};
 
 	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	redLight.x = 5;
-	redLight.y = 5;
-	redLight.z = 0;
+	redLight.x = 0;
+	redLight.y = 0;
+	redLight.z = 8;
 	[self.lightSources addObject:redLight];
 
 //	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
@@ -126,10 +134,35 @@
 
 - (void)updateWorldToViewMatrix
 {
-	const vector_float3 axis = {0, 1, 0};
-	const vector_float3 translation = {self.position.x, self.position.y, self.position.z};
-	_worldToViewMatrix = matrix_multiply(matrix_float4x4_rotation(axis, self.rotY), matrix_float4x4_translation(translation));
+	vector_float3 forward = self.eye - self.at;
+	vector_float3 norm_forward = simd_normalize(forward);
+	vector_float3 norm_up = simd_normalize(self.up);
+	vector_float3 norm_side = simd_normalize(simd_cross(norm_up, norm_forward));
+
+	// TODO
+	norm_up = simd_normalize(simd_cross(norm_forward, norm_side));
+
+	matrix_float4x4 viewMatrix = {
+		.columns[0] = {
+			norm_side.x, norm_up.x, norm_forward.x, 0
+		},
+		.columns[1] = {
+			norm_side.y, norm_up.y, norm_forward.y, 0
+		},
+		.columns[2] = {
+			norm_side.z, norm_up.z, norm_forward.z, 0
+		},
+		.columns[3] = {
+			          0,		 0, 	      	 0, 1
+		}
+	};
+
+	matrix_float4x4 translationMatrix = matrix_float4x4_translation(-1.0 * self.eye);
+	_worldToViewMatrix = matrix_multiply(viewMatrix, translationMatrix);
 }
+
+
+
 
 
 #pragma mark <MTKViewDelegate>
@@ -174,15 +207,13 @@ TODO
 	}
 
 	for (id<MBEObject> obj in self.objects) {
-//		obj.x = cos(self.time * 2);
-//		obj.z = sin(self.time * 2);
-//
-
 		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
 	}
 
 	// 3. Render objects to view
-	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:self.position worldToView:self.worldToViewMatrix MTKView:view];
+	vector_float4 position = {0};
+	position.xyz = self.eye;
+	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:position worldToView:self.worldToViewMatrix MTKView:view];
 }
 
 - (void)handleUserInput
@@ -194,9 +225,10 @@ TODO
 
 	// consume all remaining key events.
 	for (NSString *key in self.keyEvents) {
-		vector_float4 pos = self.position;
+		id<MBEPointLightSource> lightSource = self.lightSources[0];
 
-//        MBELightingSphereFragmentMaterialUniforms material = [(MBELightingSphere *)[self.objects objectAtIndex:0] material];
+		// vector_float4 pos = self.position;
+		vector_float4 pos = (vector_float4){lightSource.x, lightSource.y, lightSource.z, 1};
 
 		vector_float3 rotationAxis = {0, 1, 0};
 		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
@@ -229,32 +261,6 @@ TODO
 			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
 		}
 
-
-        /*typedef struct {
-         vector_float4 objectColor;
-         float ambientStrength;
-         float diffuseStrength;
-         float specularStrength;
-         float specularFactor;
-         } MBELightingSphereFragmentMaterialUniforms;*/
-
-//        if ([self.pressedKeys containsObject:@"a"]) {
-//            material.ambientStrength += direction * 0.05;
-//        }
-//
-//        if ([self.pressedKeys containsObject:@"d"]) {
-//            material.diffuseStrength += direction * 0.05;
-//        }
-//
-//        if ([self.pressedKeys containsObject:@"s"]) {
-//            material.specularStrength += direction * 0.05;
-//        }
-//
-//        if ([self.pressedKeys containsObject:@"f"]) {
-//            material.specularFactor += direction;
-//        }
-
-
 		if ([key isEqualToString:@"left"]) {
 			self.rotY += 0.01 * factor * M_PI;
 		}
@@ -262,16 +268,12 @@ TODO
 			self.rotY -= 0.01 * factor * M_PI;
 		}
 
-		self.position = pos;
+		// self.position = pos;
 
+		self.lightSources[0].x = pos.x;
+		self.lightSources[0].y = pos.y;
+		self.lightSources[0].z = pos.z;
 
-//		self.lightSource.x = pos.x;
-//		self.lightSource.y = pos.y;
-//		self.lightSource.z = pos.z;
-
-//        NSLog(@"ambient: %f, diffise: %f, specular: %f, factor: %f", (float)material.ambientStrength, (float)material.diffuseStrength, (float)material.specularStrength, (float)material.specularFactor);
-//
-//        [(MBELightingSphere *)[self.objects objectAtIndex:0] setMaterial:material];
 	}
 	[self.keyEvents removeAllObjects];
 }
