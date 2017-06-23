@@ -106,7 +106,7 @@
 	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 	redLight.x = 0;
 	redLight.y = 0;
-	redLight.z = 8;
+	redLight.z = 5;
 	[self.lightSources addObject:redLight];
 
 //	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
@@ -254,7 +254,7 @@ TODO
 		}
 
 		if ([self.pressedKeys containsObject:@"y"]) {
-			pos += -1 * direction * factor * yVector;
+			pos += direction * factor * yVector;
 		}
 
 		if ([self.pressedKeys containsObject:@"z"]) {
