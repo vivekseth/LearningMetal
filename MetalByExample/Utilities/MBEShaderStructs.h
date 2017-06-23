@@ -8,6 +8,18 @@
 
 #import <simd/simd.h>
 
+typedef enum MBEVertexShaderIndex {
+	MBEVertexShaderIndexSceneUniforms = 0,
+	MBEVertexShaderIndexObjectUniforms = 1,
+	MBEVertexShaderIndexVertices = 2,
+} MBEVertexShaderIndex;
+
+typedef enum MBEFragmentShaderIndex {
+	MBEFragmentShaderIndexSceneUniforms = 0,
+	MBEFragmentShaderIndexLightUniforms = 1,
+	MBEFragmentShaderIndexMaterialUniforms = 2,
+} MBEFragmentShaderIndex;
+
 typedef struct {
 	vector_float4 position;
 	vector_float4 color;
@@ -22,7 +34,7 @@ typedef struct {
 typedef struct {
 	matrix_float4x4 worldToView;
 	matrix_float4x4 viewToProjection;
-} MBEVertexSceneUniforms;
+} MBESceneUniforms;
 
 typedef struct {
 	vector_float4 objectColor;

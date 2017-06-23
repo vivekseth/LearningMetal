@@ -26,7 +26,7 @@
 
 @property id<MTLBuffer> fragmentLightUniformsBuffer;
 
-@property id<MTLBuffer> vertexSceneUniformsBuffer;
+@property id<MTLBuffer> sceneUniformsBuffer;
 
 @property (nonatomic, readonly) matrix_float4x4 viewToProjectionMatrix;
 
@@ -89,8 +89,8 @@
 	self.fragmentLightUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEFragmentLightUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.fragmentLightUniformsBuffer setLabel:@"fragmentLightUniformsBuffer"];
 
-	self.vertexSceneUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEVertexSceneUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.vertexSceneUniformsBuffer setLabel:@"vertexSceneUniformsBuffer"];
+	self.sceneUniformsBuffer = [self.device newBufferWithLength:sizeof(MBESceneUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.sceneUniformsBuffer setLabel:@"sceneUniformsBuffer"];
 }
 
 - (void)makeDepthStencilState
@@ -135,6 +135,9 @@
 		id<MBEPointLightSource> lightSource = lightSources[i];
 
 		MBEFragmentPointLight pointLight = {0};
+
+		// TODO(VIVEK): ** THIS IS THE PROBLEM ** Lights are not in the right coordinate space. I think they should end up in View Space, but are sent in World Space. 
+
 		pointLight.position = (vector_float4){lightSource.x, lightSource.y, lightSource.z, 1};
 		pointLight.color = lightSource.color;
 		pointLight.strength = lightSource.strength;
@@ -150,12 +153,12 @@
 
 - (void)updateVertexSceneUniformsBufferWithWorldToView:(matrix_float4x4)worldToView viewToProjection:(matrix_float4x4)viewToProjection
 {
-	MBEVertexSceneUniforms sceneUniforms = {0};
+	MBESceneUniforms sceneUniforms = {0};
 
 	sceneUniforms.worldToView = worldToView;
 	sceneUniforms.viewToProjection = viewToProjection;
 
-	memcpy([self.vertexSceneUniformsBuffer contents], &sceneUniforms, sizeof(sceneUniforms));
+	memcpy([self.sceneUniformsBuffer contents], &sceneUniforms, sizeof(sceneUniforms));
 }
 
 - (void)drawableSizeWillChange:(CGSize)size
@@ -202,8 +205,9 @@
 	[renderCommandEncoder setCullMode:MTLCullModeBack];
 	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
-	[renderCommandEncoder setVertexBuffer:self.vertexSceneUniformsBuffer offset:0 atIndex:0];
-	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:0];
+	[renderCommandEncoder setVertexBuffer:self.sceneUniformsBuffer offset:0 atIndex:MBEVertexShaderIndexSceneUniforms];
+	[renderCommandEncoder setFragmentBuffer:self.sceneUniformsBuffer offset:0 atIndex:MBEFragmentShaderIndexSceneUniforms];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:MBEFragmentShaderIndexLightUniforms];
 
 	// Render objects
 	[renderCommandEncoder setRenderPipelineState:self.objectRenderPipelineState];

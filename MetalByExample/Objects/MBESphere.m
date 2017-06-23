@@ -256,9 +256,9 @@
 #pragma mark <MBEObject>
 
 - (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
-	[renderCommandEncoder setVertexBuffer:self.vertexObjectUniformsBuffer offset:0 atIndex:1];
-	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:2];
-	[renderCommandEncoder setFragmentBuffer:self.fragmentMaterialUniformsBuffer offset:0 atIndex:1];
+	[renderCommandEncoder setVertexBuffer:self.vertexObjectUniformsBuffer offset:0 atIndex:MBEVertexShaderIndexObjectUniforms];
+	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:MBEVertexShaderIndexVertices];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentMaterialUniformsBuffer offset:0 atIndex:MBEFragmentShaderIndexMaterialUniforms];
 	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
 									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
 									  indexType:MBEIndexType

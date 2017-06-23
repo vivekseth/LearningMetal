@@ -101,23 +101,23 @@
 	redLight.z = 0;
 	[self.lightSources addObject:redLight];
 
-	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	blueLight.x = -5;
-	blueLight.y = -5;
-	blueLight.z = 0;
-	[self.lightSources addObject:blueLight];
-
-	MBECubePointLight *greenLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	greenLight.x = 5;
-	greenLight.y = -5;
-	greenLight.z = 0;
-	[self.lightSources addObject:greenLight];
-
-	MBECubePointLight *yellowLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	yellowLight.x = -5;
-	yellowLight.y = 5;
-	yellowLight.z = 0;
-	[self.lightSources addObject:yellowLight];
+//	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+//	blueLight.x = -5;
+//	blueLight.y = -5;
+//	blueLight.z = 0;
+//	[self.lightSources addObject:blueLight];
+//
+//	MBECubePointLight *greenLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+//	greenLight.x = 5;
+//	greenLight.y = -5;
+//	greenLight.z = 0;
+//	[self.lightSources addObject:greenLight];
+//
+//	MBECubePointLight *yellowLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+//	yellowLight.x = -5;
+//	yellowLight.y = 5;
+//	yellowLight.z = 0;
+//	[self.lightSources addObject:yellowLight];
 
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:30 meridians:30];
@@ -164,7 +164,7 @@ TODO
 	float duration = self.time - prevTime;
 
 	// 1. Handle User Input
-	// [self handleUserInput];
+	[self handleUserInput];
 
 	[self updateWorldToViewMatrix];
 
@@ -174,9 +174,9 @@ TODO
 	}
 
 	for (id<MBEObject> obj in self.objects) {
-		obj.x = cos(self.time * 2);
-		obj.z = sin(self.time * 2);
-
+//		obj.x = cos(self.time * 2);
+//		obj.z = sin(self.time * 2);
+//
 
 		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
 	}
@@ -185,59 +185,59 @@ TODO
 	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:self.position worldToView:self.worldToViewMatrix MTKView:view];
 }
 
-//- (void)handleUserInput
-//{
-//	// quit if needed
-//	if ([self.modifierFlags containsObject:@"command"] && [self.pressedKeys containsObject:@"q"]) {
-//		[NSApp terminate:self];
-//	}
-//
-//	// consume all remaining key events.
-//	for (NSString *key in self.keyEvents) {
-//		// vector_float4 pos = {self.lightSource.x, self.lightSource.y, self.lightSource.z, 1};
-//
+- (void)handleUserInput
+{
+	// quit if needed
+	if ([self.modifierFlags containsObject:@"command"] && [self.pressedKeys containsObject:@"q"]) {
+		[NSApp terminate:self];
+	}
+
+	// consume all remaining key events.
+	for (NSString *key in self.keyEvents) {
+		vector_float4 pos = self.position;
+
 //        MBELightingSphereFragmentMaterialUniforms material = [(MBELightingSphere *)[self.objects objectAtIndex:0] material];
-//
-////		vector_float3 rotationAxis = {0, 1, 0};
-////		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
-////		vector_float4 xVector = {1, 0, 0, 1};
-////		vector_float4 yVector = {0, 1, 0, 1};
-////		vector_float4 zVector = {0, 0, 1, 1};
-//
-//		float factor = 0.5;
-//		if ([self.modifierFlags containsObject:@"shift"]) {
-//			factor = 2.0;
-//		}
-//
-//		float direction = 0.0;
-//		if ([key isEqualToString:@"up"]) {
-//			direction = 1.0;
-//		}
-//		else if ([key isEqualToString:@"down"]) {
-//			direction = -1.0;
-//		}
-//
-////		if ([self.pressedKeys containsObject:@"x"]) {
-////			pos += direction * factor * matrix_multiply(rotationMatrix, xVector);
-////		}
-////
-////		if ([self.pressedKeys containsObject:@"y"]) {
-////			pos += -1 * direction * factor * yVector;
-////		}
-////
-////		if ([self.pressedKeys containsObject:@"z"]) {
-////			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
-////		}
-//
-//
-//        /*typedef struct {
-//         vector_float4 objectColor;
-//         float ambientStrength;
-//         float diffuseStrength;
-//         float specularStrength;
-//         float specularFactor;
-//         } MBELightingSphereFragmentMaterialUniforms;*/
-//
+
+		vector_float3 rotationAxis = {0, 1, 0};
+		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
+		vector_float4 xVector = {1, 0, 0, 1};
+		vector_float4 yVector = {0, 1, 0, 1};
+		vector_float4 zVector = {0, 0, 1, 1};
+
+		float factor = 0.5;
+		if ([self.modifierFlags containsObject:@"shift"]) {
+			factor = 2.0;
+		}
+
+		float direction = 0.0;
+		if ([key isEqualToString:@"up"]) {
+			direction = 1.0;
+		}
+		else if ([key isEqualToString:@"down"]) {
+			direction = -1.0;
+		}
+
+		if ([self.pressedKeys containsObject:@"x"]) {
+			pos += direction * factor * matrix_multiply(rotationMatrix, xVector);
+		}
+
+		if ([self.pressedKeys containsObject:@"y"]) {
+			pos += -1 * direction * factor * yVector;
+		}
+
+		if ([self.pressedKeys containsObject:@"z"]) {
+			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
+		}
+
+
+        /*typedef struct {
+         vector_float4 objectColor;
+         float ambientStrength;
+         float diffuseStrength;
+         float specularStrength;
+         float specularFactor;
+         } MBELightingSphereFragmentMaterialUniforms;*/
+
 //        if ([self.pressedKeys containsObject:@"a"]) {
 //            material.ambientStrength += direction * 0.05;
 //        }
@@ -253,26 +253,28 @@ TODO
 //        if ([self.pressedKeys containsObject:@"f"]) {
 //            material.specularFactor += direction;
 //        }
-//
-//
-//		if ([key isEqualToString:@"left"]) {
-//			self.rotY += 0.01 * factor * M_PI;
-//		}
-//		else if ([key isEqualToString:@"right"]) {
-//			self.rotY -= 0.01 * factor * M_PI;
-//		}
-//
-//
-////		self.lightSource.x = pos.x;
-////		self.lightSource.y = pos.y;
-////		self.lightSource.z = pos.z;
-//
+
+
+		if ([key isEqualToString:@"left"]) {
+			self.rotY += 0.01 * factor * M_PI;
+		}
+		else if ([key isEqualToString:@"right"]) {
+			self.rotY -= 0.01 * factor * M_PI;
+		}
+
+		self.position = pos;
+
+
+//		self.lightSource.x = pos.x;
+//		self.lightSource.y = pos.y;
+//		self.lightSource.z = pos.z;
+
 //        NSLog(@"ambient: %f, diffise: %f, specular: %f, factor: %f", (float)material.ambientStrength, (float)material.diffuseStrength, (float)material.specularStrength, (float)material.specularFactor);
 //
 //        [(MBELightingSphere *)[self.objects objectAtIndex:0] setMaterial:material];
-//	}
-//	[self.keyEvents removeAllObjects];
-//}
+	}
+	[self.keyEvents removeAllObjects];
+}
 
 #pragma mark - Input Handlers
 
