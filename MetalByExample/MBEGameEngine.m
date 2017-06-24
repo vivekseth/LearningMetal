@@ -250,15 +250,27 @@ TODO
 
 - (void)mouseMoved:(NSEvent *)event
 {
-	[NSCursor hide];
+	CGPoint mouseLocationWindowSpace = [event locationInWindow];
+	CGRect windowFrameScreenSpace = event.window.frame;
+	CGRect mouseRectScreenSpace = [event.window convertRectToScreen:CGRectMake(mouseLocationWindowSpace.x, mouseLocationWindowSpace.y, 0, 0)];
+	if (CGRectContainsRect(windowFrameScreenSpace, mouseRectScreenSpace)) {
+		[NSCursor hide];
 
-	float sensitivity = 0.005;
-	self.camera.yaw += [event deltaX] * sensitivity;
-	self.camera.pitch -= [event deltaY] * sensitivity;
+		float sensitivity = 0.005;
+		self.camera.yaw += [event deltaX] * sensitivity;
+		self.camera.pitch -= [event deltaY] * sensitivity;
 
-	float maxPitch = M_PI_2 - 0.05;
-	float minPitch = -1 * maxPitch;
-	self.camera.pitch = MAX(minPitch, MIN(maxPitch, self.camera.pitch));
+		float maxPitch = M_PI_2 - 0.05;
+		float minPitch = -1 * maxPitch;
+		self.camera.pitch = MAX(minPitch, MIN(maxPitch, self.camera.pitch));
+	}
+	else {
+		[NSCursor unhide];
+	}
+
+	if ([self.activeActions containsObject:@"unhide_cursor"]) {
+		[NSCursor unhide];
+	}
 }
 
 - (void)keyUp:(NSEvent*)event
@@ -275,6 +287,10 @@ TODO
 	}
 	else if ([key isEqualToString:@"d"]) {
 		[self.activeActions removeObject:@"move_right"];
+	}
+
+	if (event.keyCode == kVK_Escape) {
+		[self.activeActions removeObject:@"unhide_cursor"];
 	}
 }
 
@@ -295,6 +311,10 @@ TODO
 	}
 	else if ([key isEqualToString:@"q"] && (event.modifierFlags & NSEventModifierFlagCommand)) {
 		[self.activeActions addObject:@"QUIT"];
+	}
+
+	if (event.keyCode == kVK_Escape) {
+		[self.activeActions addObject:@"unhide_cursor"];
 	}
 }
 
