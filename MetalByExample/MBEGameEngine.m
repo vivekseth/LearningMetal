@@ -14,6 +14,7 @@
 #import "MBEKeyboardUtilities.h"
 #import "MBEPointLightSource.h"
 #import "MBECubePointLight.h"
+#import "MBECamera.h"
 
 @interface MBEGameEngine ()
 
@@ -21,7 +22,7 @@
 @property (nonatomic, strong) MBERenderer *renderer;
 
 // Camera
-@property (nonatomic) float rotY;
+// @property (nonatomic) float rotY;
 @property (nonatomic) vector_float4 position;
 
 @property (assign) float time;
@@ -60,7 +61,7 @@
 
 - (void)createScene
 {
-	const vector_float4 cameraTranslation = {0, -5, -5, 1};
+	const vector_float4 cameraTranslation = {5, 5, 5, 1};
 	self.position = cameraTranslation;
 
 	_objects = [NSMutableArray array];
@@ -141,9 +142,7 @@
 
 - (void)updateWorldToViewMatrix
 {
-	const vector_float3 axis = {0, 1, 0};
-	const vector_float3 translation = {self.position.x, self.position.y, self.position.z};
-	_worldToViewMatrix = matrix_multiply(matrix_float4x4_rotation(axis, self.rotY), matrix_float4x4_translation(translation));
+	_worldToViewMatrix = [MBECamera worldToViewMatrixWithPosition:self.position.xyz target:(vector_float3){0, 0, 0} up:(vector_float3){0, 1, 0}];
 }
 
 

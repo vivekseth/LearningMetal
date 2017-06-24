@@ -21,6 +21,7 @@
 		585BB6501EE918F500AEBDA1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 585BB64F1EE918F500AEBDA1 /* main.m */; };
 		585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 585BB6521EE918F500AEBDA1 /* GameViewController.m */; };
 		585BB6581EE918F500AEBDA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 585BB6571EE918F500AEBDA1 /* Assets.xcassets */; };
+		5870574F1EFF0FFC00036714 /* MBECamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 5870574E1EFF0FFC00036714 /* MBECamera.m */; };
 		58838AFC1EF2528900858BB0 /* Lighting.metal in Sources */ = {isa = PBXBuildFile; fileRef = 58838AFB1EF2528900858BB0 /* Lighting.metal */; };
 		58838B011EF2578400858BB0 /* MBESafeArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 58838B001EF2578400858BB0 /* MBESafeArray.m */; };
 		58838B021EF258E600858BB0 /* MBESphere.m in Sources */ = {isa = PBXBuildFile; fileRef = 58838AFD1EF256A800858BB0 /* MBESphere.m */; };
@@ -51,6 +52,8 @@
 		585BB6521EE918F500AEBDA1 /* GameViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GameViewController.m; sourceTree = "<group>"; };
 		585BB6571EE918F500AEBDA1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		585BB65C1EE918F500AEBDA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5870574D1EFF0FFC00036714 /* MBECamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECamera.h; sourceTree = "<group>"; };
+		5870574E1EFF0FFC00036714 /* MBECamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECamera.m; sourceTree = "<group>"; };
 		58830D921EF4F55300BF11CF /* MBEShaderStructs.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = MBEShaderStructs.h; sourceTree = "<group>"; };
 		58830D951EF4FD5200BF11CF /* MBEPointLightSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEPointLightSource.h; sourceTree = "<group>"; };
 		58838AFB1EF2528900858BB0 /* Lighting.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Lighting.metal; sourceTree = "<group>"; };
@@ -121,6 +124,8 @@
 				582C55AF1EEBAF4400C2F815 /* MBERenderer.m */,
 				58ECB6CF1EEBC436006B88AB /* MBEGameEngine.h */,
 				58ECB6D01EEBC436006B88AB /* MBEGameEngine.m */,
+				5870574D1EFF0FFC00036714 /* MBECamera.h */,
+				5870574E1EFF0FFC00036714 /* MBECamera.m */,
 				58A2DD6D1EF248F700A9592D /* Objects */,
 				58A2DD6F1EF2491700A9592D /* Utilities */,
 				58A2DD6E1EF2490700A9592D /* AppKit */,
@@ -253,6 +258,7 @@
 				583993DF1EE9220C009142CF /* Shaders.metal in Sources */,
 				585BB6501EE918F500AEBDA1 /* main.m in Sources */,
 				58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */,
+				5870574F1EFF0FFC00036714 /* MBECamera.m in Sources */,
 				58029D5E1EF5B5B3005D5147 /* MBECubePointLight.m in Sources */,
 				585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */,
 				584F3FA61EF5036800CC3BB4 /* MultipleLights.metal in Sources */,
