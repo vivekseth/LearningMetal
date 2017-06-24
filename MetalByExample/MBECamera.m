@@ -11,6 +11,21 @@
 
 @implementation MBECamera
 
+- (instancetype)init{
+	self = [super init];
+
+	_position = (vector_float3){0.0f, 0.0f,  5.0f};
+	_target = (vector_float3){0.0f, 0.0f,  0.0f};
+	_up = (vector_float3){0.0f, 1.0f,  0.0f};
+
+	return self;
+}
+
+- (matrix_float4x4)worldToViewMatrix
+{
+	return [self.class worldToViewMatrixWithPosition:self.position target:self.target up:self.up];
+}
+
 + (matrix_float4x4)worldToViewMatrixWithPosition:(vector_float3)position target:(vector_float3)target up:(vector_float3)up
 {
 	vector_float3 normCameraDirection = simd_normalize(position - target);

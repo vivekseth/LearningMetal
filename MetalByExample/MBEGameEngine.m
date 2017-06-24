@@ -19,14 +19,10 @@
 @interface MBEGameEngine ()
 
 @property (readonly) id<MTLDevice> device;
+@property (nonatomic, strong) MBECamera *camera;
 @property (nonatomic, strong) MBERenderer *renderer;
 
-// Camera
-// @property (nonatomic) float rotY;
-@property (nonatomic) vector_float4 position;
-
 @property (assign) float time;
-@property (nonatomic) matrix_float4x4 worldToViewMatrix;
 
 @property (nonatomic, strong) NSMutableArray <id<MBEPointLightSource>> *lightSources;
 @property (nonatomic, strong) NSMutableArray <id<MBEObject>> *objects;
@@ -48,21 +44,20 @@
 
 	_device = MTLCreateSystemDefaultDevice();
 	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
+	_camera = [[MBECamera alloc] init];
+	self.camera.position = (vector_float3){5, 5, 5};
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 
 	// Create scene
 	[self createScene];
 
-	[self updateWorldToViewMatrix];
-
 	return self;
 }
 
 - (void)createScene
 {
-	const vector_float4 cameraTranslation = {5, 5, 5, 1};
-	self.position = cameraTranslation;
+	self.camera.position = (vector_float3){5, 5, 5};
 
 	_objects = [NSMutableArray array];
 
@@ -98,8 +93,7 @@
 
 - (void)createSingleSphere
 {
-	const vector_float4 cameraTranslation = {0, 0, -8, 1};
-	self.position = cameraTranslation;
+	self.camera.position = (vector_float3){0, 0, -8};
 
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
@@ -108,8 +102,7 @@
 
 - (void)mutliPointLightDemo
 {
-	const vector_float4 cameraTranslation = {0, 0, -8, 1};
-	self.position = cameraTranslation;
+	self.camera.position = (vector_float3){0, 0, -8};
 
 	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 	redLight.x = 5;
@@ -142,17 +135,11 @@
 
 - (void)constantRotation
 {
-	vector_float4 pos = self.position;
+	vector_float3 pos = self.camera.position;
 	pos.x = 5 * cos(self.time);
 	pos.z = 5 * sin(self.time);
-	self.position = pos;
+	self.camera.position = pos;
 }
-
-- (void)updateWorldToViewMatrix
-{
-	_worldToViewMatrix = [MBECamera worldToViewMatrixWithPosition:self.position.xyz target:(vector_float3){0, 0, 0} up:(vector_float3){0, 1, 0}];
-}
-
 
 #pragma mark <MTKViewDelegate>
 
@@ -190,19 +177,22 @@ TODO
 
 	[self constantRotation];
 
-	[self updateWorldToViewMatrix];
+	matrix_float4x4 worldToViewMatrix = [self.camera worldToViewMatrix];
 
 	// 2. Update objects in Scene
 	for (id<MBEObject> light in self.lightSources) {
-		[light updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
+		[light updateWithTime:self.time duration:duration worldToView:worldToViewMatrix];
 	}
 
 	for (id<MBEObject> obj in self.objects) {
-		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
+		[obj updateWithTime:self.time duration:duration worldToView:worldToViewMatrix];
 	}
 
 	// 3. Render objects to view
-	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:self.position worldToView:self.worldToViewMatrix MTKView:view];
+	vector_float4 viewPosition = {0};
+	viewPosition.xyz = self.camera.position;
+	viewPosition.w = 1.0;
+	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:viewPosition worldToView:worldToViewMatrix MTKView:view];
 }
 
 #pragma mark - Input Handlers
