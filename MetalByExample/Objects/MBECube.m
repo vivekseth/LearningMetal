@@ -16,8 +16,9 @@
 @property (readonly) id <MTLRenderPipelineState> renderPipelineState;
 
 @property id<MTLBuffer> vertexBuffer;
-@property id<MTLBuffer> indexBuffer;
-@property id<MTLBuffer> objectUniformsBuffer;
+
+@property id<MTLBuffer> vertexObjectUniformsBuffer;
+@property id<MTLBuffer> fragmentMaterialUniformsBuffer;
 
 @end
 
@@ -42,34 +43,65 @@
 - (void)makeBuffers {
 	static const MBEVertexIn vertices[] =
 	{
-		{ .position = { -1,  1,  1, 1 }, .color = { 0, 1, 1, 1 }, .normal = {0, 0, 0} },
-		{ .position = { -1, -1,  1, 1 }, .color = { 0, 0, 1, 1 }, .normal = {0, 0, 0}},
-		{ .position = {  1, -1,  1, 1 }, .color = { 1, 0, 1, 1 }, .normal = {0, 0, 0}},
-		{ .position = {  1,  1,  1, 1 }, .color = { 1, 1, 1, 1 }, .normal = {0, 0, 0}},
-		{ .position = { -1,  1, -1, 1 }, .color = { 0, 1, 0, 1 }, .normal = {0, 0, 0}},
-		{ .position = { -1, -1, -1, 1 }, .color = { 0, 0, 0, 1 }, .normal = {0, 0, 0}},
-		{ .position = {  1, -1, -1, 1 }, .color = { 1, 0, 0, 1 }, .normal = {0, 0, 0}},
-		{ .position = {  1,  1, -1, 1 }, .color = { 1, 1, 0, 1 }, .normal = {0, 0, 0}}
-	};
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
 
-	static const MBEIndex indices[] =
-	{
-		3, 2, 6, 6, 7, 3,
-		4, 5, 1, 1, 0, 4,
-		4, 0, 3, 3, 7, 4,
-		1, 5, 6, 6, 2, 1,
-		0, 1, 2, 2, 3, 0,
-		7, 6, 5, 5, 4, 7
+		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+
+		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
+		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
+		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
+
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {1.0f, 0.0f, 6}},
+		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {1.0f, 0.0f, 6}},
+		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {1.0f, 0.0f, 6}},
+		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {1.0f, 0.0f, 6}},
+		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {1.0f, 0.0f, 6}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {1.0f, 0.0f, 6}},
+
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
+		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
+		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
+		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
+
+		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 1.0f, 6}},
+		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 1.0f, 6}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 1.0f, 6}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 1.0f, 6}},
+		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 1.0f, 6}},
+		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 0, 0 }, .normal = {0.0f, 1.0f, 6}}
 	};
 
 	self.vertexBuffer = [self.device newBufferWithBytes:vertices length:sizeof(vertices) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.vertexBuffer setLabel:@"Vertices"];
 
-	self.indexBuffer = [self.device newBufferWithBytes:indices length:sizeof(indices) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.indexBuffer setLabel:@"Indices"];
+	self.vertexObjectUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEVertexObjectUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.vertexObjectUniformsBuffer setLabel:@"vertexObjectUniformsBuffer"];
 
-	self.objectUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEVertexObjectUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.objectUniformsBuffer setLabel:@"objectUniformsBuffer"];
+	// TODO(vivek): allow users to modify this.
+	MBEFragmentMaterialUniforms fragmentMaterialUniforms;
+	fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
+	fragmentMaterialUniforms.ambientStrength = 0.3;
+	fragmentMaterialUniforms.diffuseStrength = 0.7;
+	fragmentMaterialUniforms.specularStrength = 0.4;
+	fragmentMaterialUniforms.specularFactor = 32;
+
+	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
 }
 
 - (void)makePipeline
@@ -84,8 +116,7 @@
 
 	NSError *error = nil;
 	_renderPipelineState = [self.device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
-	if (!self.renderPipelineState)
-	{
+	if (!self.renderPipelineState) {
 		NSLog(@"Error occurred when creating render pipeline state: %@", error);
 	}
 }
@@ -94,35 +125,31 @@
 
 - (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder
 {
-	// TODO(vivek): fix this!
-	assert(NO);
-//	[renderCommandEncoder setRenderPipelineState:self.renderPipelineState];
-//
-//	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:0];
-//	[renderCommandEncoder setVertexBuffer:self.uniformsBuffer offset:0 atIndex:1];
-//
-//	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-//									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
-//									  indexType:MBEIndexType
-//									indexBuffer:self.indexBuffer
-//							  indexBufferOffset:0];
+	[renderCommandEncoder setVertexBuffer:self.vertexObjectUniformsBuffer offset:0 atIndex:1];
+	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:2];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentMaterialUniformsBuffer offset:0 atIndex:1];
+	[renderCommandEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
 }
 
 - (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView {
-	// TODO(vivek): fix this!
-	assert(NO);
-//	MBEVertexObjectUniforms uniforms;
-//	uniforms.modelToWorld = matrix_float4x4_translation((vector_float3){self.x, self.y, self.z});
-//
-//	matrix_float4x4 modelToView = matrix_multiply(worldToView, uniforms.modelToWorld);
-//	matrix_float3x3 initialNormalMatrix = {
-//		.columns[0] = modelToView.columns[0].xyz,
-//		.columns[1] = modelToView.columns[1].xyz,
-//		.columns[2] = modelToView.columns[2].xyz,
-//	};
-//	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
-//
-//	memcpy([self.objectUniformsBuffer contents], &uniforms, sizeof(uniforms));
+	vector_float3 position = {self.x, self.y, self.z};
+	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
+	const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(1.0);
+	const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
+
+	MBEVertexObjectUniforms uniforms;
+	uniforms.modelToWorld = modelToWorld;
+
+	matrix_float4x4 modelToView = matrix_multiply(worldToView, modelToWorld);
+
+	matrix_float3x3 initialNormalMatrix = {
+		.columns[0] = modelToView.columns[0].xyz,
+		.columns[1] = modelToView.columns[1].xyz,
+		.columns[2] = modelToView.columns[2].xyz,
+	};
+	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
+
+	memcpy([self.vertexObjectUniformsBuffer contents], &uniforms, sizeof(uniforms));
 }
 
 @end
