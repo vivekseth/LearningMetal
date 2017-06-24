@@ -227,19 +227,34 @@ TODO
 	for (NSString *key in self.keyEvents) {
 		id<MBEPointLightSource> lightSource = self.lightSources[0];
 
-		// vector_float4 pos = self.position;
-		vector_float4 pos = (vector_float4){lightSource.x, lightSource.y, lightSource.z, 1};
+
+		vector_float4 pos;
+		if ([self.modifierFlags containsObject:@"command"]) {
+			pos = vector4(self.eye, 1);
+		}
+		else {
+			pos = (vector_float4){lightSource.x, lightSource.y, lightSource.z, 1};
+		}
+
+		float factor = 0.5;
+		if ([self.modifierFlags containsObject:@"shift"]) {
+			factor = 2.0;
+		}
+
+		if ([self.modifierFlags containsObject:@"command"]) {
+			if ([key isEqualToString:@"left"]) {
+				self.rotY += 0.01 * factor * M_PI;
+			}
+			else if ([key isEqualToString:@"right"]) {
+				self.rotY -= 0.01 * factor * M_PI;
+			}
+		}
 
 		vector_float3 rotationAxis = {0, 1, 0};
 		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
 		vector_float4 xVector = {1, 0, 0, 1};
 		vector_float4 yVector = {0, 1, 0, 1};
 		vector_float4 zVector = {0, 0, 1, 1};
-
-		float factor = 0.5;
-		if ([self.modifierFlags containsObject:@"shift"]) {
-			factor = 2.0;
-		}
 
 		float direction = 0.0;
 		if ([key isEqualToString:@"up"]) {
@@ -261,18 +276,19 @@ TODO
 			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
 		}
 
-		if ([key isEqualToString:@"left"]) {
-			self.rotY += 0.01 * factor * M_PI;
-		}
-		else if ([key isEqualToString:@"right"]) {
-			self.rotY -= 0.01 * factor * M_PI;
-		}
-
-		// self.position = pos;
-
 		self.lightSources[0].x = pos.x;
 		self.lightSources[0].y = pos.y;
 		self.lightSources[0].z = pos.z;
+
+		if ([self.modifierFlags containsObject:@"command"]) {
+			self.eye = pos.xyz;
+			self.at = self.eye + matrix_multiply(rotationMatrix, (vector_float4){0, 0, 1, 0}).xyz;
+		}
+		else {
+			self.lightSources[0].x = pos.x;
+			self.lightSources[0].y = pos.y;
+			self.lightSources[0].z = pos.z;
+		}
 
 	}
 	[self.keyEvents removeAllObjects];

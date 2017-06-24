@@ -58,8 +58,10 @@ fragment float4 multiple_lights_fragment(constant MBESceneUniforms &sceneUniform
 										 constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(MBEFragmentShaderIndexMaterialUniforms)]],
 										 MBEVertexOut vertexIn [[stage_in]])
 {
-	return float4(((vertexIn.normal).z + 1.0) * 0.5);
-	return float4((vertexIn.normal + 1.0) * 0.5, 1);
+	// return float4(((vertexIn.normal).z + 1.0) * 0.5);
+	// return float4((vertexIn.normal + 1.0) * 0.5, 1);
+
+	return vertexIn.color;
 
 	float4 light = float4(0);
 
