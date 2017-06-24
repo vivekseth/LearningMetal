@@ -48,7 +48,7 @@ vertex MBEVertexOut multiple_lights_vertex_projection(constant MBESceneUniforms 
 	out.worldSpacePosition = objectUniforms.modelToWorld * in.position;
 	out.viewSpacePosition = sceneUniforms.worldToView * objectUniforms.modelToWorld * in.position;
 	out.position = sceneUniforms.viewToProjection * sceneUniforms.worldToView * objectUniforms.modelToWorld * in.position;
-	out.normal = objectUniforms.normalMatrix * in.normal;
+	out.normal = normalize(/*objectUniforms.normalMatrix * */ in.normal);
 	out.color = in.color;
 	return out;
 }
@@ -58,6 +58,9 @@ fragment float4 multiple_lights_fragment(constant MBESceneUniforms &sceneUniform
 										 constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(MBEFragmentShaderIndexMaterialUniforms)]],
 										 MBEVertexOut vertexIn [[stage_in]])
 {
+	return float4(((vertexIn.normal).z + 1.0) * 0.5);
+	return float4((vertexIn.normal + 1.0) * 0.5, 1);
+
 	float4 light = float4(0);
 
 	// Accumulate light from pointLights. 

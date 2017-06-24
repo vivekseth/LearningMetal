@@ -182,6 +182,11 @@
 
 	// Begin Rendering...
 	id<CAMetalDrawable> drawable = [view currentDrawable];
+	if (!drawable) {
+		return;
+	}
+
+	
 	id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
 
 	MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
@@ -202,18 +207,19 @@
 	[renderCommandEncoder setCullMode:MTLCullModeBack];
 	[renderCommandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
-	[renderCommandEncoder setVertexBuffer:self.sceneUniformsBuffer offset:0 atIndex:MBEVertexShaderIndexSceneUniforms];
-	[renderCommandEncoder setFragmentBuffer:self.sceneUniformsBuffer offset:0 atIndex:MBEFragmentShaderIndexSceneUniforms];
-	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:MBEFragmentShaderIndexLightUniforms];
 
 	// Render objects
 	[renderCommandEncoder setRenderPipelineState:self.objectRenderPipelineState];
+	[renderCommandEncoder setVertexBuffer:self.sceneUniformsBuffer offset:0 atIndex:MBEVertexShaderIndexSceneUniforms];
+	[renderCommandEncoder setFragmentBuffer:self.sceneUniformsBuffer offset:0 atIndex:MBEFragmentShaderIndexSceneUniforms];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentLightUniformsBuffer offset:0 atIndex:MBEFragmentShaderIndexLightUniforms];
 	for (id <MBEObject> obj in objects) {
 		[obj encodeRenderCommand:renderCommandEncoder];
 	}
 
 	// Render lights
 	[renderCommandEncoder setRenderPipelineState:self.pointLightRenderPipelineState];
+	[renderCommandEncoder setVertexBuffer:self.sceneUniformsBuffer offset:0 atIndex:MBEVertexShaderIndexSceneUniforms];
 	for (id <MBEPointLightSource> lightSource in lightSources) {
 		[lightSource encodeRenderCommand:renderCommandEncoder];
 	}

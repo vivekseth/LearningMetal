@@ -30,7 +30,7 @@ vertex MBESimpleVertexOut simple_vertex_projection(constant MBESceneUniforms &sc
 	return out;
 }
 
-fragment float4 simple_fragment(constant MBEFragmentPointLight &pointLight [[buffer(1)]],
+fragment float4 simple_fragment(constant MBEFragmentPointLight &pointLight [[buffer(0)]],
 								MBESimpleVertexOut vertexIn [[stage_in]])
 {
 	return pointLight.color;

@@ -99,7 +99,7 @@
 
 - (void)mutliPointLightDemo
 {
-	self.eye = (vector_float3){0, 0, 8};
+	self.eye = (vector_float3){0, 0, -8};
 	self.at = (vector_float3){0, 0, 0};
 	self.up = (vector_float3){0, 1, 0};
 
@@ -134,12 +134,12 @@
 
 - (void)updateWorldToViewMatrix
 {
+	// gluLookAt()
 	vector_float3 forward = self.eye - self.at;
 	vector_float3 norm_forward = simd_normalize(forward);
 	vector_float3 norm_up = simd_normalize(self.up);
 	vector_float3 norm_side = simd_normalize(simd_cross(norm_up, norm_forward));
 
-	// TODO
 	norm_up = simd_normalize(simd_cross(norm_forward, norm_side));
 
 	matrix_float4x4 viewMatrix = {
