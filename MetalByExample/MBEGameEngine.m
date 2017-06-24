@@ -53,9 +53,17 @@
 	_activeActions = [NSMutableSet set];
 
 	// Create scene
-	[self createScene];
+	[self resetScene];
 
 	return self;
+}
+
+- (void)resetScene
+{
+	_camera = [[MBECamera alloc] init];
+	_objects = [NSMutableArray array];
+	_lightSources = [NSMutableArray array];
+	[self createSingleCube];
 }
 
 - (void)createScene
@@ -99,6 +107,27 @@
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
 	[self.objects addObject:sphere];
+
+	float radius = 3;
+	int numLights = 8;
+	for (int i=0; i<numLights; i++) {
+
+		float angle = 2 * M_PI * ((float)i/(float)numLights);
+		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+		light.x = radius*cos(angle);
+		light.y = 15;
+		light.z = radius*sin(angle);
+		[self.lightSources addObject:light];
+	}
+}
+
+- (void)createSingleCube
+{
+	self.camera.position = (vector_float3){0, 0, -8};
+
+	_objects = [NSMutableArray array];
+	MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
+	[self.objects addObject:cube];
 }
 
 - (void)mutliPointLightDemo
@@ -311,6 +340,9 @@ TODO
 	}
 	else if ([key isEqualToString:@"q"] && (event.modifierFlags & NSEventModifierFlagCommand)) {
 		[self.activeActions addObject:@"QUIT"];
+	}
+	else if ([key isEqualToString:@"r"]) {
+		[self resetScene];
 	}
 
 	if (event.keyCode == kVK_Escape) {
