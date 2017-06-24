@@ -14,76 +14,87 @@
 #import "MBEKeyboardUtilities.h"
 #import "MBEPointLightSource.h"
 #import "MBECubePointLight.h"
+#import "MBECamera.h"
 
 @interface MBEGameEngine ()
 
+@property (nonatomic, strong) MTKView *view;
+
 @property (readonly) id<MTLDevice> device;
+@property (nonatomic, strong) MBECamera *camera;
 @property (nonatomic, strong) MBERenderer *renderer;
 
-// Camera
-@property (nonatomic) float rotY;
-@property (nonatomic) vector_float4 position;
-
 @property (assign) float time;
-@property (nonatomic) matrix_float4x4 worldToViewMatrix;
 
 @property (nonatomic, strong) NSMutableArray <id<MBEPointLightSource>> *lightSources;
 @property (nonatomic, strong) NSMutableArray <id<MBEObject>> *objects;
 
-@property (nonatomic, strong) NSMutableSet *pressedKeys;
-@property (nonatomic, strong) NSSet *modifierFlags;
-@property (nonatomic, strong) NSMutableArray *keyEvents;
+//@property (nonatomic, strong) NSMutableSet *pressedKeys;
+//@property (nonatomic, strong) NSSet *modifierFlags;
+//@property (nonatomic, strong) NSMutableArray *keyEvents;
+
+@property (nonatomic, strong) NSMutableSet *activeActions;
 
 @end
 
 @implementation MBEGameEngine
 
-- (instancetype)initWithSize:(CGSize)size
+- (instancetype)initWithView:(MTKView *)view;
 {
 	self = [super init];
 
-	_pressedKeys = [NSMutableSet set];
-	_keyEvents = [NSMutableArray array];
-
+	_view = view;
 	_device = MTLCreateSystemDefaultDevice();
-	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
+	_renderer = [[MBERenderer alloc] initWithSize:view.drawableSize device:self.device];
+	_camera = [[MBECamera alloc] init];
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 
-	// Create scene
-	[self mutliPointLightDemo];
+	_activeActions = [NSMutableSet set];
 
-	[self updateWorldToViewMatrix];
+	// Create scene
+	[self createScene];
 
 	return self;
 }
 
 - (void)createScene
 {
-	const vector_float4 cameraTranslation = {0, -5, -5, 1};
-	self.position = cameraTranslation;
+	self.camera.position = (vector_float3){5, 5, 5};
+	self.camera.front = (vector_float3){0.0f, 0.0f, -1.0f};
 
 	_objects = [NSMutableArray array];
 
-	int N = 32;
+	int N = 24;
 	int low = -1*N/2;
 	int high = N/2+1;
 
 	for (int i=low; i<high; i++) {
 		for (int j=low; j<high; j++) {
-			MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
-			cube.x = i*2;
-			cube.y = 0.1 * i * j;
-			cube.z = j*2;
-			[self.objects addObject:cube];
+			MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+			sphere.x = i*2;
+			sphere.y = 0.1 * i * j;
+			sphere.z = j*2;
+			[self.objects addObject:sphere];
 		}
+	}
+
+	float radius = 10;
+	int numLights = 8;
+	for (int i=0; i<numLights; i++) {
+
+		float angle = 2 * M_PI * ((float)i/(float)numLights);
+		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+		light.x = radius*cos(angle);
+		light.y = 15;
+		light.z = radius*sin(angle);
+		[self.lightSources addObject:light];
 	}
 }
 
 - (void)createSingleSphere
 {
-	const vector_float4 cameraTranslation = {0, 0, -8, 1};
-	self.position = cameraTranslation;
+	self.camera.position = (vector_float3){0, 0, -8};
 
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
@@ -92,8 +103,7 @@
 
 - (void)mutliPointLightDemo
 {
-	const vector_float4 cameraTranslation = {0, 0, -8, 1};
-	self.position = cameraTranslation;
+	self.camera.position = (vector_float3){0, 0, -8};
 
 	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 	redLight.x = 5;
@@ -124,13 +134,13 @@
 	[self.objects addObject:sphere];
 }
 
-- (void)updateWorldToViewMatrix
+- (void)constantRotation
 {
-	const vector_float3 axis = {0, 1, 0};
-	const vector_float3 translation = {self.position.x, self.position.y, self.position.z};
-	_worldToViewMatrix = matrix_multiply(matrix_float4x4_rotation(axis, self.rotY), matrix_float4x4_translation(translation));
+	vector_float3 pos = self.camera.position;
+	pos.x = 5 * cos(self.time);
+	pos.z = 5 * sin(self.time);
+	self.camera.position = pos;
 }
-
 
 #pragma mark <MTKViewDelegate>
 
@@ -163,116 +173,28 @@ TODO
 	self.time = CACurrentMediaTime();
 	float duration = self.time - prevTime;
 
-	// 1. Handle User Input
-	// [self handleUserInput];
+	// [self constantRotation];
+	for (id action in self.activeActions) {
+		[self applyAction:action duration:duration];
+	}
 
-	[self updateWorldToViewMatrix];
+	matrix_float4x4 worldToViewMatrix = [self.camera worldToViewMatrix];
 
 	// 2. Update objects in Scene
 	for (id<MBEObject> light in self.lightSources) {
-		[light updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
+		[light updateWithTime:self.time duration:duration worldToView:worldToViewMatrix];
 	}
 
 	for (id<MBEObject> obj in self.objects) {
-		obj.x = cos(self.time * 2);
-		obj.z = sin(self.time * 2);
-
-
-		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
+		[obj updateWithTime:self.time duration:duration worldToView:worldToViewMatrix];
 	}
 
 	// 3. Render objects to view
-	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:self.position worldToView:self.worldToViewMatrix MTKView:view];
+	vector_float4 viewPosition = {0};
+	viewPosition.xyz = self.camera.position;
+	viewPosition.w = 1.0;
+	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:viewPosition worldToView:worldToViewMatrix MTKView:view];
 }
-
-//- (void)handleUserInput
-//{
-//	// quit if needed
-//	if ([self.modifierFlags containsObject:@"command"] && [self.pressedKeys containsObject:@"q"]) {
-//		[NSApp terminate:self];
-//	}
-//
-//	// consume all remaining key events.
-//	for (NSString *key in self.keyEvents) {
-//		// vector_float4 pos = {self.lightSource.x, self.lightSource.y, self.lightSource.z, 1};
-//
-//        MBELightingSphereFragmentMaterialUniforms material = [(MBELightingSphere *)[self.objects objectAtIndex:0] material];
-//
-////		vector_float3 rotationAxis = {0, 1, 0};
-////		matrix_float4x4 rotationMatrix = matrix_float4x4_rotation(rotationAxis, -self.rotY);
-////		vector_float4 xVector = {1, 0, 0, 1};
-////		vector_float4 yVector = {0, 1, 0, 1};
-////		vector_float4 zVector = {0, 0, 1, 1};
-//
-//		float factor = 0.5;
-//		if ([self.modifierFlags containsObject:@"shift"]) {
-//			factor = 2.0;
-//		}
-//
-//		float direction = 0.0;
-//		if ([key isEqualToString:@"up"]) {
-//			direction = 1.0;
-//		}
-//		else if ([key isEqualToString:@"down"]) {
-//			direction = -1.0;
-//		}
-//
-////		if ([self.pressedKeys containsObject:@"x"]) {
-////			pos += direction * factor * matrix_multiply(rotationMatrix, xVector);
-////		}
-////
-////		if ([self.pressedKeys containsObject:@"y"]) {
-////			pos += -1 * direction * factor * yVector;
-////		}
-////
-////		if ([self.pressedKeys containsObject:@"z"]) {
-////			pos += direction * factor * matrix_multiply(rotationMatrix, zVector);
-////		}
-//
-//
-//        /*typedef struct {
-//         vector_float4 objectColor;
-//         float ambientStrength;
-//         float diffuseStrength;
-//         float specularStrength;
-//         float specularFactor;
-//         } MBELightingSphereFragmentMaterialUniforms;*/
-//
-//        if ([self.pressedKeys containsObject:@"a"]) {
-//            material.ambientStrength += direction * 0.05;
-//        }
-//
-//        if ([self.pressedKeys containsObject:@"d"]) {
-//            material.diffuseStrength += direction * 0.05;
-//        }
-//
-//        if ([self.pressedKeys containsObject:@"s"]) {
-//            material.specularStrength += direction * 0.05;
-//        }
-//
-//        if ([self.pressedKeys containsObject:@"f"]) {
-//            material.specularFactor += direction;
-//        }
-//
-//
-//		if ([key isEqualToString:@"left"]) {
-//			self.rotY += 0.01 * factor * M_PI;
-//		}
-//		else if ([key isEqualToString:@"right"]) {
-//			self.rotY -= 0.01 * factor * M_PI;
-//		}
-//
-//
-////		self.lightSource.x = pos.x;
-////		self.lightSource.y = pos.y;
-////		self.lightSource.z = pos.z;
-//
-//        NSLog(@"ambient: %f, diffise: %f, specular: %f, factor: %f", (float)material.ambientStrength, (float)material.diffuseStrength, (float)material.specularStrength, (float)material.specularFactor);
-//
-//        [(MBELightingSphere *)[self.objects objectAtIndex:0] setMaterial:material];
-//	}
-//	[self.keyEvents removeAllObjects];
-//}
 
 #pragma mark - Input Handlers
 
@@ -324,22 +246,85 @@ TODO
 
 - (void)flagsChanged:(NSEvent *)event
 {
-	self.modifierFlags = [self modifierFlagsSetFromEvent:event];
-	// NSLog(@"%@", self.modifierFlags);
+}
+
+- (void)mouseMoved:(NSEvent *)event
+{
+	[NSCursor hide];
+
+	float sensitivity = 0.005;
+	self.camera.yaw += [event deltaX] * sensitivity;
+	self.camera.pitch -= [event deltaY] * sensitivity;
+
+	float maxPitch = M_PI_2 - 0.05;
+	float minPitch = -1 * maxPitch;
+	self.camera.pitch = MAX(minPitch, MIN(maxPitch, self.camera.pitch));
 }
 
 - (void)keyUp:(NSEvent*)event
 {
-	[self.pressedKeys removeObject:[self normalizedStringFromKeyCode:event.keyCode]];
-	// NSLog(@"%@", self.pressedKeys);
+	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
+	if ([key isEqualToString:@"w"]) {
+		[self.activeActions removeObject:@"move_forward"];
+	}
+	else if ([key isEqualToString:@"s"]) {
+		[self.activeActions removeObject:@"move_backward"];
+	}
+	else if ([key isEqualToString:@"a"]) {
+		[self.activeActions removeObject:@"move_left"];
+	}
+	else if ([key isEqualToString:@"d"]) {
+		[self.activeActions removeObject:@"move_right"];
+	}
 }
 
 - (void)keyDown:(NSEvent*)event
 {
 	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
-	[self.pressedKeys addObject:key];
-	[self.keyEvents addObject:key];
-	// NSLog(@"%@", self.pressedKeys);
+	if ([key isEqualToString:@"w"]) {
+		[self.activeActions addObject:@"move_forward"];
+	}
+	else if ([key isEqualToString:@"s"]) {
+		[self.activeActions addObject:@"move_backward"];
+	}
+	else if ([key isEqualToString:@"a"]) {
+		[self.activeActions addObject:@"move_left"];
+	}
+	else if ([key isEqualToString:@"d"]) {
+		[self.activeActions addObject:@"move_right"];
+	}
+	else if ([key isEqualToString:@"q"] && (event.modifierFlags & NSEventModifierFlagCommand)) {
+		[self.activeActions addObject:@"QUIT"];
+	}
+}
+
+// TODO(vivek): create action object that can execute block when in activeActions set. That way I can avoid creating a huge if-else list. The block will capture references to objects it needs to mutate.
+- (void)applyAction:(id)action duration:(NSTimeInterval)duration
+{
+	float cameraSpeed = 0.8;
+	vector_float3 cameraFront = self.camera.front;
+	vector_float3 cameraPos = self.camera.position;
+
+	if ([action isKindOfClass:[NSString class]]) {
+		if ([action isEqualToString:@"QUIT"]) {
+			[NSApp terminate:self];
+		}
+		else if ([action isEqualToString:@"move_forward"]) {
+			cameraPos += cameraSpeed * cameraFront;
+		}
+		else if ([action isEqualToString:@"move_backward"]) {
+			cameraPos -= cameraSpeed * cameraFront;
+		}
+		else if ([action isEqualToString:@"move_left"]) {
+			cameraPos -= simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
+		}
+		else if ([action isEqualToString:@"move_right"]) {
+			cameraPos += simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
+		}
+	}
+
+	self.camera.position = cameraPos;
+	self.camera.front = cameraFront;
 }
 
 @end

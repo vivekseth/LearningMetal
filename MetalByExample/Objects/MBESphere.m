@@ -50,7 +50,7 @@
 - (MBESafeArray)createNormalizeSphereVerticesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
 {
 	NSUInteger numVertices = 2 + meridians * parallels;
-	printf("P=%f, M=%f, numVerticies=%d\n", (float)parallels, (float)meridians, (int)numVertices);
+	// printf("P=%f, M=%f, numVerticies=%d\n", (float)parallels, (float)meridians, (int)numVertices);
 
 	MBESafeArray verticesArr = MBESafeArrayCreate(numVertices, sizeof(MBEVertexIn));
 
@@ -72,13 +72,13 @@
 		// Slicing sphere along a meridian results in circle divided into parallels + 2 segments.
 		// First and last segments are the poles.
 		CGFloat radians = (float)i/(float)(2 * parallels + 2) * 2 * M_PI;
-		printf("radians: %f\n", (float)radians);
+		// printf("radians: %f\n", (float)radians);
 		NSAssert(radians < (2 * M_PI), @"radians must be less than 2 pi");
 
 		CGFloat radius = sin(radians);
 		CGFloat zOffset = cos(radians);
 
-		printf("buffer + index(%d)\n", (int)(1 + (i - 1)*meridians));
+		// printf("buffer + index(%d)\n", (int)(1 + (i - 1)*meridians));
 		MBESafeArray offsetArray = MBESafeArrayCreateOffsetArray(verticesArr, 1 + (i - 1)*meridians);
 		[self generateVerticesForRingWithRadius:radius zOffset:zOffset numDivisions:meridians array:offsetArray];
 		MBESafeArrayFree(offsetArray);
@@ -107,7 +107,7 @@
 			.normal = {x, y, zOffset}
 		};
 
-		printf("+ %d\n", (int)i);
+		// printf("+ %d\n", (int)i);
 		*((MBEVertexIn *)MBESafeArrayGetPointer(array, i)) = point;
 	}
 }
@@ -222,16 +222,6 @@
 
 	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
-
-
-//	self.vertexUniformsBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereVertexUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-//	[self.vertexUniformsBuffer setLabel:@"vertexUniformsBuffer"];
-//
-//	self.fragmentUniformsMaterialBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-//	[self.fragmentUniformsMaterialBuffer setLabel:@"fragmentUniformsMaterialBuffer"];
-//
-//	self.fragmentUniformsLightBuffer = [self.device newBufferWithLength:sizeof(MBELightingSphereFragmentLightUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-//	[self.fragmentUniformsLightBuffer setLabel:@"fragmentUniformsLightBuffer"];
 }
 
 - (void)makePipeline
@@ -270,7 +260,7 @@
 {
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-    const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(2.0);
+    const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(1.0);
     const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
 
 	MBEVertexObjectUniforms uniforms;
