@@ -140,6 +140,14 @@
 	[self.objects addObject:sphere];
 }
 
+- (void)constantRotation
+{
+	vector_float4 pos = self.position;
+	pos.x = 5 * cos(self.time);
+	pos.z = 5 * sin(self.time);
+	self.position = pos;
+}
+
 - (void)updateWorldToViewMatrix
 {
 	_worldToViewMatrix = [MBECamera worldToViewMatrixWithPosition:self.position.xyz target:(vector_float3){0, 0, 0} up:(vector_float3){0, 1, 0}];
@@ -179,6 +187,8 @@ TODO
 
 	// 1. Handle User Input
 	// [self handleUserInput];
+
+	[self constantRotation];
 
 	[self updateWorldToViewMatrix];
 
