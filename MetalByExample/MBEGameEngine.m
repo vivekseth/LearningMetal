@@ -51,7 +51,7 @@
 	_lightSources = [NSMutableArray array];
 
 	// Create scene
-	[self mutliPointLightDemo];
+	[self createScene];
 
 	[self updateWorldToViewMatrix];
 
@@ -65,18 +65,33 @@
 
 	_objects = [NSMutableArray array];
 
-	int N = 32;
+	int N = 24;
 	int low = -1*N/2;
 	int high = N/2+1;
 
 	for (int i=low; i<high; i++) {
 		for (int j=low; j<high; j++) {
-			MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
-			cube.x = i*2;
-			cube.y = 0.1 * i * j;
-			cube.z = j*2;
-			[self.objects addObject:cube];
+			MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+			sphere.x = i*2;
+			sphere.y = 0.1 * i * j;
+			sphere.z = j*2;
+			[self.objects addObject:sphere];
 		}
+	}
+
+	float radius = 10;
+	int numLights = 4;
+	for (int i=0; i<numLights; i++) {
+
+		float angle = 2 * M_PI * ((float)i/(float)numLights);
+		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+		light.x = radius*cos(angle);
+		light.y = 15;
+		light.z = radius*sin(angle);
+		[self.lightSources addObject:light];
+
+		NSLog(@"light @ (%f, %f)", (float)light.x, (float)light.z);
+
 	}
 }
 
@@ -174,10 +189,6 @@ TODO
 	}
 
 	for (id<MBEObject> obj in self.objects) {
-		obj.x = cos(self.time * 2);
-		obj.z = sin(self.time * 2);
-
-
 		[obj updateWithTime:self.time duration:duration worldToView:self.worldToViewMatrix];
 	}
 
