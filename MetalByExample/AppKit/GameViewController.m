@@ -30,32 +30,14 @@
 	self.metalView.device = MTLCreateSystemDefaultDevice();
 	self.metalView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
 
-//	self.renderer = [[MBERenderer alloc] initWithSize:self.metalView.drawableSize];
-//	self.metalView.delegate = self.renderer;
-
-	self.engine = [[MBEGameEngine alloc] initWithSize:self.metalView.drawableSize];
+	self.engine = [[MBEGameEngine alloc] initWithView:self.metalView];
 	self.metalView.delegate = self.engine;
-
-	
 }
 
 - (void)viewDidAppear
 {
+	[[[NSApplication sharedApplication] mainWindow] setAcceptsMouseMovedEvents:YES];
 	[self.view.window makeFirstResponder:self.engine];
 }
-
-//- (BOOL)acceptsFirstResponder {
-//	return YES;
-//}
-//
-//- (void)keyUp:(NSEvent*)event
-//{
-//	// [self.renderer keyUp:event];
-//}
-//
-//- (void)keyDown:(NSEvent*)event
-//{
-//	// [self.renderer keyDown:event];
-//}
 
 @end

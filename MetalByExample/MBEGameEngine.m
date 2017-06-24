@@ -18,6 +18,8 @@
 
 @interface MBEGameEngine ()
 
+@property (nonatomic, strong) MTKView *view;
+
 @property (readonly) id<MTLDevice> device;
 @property (nonatomic, strong) MBECamera *camera;
 @property (nonatomic, strong) MBERenderer *renderer;
@@ -37,12 +39,13 @@
 
 @implementation MBEGameEngine
 
-- (instancetype)initWithSize:(CGSize)size
+- (instancetype)initWithView:(MTKView *)view;
 {
 	self = [super init];
 
+	_view = view;
 	_device = MTLCreateSystemDefaultDevice();
-	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
+	_renderer = [[MBERenderer alloc] initWithSize:view.drawableSize device:self.device];
 	_camera = [[MBECamera alloc] init];
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
@@ -58,7 +61,7 @@
 - (void)createScene
 {
 	self.camera.position = (vector_float3){5, 5, 5};
-	self.camera.target = self.camera.position + (vector_float3){0.0f, 0.0f, -1.0f};
+	self.camera.front = (vector_float3){0.0f, 0.0f, -1.0f};
 
 	_objects = [NSMutableArray array];
 
@@ -245,6 +248,19 @@ TODO
 {
 }
 
+- (void)mouseMoved:(NSEvent *)event
+{
+	[NSCursor hide];
+
+	float sensitivity = 0.005;
+	self.camera.yaw += [event deltaX] * sensitivity;
+	self.camera.pitch -= [event deltaY] * sensitivity;
+
+	float maxPitch = M_PI_2 - 0.05;
+	float minPitch = -1 * maxPitch;
+	self.camera.pitch = MAX(minPitch, MIN(maxPitch, self.camera.pitch));
+}
+
 - (void)keyUp:(NSEvent*)event
 {
 	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
@@ -282,10 +298,11 @@ TODO
 	}
 }
 
+// TODO(vivek): create action object that can execute block when in activeActions set. That way I can avoid creating a huge if-else list. The block will capture references to objects it needs to mutate.
 - (void)applyAction:(id)action duration:(NSTimeInterval)duration
 {
 	float cameraSpeed = 0.8;
-	vector_float3 cameraFront = (vector_float3){0.0f, 0.0f, -1.0f};
+	vector_float3 cameraFront = self.camera.front;
 	vector_float3 cameraPos = self.camera.position;
 
 	if ([action isKindOfClass:[NSString class]]) {
@@ -307,31 +324,7 @@ TODO
 	}
 
 	self.camera.position = cameraPos;
-	self.camera.target = cameraPos + cameraFront;
+	self.camera.front = cameraFront;
 }
-
-/*NSLog(@"keyDown: [%lf]", (double)self.time);
-
- vector_float3 cameraFront = (vector_float3){0.0f, 0.0f, -1.0f};
- vector_float3 cameraPos = self.camera.position;
-
- float cameraSpeed = 1.0;
-
- NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
- if ([key isEqualToString:@"w"]) {
- cameraPos += cameraSpeed * cameraFront;
- }
- else if ([key isEqualToString:@"s"]) {
- cameraPos -= cameraSpeed * cameraFront;
- }
- else if ([key isEqualToString:@"a"]) {
- cameraPos -= simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
- }
- else if ([key isEqualToString:@"d"]) {
- cameraPos += simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
- }
-
- self.camera.position = cameraPos;
- self.camera.target = cameraPos + cameraFront;*/
 
 @end

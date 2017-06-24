@@ -21,6 +21,47 @@
 	return self;
 }
 
+- (vector_float3)front
+{
+	return simd_normalize(self.target - self.position);
+}
+
+- (void)setFront:(vector_float3)front
+{
+	self.target = self.position + simd_normalize(front);
+}
+
+- (void)setYaw:(float)yaw
+{
+	if (_yaw == yaw) {
+		return;
+	}
+
+	_yaw = yaw;
+
+	[self _updateFrontWithAngles];
+}
+
+- (void)setPitch:(float)pitch
+{
+	if (_pitch == pitch) {
+		return;
+	}
+
+	_pitch = pitch;
+
+	[self _updateFrontWithAngles];
+}
+
+- (void)_updateFrontWithAngles
+{
+	vector_float3 front;
+	front.x = cos(self.yaw) * cos(self.pitch);
+	front.y = sin(self.pitch);
+	front.z = sin(self.yaw) * cos(self.pitch);
+	self.front = simd_normalize(front);
+}
+
 - (matrix_float4x4)worldToViewMatrix
 {
 	return [self.class worldToViewMatrixWithPosition:self.position target:self.target up:self.up];

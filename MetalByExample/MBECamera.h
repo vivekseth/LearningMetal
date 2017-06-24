@@ -21,6 +21,12 @@
 @property (nonatomic) vector_float3 up;
 @property (nonatomic) vector_float3 target;
 
+// Computed property. Truth stored in target.
+@property (nonatomic) vector_float3 front;
+
+@property (nonatomic) float yaw;
+@property (nonatomic) float pitch;
+
 - (matrix_float4x4)worldToViewMatrix;
 
 + (matrix_float4x4)worldToViewMatrixWithPosition:(vector_float3)position target:(vector_float3)target up:(vector_float3)up;
