@@ -27,9 +27,11 @@
 @property (nonatomic, strong) NSMutableArray <id<MBEPointLightSource>> *lightSources;
 @property (nonatomic, strong) NSMutableArray <id<MBEObject>> *objects;
 
-@property (nonatomic, strong) NSMutableSet *pressedKeys;
-@property (nonatomic, strong) NSSet *modifierFlags;
-@property (nonatomic, strong) NSMutableArray *keyEvents;
+//@property (nonatomic, strong) NSMutableSet *pressedKeys;
+//@property (nonatomic, strong) NSSet *modifierFlags;
+//@property (nonatomic, strong) NSMutableArray *keyEvents;
+
+@property (nonatomic, strong) NSMutableSet *activeActions;
 
 @end
 
@@ -39,15 +41,13 @@
 {
 	self = [super init];
 
-	_pressedKeys = [NSMutableSet set];
-	_keyEvents = [NSMutableArray array];
-
 	_device = MTLCreateSystemDefaultDevice();
 	_renderer = [[MBERenderer alloc] initWithSize:size device:self.device];
 	_camera = [[MBECamera alloc] init];
-	self.camera.position = (vector_float3){5, 5, 5};
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
+
+	_activeActions = [NSMutableSet set];
 
 	// Create scene
 	[self createScene];
@@ -58,6 +58,7 @@
 - (void)createScene
 {
 	self.camera.position = (vector_float3){5, 5, 5};
+	self.camera.target = self.camera.position + (vector_float3){0.0f, 0.0f, -1.0f};
 
 	_objects = [NSMutableArray array];
 
@@ -76,7 +77,7 @@
 	}
 
 	float radius = 10;
-	int numLights = 4;
+	int numLights = 8;
 	for (int i=0; i<numLights; i++) {
 
 		float angle = 2 * M_PI * ((float)i/(float)numLights);
@@ -85,9 +86,6 @@
 		light.y = 15;
 		light.z = radius*sin(angle);
 		[self.lightSources addObject:light];
-
-		NSLog(@"light @ (%f, %f)", (float)light.x, (float)light.z);
-
 	}
 }
 
@@ -172,10 +170,10 @@ TODO
 	self.time = CACurrentMediaTime();
 	float duration = self.time - prevTime;
 
-	// 1. Handle User Input
-	// [self handleUserInput];
-
-	[self constantRotation];
+	// [self constantRotation];
+	for (id action in self.activeActions) {
+		[self applyAction:action duration:duration];
+	}
 
 	matrix_float4x4 worldToViewMatrix = [self.camera worldToViewMatrix];
 
@@ -245,19 +243,95 @@ TODO
 
 - (void)flagsChanged:(NSEvent *)event
 {
-	self.modifierFlags = [self modifierFlagsSetFromEvent:event];
 }
 
 - (void)keyUp:(NSEvent*)event
 {
-	[self.pressedKeys removeObject:[self normalizedStringFromKeyCode:event.keyCode]];
+	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
+	if ([key isEqualToString:@"w"]) {
+		[self.activeActions removeObject:@"move_forward"];
+	}
+	else if ([key isEqualToString:@"s"]) {
+		[self.activeActions removeObject:@"move_backward"];
+	}
+	else if ([key isEqualToString:@"a"]) {
+		[self.activeActions removeObject:@"move_left"];
+	}
+	else if ([key isEqualToString:@"d"]) {
+		[self.activeActions removeObject:@"move_right"];
+	}
 }
 
 - (void)keyDown:(NSEvent*)event
 {
 	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
-	[self.pressedKeys addObject:key];
-	[self.keyEvents addObject:key];
+	if ([key isEqualToString:@"w"]) {
+		[self.activeActions addObject:@"move_forward"];
+	}
+	else if ([key isEqualToString:@"s"]) {
+		[self.activeActions addObject:@"move_backward"];
+	}
+	else if ([key isEqualToString:@"a"]) {
+		[self.activeActions addObject:@"move_left"];
+	}
+	else if ([key isEqualToString:@"d"]) {
+		[self.activeActions addObject:@"move_right"];
+	}
+	else if ([key isEqualToString:@"q"] && (event.modifierFlags & NSEventModifierFlagCommand)) {
+		[self.activeActions addObject:@"QUIT"];
+	}
 }
+
+- (void)applyAction:(id)action duration:(NSTimeInterval)duration
+{
+	float cameraSpeed = 0.8;
+	vector_float3 cameraFront = (vector_float3){0.0f, 0.0f, -1.0f};
+	vector_float3 cameraPos = self.camera.position;
+
+	if ([action isKindOfClass:[NSString class]]) {
+		if ([action isEqualToString:@"QUIT"]) {
+			[NSApp terminate:self];
+		}
+		else if ([action isEqualToString:@"move_forward"]) {
+			cameraPos += cameraSpeed * cameraFront;
+		}
+		else if ([action isEqualToString:@"move_backward"]) {
+			cameraPos -= cameraSpeed * cameraFront;
+		}
+		else if ([action isEqualToString:@"move_left"]) {
+			cameraPos -= simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
+		}
+		else if ([action isEqualToString:@"move_right"]) {
+			cameraPos += simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
+		}
+	}
+
+	self.camera.position = cameraPos;
+	self.camera.target = cameraPos + cameraFront;
+}
+
+/*NSLog(@"keyDown: [%lf]", (double)self.time);
+
+ vector_float3 cameraFront = (vector_float3){0.0f, 0.0f, -1.0f};
+ vector_float3 cameraPos = self.camera.position;
+
+ float cameraSpeed = 1.0;
+
+ NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
+ if ([key isEqualToString:@"w"]) {
+ cameraPos += cameraSpeed * cameraFront;
+ }
+ else if ([key isEqualToString:@"s"]) {
+ cameraPos -= cameraSpeed * cameraFront;
+ }
+ else if ([key isEqualToString:@"a"]) {
+ cameraPos -= simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
+ }
+ else if ([key isEqualToString:@"d"]) {
+ cameraPos += simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
+ }
+
+ self.camera.position = cameraPos;
+ self.camera.target = cameraPos + cameraFront;*/
 
 @end
