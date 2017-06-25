@@ -15,8 +15,10 @@
 	self = [super init];
 
 	_position = (vector_float3){0.0f, 0.0f,  5.0f};
-	_target = (vector_float3){0.0f, 0.0f,  0.0f};
+	_target = (vector_float3){0.0f, 0.0f, 0.0f};
 	_up = (vector_float3){0.0f, 1.0f,  0.0f};
+	_pitch = 0;
+	_yaw = M_PI_2;
 
 	return self;
 }
@@ -33,10 +35,6 @@
 
 - (void)setYaw:(float)yaw
 {
-	if (_yaw == yaw) {
-		return;
-	}
-
 	_yaw = yaw;
 
 	[self _updateFrontWithAngles];
@@ -44,10 +42,6 @@
 
 - (void)setPitch:(float)pitch
 {
-	if (_pitch == pitch) {
-		return;
-	}
-
 	_pitch = pitch;
 
 	[self _updateFrontWithAngles];

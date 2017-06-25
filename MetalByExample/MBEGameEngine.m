@@ -24,7 +24,7 @@
 @property (nonatomic, strong) MBECamera *camera;
 @property (nonatomic, strong) MBERenderer *renderer;
 
-@property (assign) float time;
+@property (assign) double time;
 
 @property (nonatomic, strong) NSMutableArray <id<MBEPointLightSource>> *lightSources;
 @property (nonatomic, strong) NSMutableArray <id<MBEObject>> *objects;
@@ -52,6 +52,8 @@
 
 	_activeActions = [NSMutableSet set];
 
+	_time = CACurrentMediaTime();
+
 	// Create scene
 	[self resetScene];
 
@@ -63,13 +65,16 @@
 	_camera = [[MBECamera alloc] init];
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
-	[self createSingleCube];
+	_activeActions = [NSMutableSet set];
+	[self createSingleSphere];
 }
 
 - (void)createScene
 {
 	self.camera.position = (vector_float3){5, 5, 5};
-	self.camera.front = (vector_float3){0.0f, 0.0f, -1.0f};
+
+	// TODO(vivek)
+	// self.camera.front = (vector_float3){0.0f, 0.0f, -1.0f};
 
 	_objects = [NSMutableArray array];
 
@@ -104,6 +109,8 @@
 {
 	self.camera.position = (vector_float3){0, 0, -8};
 
+	//self.camera.target = (vector_float3){0, 0, 0};
+
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
 	[self.objects addObject:sphere];
@@ -115,7 +122,7 @@
 		float angle = 2 * M_PI * ((float)i/(float)numLights);
 		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 		light.x = radius*cos(angle);
-		light.y = 15;
+		light.y = 5;
 		light.z = radius*sin(angle);
 		[self.lightSources addObject:light];
 	}
@@ -124,20 +131,20 @@
 - (void)createSingleCube
 {
 	self.camera.position = (vector_float3){5, 5, 5};
-	self.camera.target = (vector_float3){0, 0, 0};
+	// self.camera.target = (vector_float3){0, 0, 0};
 
 	_objects = [NSMutableArray array];
 	MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
 	[self.objects addObject:cube];
 
 	float radius = 10;
-	int numLights = 8;
+	int numLights = 3;
 	for (int i=0; i<numLights; i++) {
 
 		float angle = 2 * M_PI * ((float)i/(float)numLights);
 		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 		light.x = radius*cos(angle);
-		light.y = 15;
+		light.y = 5;
 		light.z = radius*sin(angle);
 		[self.lightSources addObject:light];
 	}
@@ -193,17 +200,15 @@
 
 /**
 TODO
- 1. Objects should move with velocity
- 2. Objects should move with accelleration (there should be a concept of gravity or force source)
+ DONE 1. Movement with velocity
+ 2. Objects should move with acceleration (there should be a concept of gravity or force source)
  3. Select object by clicking on it
  4. Outline object using stencil
  DONE 5. Create another primitive shape class (sphere?)
- 6. Create 3d rectangle with dynamic height
  DONE 6. Create scene of cubes and allow user to navigate through scene
  7. specify scene using DSL grid
  8. Enable jumping (will require rudimentally collision detection)
- 9. Create a "Gesture Recognizer" for keyboard events. I should be able to distinguish between a tap and long press
- 10. Create an object that updates scene objects based on past state + user input.
+ 10. Create an function that updates scene objects based on past state + user input.
 
  */
 
@@ -211,11 +216,11 @@ TODO
 {
 	[self.renderer blockUntilNextRender];
 
-	float prevTime = self.time;
-	self.time = CACurrentMediaTime();
-	float duration = self.time - prevTime;
+	double currentTime = CACurrentMediaTime();
+	double duration = currentTime - self.time;
+	self.time = currentTime;
 
-	// [self constantRotation];
+	NSLog(@"actions: %@", self.activeActions);
 	for (id action in self.activeActions) {
 		[self applyAction:action duration:duration];
 	}
@@ -236,6 +241,8 @@ TODO
 	viewPosition.xyz = self.camera.position;
 	viewPosition.w = 1.0;
 	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:viewPosition worldToView:worldToViewMatrix MTKView:view];
+
+	NSLog(@"%f, %f, %f", self.camera.position.x, self.camera.position.y, self.camera.position.z);
 }
 
 #pragma mark - Input Handlers
@@ -243,19 +250,23 @@ TODO
 - (NSString *)normalizedStringFromKeyCode:(NSUInteger)keyCode
 {
 	switch (keyCode) {
-		case 56: return @"shift";
-		case 59: return @"left_control";
-		case 58: return @"left_option";
-		case 55: return @"left_command";
-		case 54: return @"right_command";
-		case 61: return @"right_option";
-		case 60: return @"right_shift";
-		case 63: return @"function";
+		case kVK_Shift: return @"shift";
+		case kVK_Control: return @"left_control";
+		case kVK_Option: return @"left_option";
+		case kVK_Command: return @"left_command";
 
-		case 123: return @"left";
-		case 124: return @"right";
-		case 125: return @"down";
-		case 126: return @"up";
+		case kVK_RightCommand: return @"right_command";
+		case kVK_RightOption: return @"right_option";
+		case kVK_RightShift: return @"right_shift";
+		case kVK_Function: return @"function";
+
+		case kVK_LeftArrow: return @"left";
+		case kVK_RightArrow: return @"right";
+		case kVK_DownArrow: return @"down";
+		case kVK_UpArrow: return @"up";
+		case kVK_Escape: return @"escape";
+
+
 		default: return MBECreateStringForKey(keyCode);
 	}
 }
@@ -290,89 +301,91 @@ TODO
 {
 }
 
+
+
 - (void)mouseMoved:(NSEvent *)event
 {
-	CGPoint mouseLocationWindowSpace = [event locationInWindow];
-	CGRect windowFrameScreenSpace = event.window.frame;
-	CGRect mouseRectScreenSpace = [event.window convertRectToScreen:CGRectMake(mouseLocationWindowSpace.x, mouseLocationWindowSpace.y, 0, 0)];
-	if (CGRectContainsRect(windowFrameScreenSpace, mouseRectScreenSpace)) {
-		[NSCursor hide];
-
-		float sensitivity = 0.005;
-		self.camera.yaw += [event deltaX] * sensitivity;
-		self.camera.pitch -= [event deltaY] * sensitivity;
-
-		float maxPitch = M_PI_2 - 0.05;
-		float minPitch = -1 * maxPitch;
-		self.camera.pitch = MAX(minPitch, MIN(maxPitch, self.camera.pitch));
-	}
-	else {
-		[NSCursor unhide];
-	}
-
-	if ([self.activeActions containsObject:@"unhide_cursor"]) {
-		[NSCursor unhide];
-	}
+//	CGPoint mouseLocationWindowSpace = [event locationInWindow];
+//	CGRect windowFrameScreenSpace = event.window.frame;
+//	CGRect mouseRectScreenSpace = [event.window convertRectToScreen:CGRectMake(mouseLocationWindowSpace.x, mouseLocationWindowSpace.y, 0, 0)];
+//	if (CGRectContainsRect(windowFrameScreenSpace, mouseRectScreenSpace)) {
+//		CGFloat xPercentage = mouseLocationWindowSpace.x / CGRectGetWidth(event.window.frame);
+//		CGFloat yPercentage = mouseLocationWindowSpace.y / CGRectGetHeight(event.window.frame);
+//
+//		float maxYaw = (M_PI_2 - 0.05) + self.camera.yaw;
+//		float minYaw = (-1 * maxYaw) + self.camera.yaw;
+//		self.camera.yaw = linear_interpolate(minYaw, maxYaw, xPercentage);
+//
+//
+//		float maxPitch = M_PI_2 - 0.05;
+//		float minPitch = -1 * maxPitch;
+//		self.camera.pitch = linear_interpolate(minPitch, maxPitch, yPercentage);
+//	}
 }
 
 - (void)keyUp:(NSEvent*)event
 {
-	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
-	if ([key isEqualToString:@"w"]) {
-		[self.activeActions removeObject:@"move_forward"];
-	}
-	else if ([key isEqualToString:@"s"]) {
-		[self.activeActions removeObject:@"move_backward"];
-	}
-	else if ([key isEqualToString:@"a"]) {
-		[self.activeActions removeObject:@"move_left"];
-	}
-	else if ([key isEqualToString:@"d"]) {
-		[self.activeActions removeObject:@"move_right"];
-	}
-
-	if (event.keyCode == kVK_Escape) {
-		[self.activeActions removeObject:@"unhide_cursor"];
+	id action = [self actionForEvent:event];
+	if (action) {
+		[self.activeActions removeObject:action];
 	}
 }
 
 - (void)keyDown:(NSEvent*)event
 {
-	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
-	if ([key isEqualToString:@"w"]) {
-		[self.activeActions addObject:@"move_forward"];
-	}
-	else if ([key isEqualToString:@"s"]) {
-		[self.activeActions addObject:@"move_backward"];
-	}
-	else if ([key isEqualToString:@"a"]) {
-		[self.activeActions addObject:@"move_left"];
-	}
-	else if ([key isEqualToString:@"d"]) {
-		[self.activeActions addObject:@"move_right"];
-	}
-	else if ([key isEqualToString:@"q"] && (event.modifierFlags & NSEventModifierFlagCommand)) {
-		[self.activeActions addObject:@"QUIT"];
-	}
-	else if ([key isEqualToString:@"r"]) {
-		[self resetScene];
-	}
-
-	if (event.keyCode == kVK_Escape) {
-		[self.activeActions addObject:@"unhide_cursor"];
+	id action = [self actionForEvent:event];
+	if (action) {
+		[self.activeActions addObject:action];
 	}
 }
+
+- (id)actionForEvent:(NSEvent *)event
+{
+	NSString *key = [self normalizedStringFromKeyCode:event.keyCode];
+	if (!key) {
+		return nil;
+	}
+	else if ([key isEqualToString:@"q"] && (event.modifierFlags & NSEventModifierFlagCommand)) {
+		return @"QUIT";
+	}
+	else {
+		NSDictionary *actionTable = @{
+									  @"w": @"move_forward",
+									  @"s": @"move_backward",
+									  @"a": @"move_left",
+									  @"d": @"move_right",
+
+									  @"left": @"rotate_left",
+									  @"right": @"rotate_right",
+									  @"up": @"rotate_up",
+									  @"down": @"rotate_down",
+
+									  @"r": @"RESET",
+									  };
+		return actionTable[key];
+	}
+}
+
 
 // TODO(vivek): create action object that can execute block when in activeActions set. That way I can avoid creating a huge if-else list. The block will capture references to objects it needs to mutate.
 - (void)applyAction:(id)action duration:(NSTimeInterval)duration
 {
-	float cameraSpeed = 0.8;
+	float rotationSpeed = 2.0 * duration;
+	float cameraSpeed = 45 * duration;
 	vector_float3 cameraFront = self.camera.front;
 	vector_float3 cameraPos = self.camera.position;
+
+	float yaw = self.camera.yaw;
+	float pitch = self.camera.pitch;
 
 	if ([action isKindOfClass:[NSString class]]) {
 		if ([action isEqualToString:@"QUIT"]) {
 			[NSApp terminate:self];
+		}
+		else if ([action isEqualToString:@"RESET"]) {
+			[self resetScene];
+			cameraFront = self.camera.front;
+			cameraPos = self.camera.position;
 		}
 		else if ([action isEqualToString:@"move_forward"]) {
 			cameraPos += cameraSpeed * cameraFront;
@@ -386,10 +399,25 @@ TODO
 		else if ([action isEqualToString:@"move_right"]) {
 			cameraPos += simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
 		}
+		else if ([action isEqualToString:@"rotate_up"]) {
+			pitch += rotationSpeed;
+		}
+		else if ([action isEqualToString:@"rotate_down"]) {
+			pitch -= rotationSpeed;
+		}
+		else if ([action isEqualToString:@"rotate_left"]) {
+			yaw -= rotationSpeed;
+		}
+		else if ([action isEqualToString:@"rotate_right"]) {
+			yaw += rotationSpeed;
+		}
 	}
 
 	self.camera.position = cameraPos;
-	self.camera.front = cameraFront;
+	float maxPitch = M_PI_2 - 0.05;
+	float minPitch = -1 * maxPitch;
+	self.camera.pitch = MAX(minPitch, MIN(maxPitch, pitch));
+	self.camera.yaw = yaw;
 }
 
 @end

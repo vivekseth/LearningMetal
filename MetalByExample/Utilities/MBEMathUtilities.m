@@ -79,3 +79,8 @@ matrix_float4x4 matrix_float4x4_perspective(float aspect, float fovy, float near
 	matrix_float4x4 mat = { P, Q, R, S };
 	return mat;
 }
+
+float linear_interpolate(float low, float high, float percentage)
+{
+	return (high - low) * percentage + low;
+}
