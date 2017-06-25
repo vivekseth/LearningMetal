@@ -43,48 +43,47 @@
 - (void)makeBuffers {
 	static const MBEVertexIn vertices[] =
 	{
-		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
+		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
+		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
+		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
+		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
 
-		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
+		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
+		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
+		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
 
-		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
-		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 6}},
+		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 0}},
+		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 0}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 0}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 0}},
+		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 0}},
+		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 0}},
 
-		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
-		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
-		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
-		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
-		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
-		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 0, 0 }, .normal = {-1.0f, 0.0f, 6}},
+		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 0}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 0}},
+		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 0}},
+		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 0}},
+		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 0}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 0}},
 
-		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 6}},
-		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 6}},
-		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 6}},
-		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 6}},
-		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 6}},
-		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 1, 0, 1, 0 }, .normal = {1.0f, 0.0f, 6}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 0}},
+		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 0}},
+		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 0}},
+		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 0}},
+		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 0}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 0}},
 
-		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
-		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
-		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
-		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
-		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
-		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 1, 0, 0, 0 }, .normal = {0.0f, -1.0f, 6}},
-
-		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 6}},
-		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 6}},
-		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 6}},
-		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 6}},
-		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 6}},
-		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 6}},
+		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 0}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 0}},
+		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 0}},
+		{.position = { 0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 0}},
+		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 0}},
+		{.position = { -0.5f,  0.5f,  0.5f, 1 }, .color = { 0, 1, 1, 0 }, .normal = {0.0f, 1.0f, 0}},
 	};
 
 	self.vertexBuffer = [self.device newBufferWithBytes:vertices length:sizeof(vertices) options:MTLResourceOptionCPUCacheModeDefault];
@@ -135,7 +134,7 @@
 - (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView {
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-	const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(1.0);
+	const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(3.0);
 	const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
 
 	MBEVertexObjectUniforms uniforms;
