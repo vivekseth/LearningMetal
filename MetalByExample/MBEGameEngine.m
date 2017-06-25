@@ -107,7 +107,7 @@
 
 - (void)createSingleSphere
 {
-	self.camera.position = (vector_float3){0, 0, -8};
+	self.camera.position = (vector_float3){0, 0, -30};
 
 	//self.camera.target = (vector_float3){0, 0, 0};
 
@@ -117,7 +117,7 @@
 	[self.objects addObject:sphere];
 
 	float radius = 10;
-	int numLights = 3;
+	int numLights = 1;
 	for (int i=0; i<numLights; i++) {
 
 		float angle = 2 * M_PI * ((float)i/(float)numLights);

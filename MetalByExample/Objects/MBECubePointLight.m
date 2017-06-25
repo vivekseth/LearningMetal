@@ -21,7 +21,7 @@
 @implementation MBECubePointLight
 
 @synthesize device;
-@synthesize x, y, z;
+@synthesize x, y, z, scale;
 @synthesize color, strength;
 @synthesize K, L, Q;
 
@@ -35,6 +35,7 @@
 	self.K = K;
 	self.L = L;
 	self.Q = Q;
+	self.scale = 1.0;
 
 	[self makeBuffers];
 
