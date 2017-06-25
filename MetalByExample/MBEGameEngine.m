@@ -16,6 +16,7 @@
 #import "MBECubePointLight.h"
 #import "MBECamera.h"
 #import "MBESphereInstanceArray.h"
+#import "MBECubeInstanceArray.h"
 
 @interface MBEGameEngine ()
 
@@ -123,15 +124,15 @@
 	int high = N/2+1;
 
 	int instanceCount = (high - low) * (high - low);
-	MBESphereInstanceArray *sphereInstanceArray = [[MBESphereInstanceArray alloc] initWithDevice:self.device instanceCount:instanceCount parallels:20 meridians:20];
+	MBECubeInstanceArray *sphereInstanceArray = [[MBECubeInstanceArray alloc] initWithDevice:self.device instanceCount:instanceCount];
 
 	int index = 0;
 	for (int i=low; i<high; i++) {
 		for (int j=low; j<high; j++) {
 			id<MBEObject> obj = sphereInstanceArray[index++];
-			obj.x = i*2;
+			obj.x = i;
 			obj.y = 0.05 * ((i * i) + (j * j));
-			obj.z = j*2;
+			obj.z = j;
 			obj.scale = 1.0;
 		}
 	}
@@ -164,25 +165,25 @@
 
 	_objects = [NSMutableArray array];
 
-	int N = 50;
+	int N = 150;
 	int low = -1*N/2;
 	int high = N/2+1;
 
 	int instanceCount = (high - low) * (high - low);
-	MBESphereInstanceArray *sphereInstanceArray = [[MBESphereInstanceArray alloc] initWithDevice:self.device instanceCount:instanceCount parallels:20 meridians:20];
+	MBECubeInstanceArray *objInstanceArray = [[MBECubeInstanceArray alloc] initWithDevice:self.device instanceCount:instanceCount];
 
 	int index = 0;
 	for (int i=low; i<high; i++) {
 		for (int j=low; j<high; j++) {
-			id<MBEObject> obj = sphereInstanceArray[index++];
-			obj.x = i*2;
+			id<MBEObject> obj = objInstanceArray[index++];
+			obj.x = i;
 			obj.y = 0;
-			obj.z = j*2;
+			obj.z = j;
 			obj.scale = 1.0;
 		}
 	}
 
-	[self.objects addObject:sphereInstanceArray];
+	[self.objects addObject:objInstanceArray];
 
 	float radius = 10;
 	int numLights = 10;
