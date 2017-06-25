@@ -11,8 +11,6 @@
 
 @interface MBESphere ()
 
-@property (readonly) id <MTLRenderPipelineState> renderPipelineState;
-
 @property id<MTLBuffer> vertexBuffer;
 @property id<MTLBuffer> indexBuffer;
 
@@ -33,13 +31,106 @@
 	self.device = device;
 	self.scale = 1.0;
 
-	[self makePipeline];
 	[self makeBuffersWithParallels:parallels meridians:meridians];
 
 	return self;
 }
 
-- (MBESafeArray)createNormalizeSphereVerticesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
+- (void)makeBuffersWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians {
+	MBESafeArray vertices = [self.class createNormalizeSphereVerticesWithParallels:parallels meridians:meridians];
+	self.vertexBuffer = [self.device newBufferWithBytes:vertices.pointer length:vertices.count * vertices.size options:MTLResourceOptionCPUCacheModeDefault];
+	[self.vertexBuffer setLabel:@"Vertices"];
+	MBESafeArrayFree(vertices);
+
+	MBESafeArray indices = [self.class createNormalizeSphereIndicesWithParallels:parallels meridians:meridians];
+	self.indexBuffer = [self.device newBufferWithBytes:indices.pointer length:indices.count * indices.size options:MTLResourceOptionCPUCacheModeDefault];
+	[self.indexBuffer setLabel:@"Indices"];
+	MBESafeArrayFree(indices);
+
+
+	self.vertexObjectUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEVertexObjectUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.vertexObjectUniformsBuffer setLabel:@"vertexObjectUniformsBuffer"];
+
+
+	// TODO(vivek): allow users to modify this.
+	MBEFragmentMaterialUniforms fragmentMaterialUniforms;
+	fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
+	fragmentMaterialUniforms.ambientStrength = 0.3;
+	fragmentMaterialUniforms.diffuseStrength = 0.7;
+	fragmentMaterialUniforms.specularStrength = 0.4;
+	fragmentMaterialUniforms.specularFactor = 32;
+
+	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
+}
+
+#pragma mark <MBEObject>
+
+- (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
+	[renderCommandEncoder setVertexBuffer:self.vertexObjectUniformsBuffer offset:0 atIndex:1];
+	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:2];
+	[renderCommandEncoder setFragmentBuffer:self.fragmentMaterialUniformsBuffer offset:0 atIndex:1];
+	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
+									  indexType:MBEIndexType
+									indexBuffer:self.indexBuffer
+							  indexBufferOffset:0];
+}
+
+- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView
+{
+	const matrix_float4x4 positionMatrix = matrix_float4x4_translation((vector_float3){self.x, self.y, self.z});
+    const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(self.scale);
+    const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
+
+	MBEVertexObjectUniforms uniforms;
+	uniforms.modelToWorld = modelToWorld;
+
+	matrix_float4x4 modelToView = modelToWorld; // matrix_multiply(worldToView, modelToWorld);
+
+	matrix_float3x3 initialNormalMatrix = {
+		.columns[0] = modelToView.columns[0].xyz,
+		.columns[1] = modelToView.columns[1].xyz,
+		.columns[2] = modelToView.columns[2].xyz,
+	};
+	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
+
+	memcpy([self.vertexObjectUniformsBuffer contents], &uniforms, sizeof(uniforms));
+}
+
+#pragma mark - Sphere Vertices Creation
+
++ (void)printSphereDotObjWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
+{
+	// MBEVertexIn
+	MBESafeArray verticesArr = [self.class createNormalizeSphereVerticesWithParallels:parallels meridians:meridians];
+
+	// MBEIndex
+	MBESafeArray indicesArr = [self.class createNormalizeSphereIndicesWithParallels:parallels meridians:meridians];
+
+	for (int i=0; i<verticesArr.count; i++) {
+		MBEVertexIn vertex = *((MBEVertexIn *)MBESafeArrayGetPointer(verticesArr, i));
+		printf("v %f %f %f\n", vertex.position.x, vertex.position.y, vertex.position.z);
+	}
+
+	for (int i=0; i<verticesArr.count; i++) {
+		MBEVertexIn vertex = *((MBEVertexIn *)MBESafeArrayGetPointer(verticesArr, i));
+		printf("vn %f %f %f\n", vertex.normal.x, vertex.normal.y, vertex.normal.z);
+	}
+
+	for (int i=0; i<(indicesArr.count/3); i++) {
+		MBEIndex *indices = ((MBEIndex *)MBESafeArrayGetPointer(indicesArr, 3 * i));
+		int v0 = indices[0] + 1;
+		int v1 = indices[1] + 1;
+		int v2 = indices[2] + 1;
+		printf("f %d//%d %d//%d %d//%d\n", v0, v0, v1, v1, v2, v2);
+	}
+
+	MBESafeArrayFree(verticesArr);
+	MBESafeArrayFree(indicesArr);
+}
+
++ (MBESafeArray)createNormalizeSphereVerticesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
 {
 	NSUInteger numVertices = 2 + meridians * parallels;
 	// printf("P=%f, M=%f, numVerticies=%d\n", (float)parallels, (float)meridians, (int)numVertices);
@@ -79,7 +170,7 @@
 	return verticesArr;
 }
 
-- (void)generateVerticesForRingWithRadius:(CGFloat)radius zOffset:(CGFloat)zOffset numDivisions:(NSUInteger)numDivisions array:(MBESafeArray)array
++ (void)generateVerticesForRingWithRadius:(CGFloat)radius zOffset:(CGFloat)zOffset numDivisions:(NSUInteger)numDivisions array:(MBESafeArray)array
 {
 	for (int i=0; i<numDivisions; i++) {
 		CGFloat radians = (float)i/(float)numDivisions * 2 * M_PI;
@@ -104,7 +195,7 @@
 	}
 }
 
-- (MBESafeArray)createNormalizeSphereIndicesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
++ (MBESafeArray)createNormalizeSphereIndicesWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
 {
 	NSUInteger numTrianglesNearPoles = 2 * meridians;
 	NSUInteger numTrianglesForParallelRows = 2 * meridians * (parallels - 1);
@@ -119,8 +210,8 @@
 	for (int i=0; i<meridians; i++) {
 		MBESafeArray offsetArr = MBESafeArrayCreateOffsetArray(indicesArr, indicesIndex);
 
-		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:0 meridianIndex:i   parallels:parallels meridians:meridians];
-		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:1 meridianIndex:i   parallels:parallels meridians:meridians];
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:0 meridianIndex:i   parallels:parallels meridians:meridians];
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:1 meridianIndex:i   parallels:parallels meridians:meridians];
 		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:1 meridianIndex:i+1 parallels:parallels meridians:meridians];
 
 		MBESafeArrayFree(offsetArr);
@@ -131,9 +222,9 @@
 	// calculate triangles near bottom pole
 	for (int i=0; i<meridians; i++) {
 		MBESafeArray offsetArr = MBESafeArrayCreateOffsetArray(indicesArr, indicesIndex);
-		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:parallels+1 meridianIndex:i   parallels:parallels meridians:meridians];
-		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:parallels   meridianIndex:i   parallels:parallels meridians:meridians];
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:parallels+1 meridianIndex:i   parallels:parallels meridians:meridians];
 		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:parallels   meridianIndex:i+1 parallels:parallels meridians:meridians];
+		*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:parallels   meridianIndex:i   parallels:parallels meridians:meridians];
 		MBESafeArrayFree(offsetArr);
 
 		indicesIndex += 3;
@@ -143,17 +234,17 @@
 	for (int p=1; p<parallels; p++) {
 		for (int m=0; m<meridians; m++) {
 			MBESafeArray offsetArr = MBESafeArrayCreateOffsetArray(indicesArr, indicesIndex);
-			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m parallels:parallels meridians:meridians];
-			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m+1 parallels:parallels meridians:meridians];
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m+1 parallels:parallels meridians:meridians];
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m parallels:parallels meridians:meridians];
 			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m parallels:parallels meridians:meridians];
 			MBESafeArrayFree(offsetArr);
 
 			indicesIndex += 3;
 
 			offsetArr = MBESafeArrayCreateOffsetArray(indicesArr, indicesIndex);
-			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m+1 parallels:parallels meridians:meridians];
-			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m+1 parallels:parallels meridians:meridians];
 			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 0)) = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m parallels:parallels meridians:meridians];
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 1)) = [self indexForSpherePointAtParallelIndex:p+1 meridianIndex:m+1 parallels:parallels meridians:meridians];
+			*((MBEIndex *)MBESafeArrayGetPointer(offsetArr, 2)) = [self indexForSpherePointAtParallelIndex:p meridianIndex:m+1 parallels:parallels meridians:meridians];
 			MBESafeArrayFree(offsetArr);
 
 			indicesIndex += 3;
@@ -163,7 +254,7 @@
 	return indicesArr;
 }
 
-- (NSUInteger)indexForSpherePointAtParallelIndex:(NSUInteger)parallelIndex meridianIndex:(NSUInteger)meridianIndex parallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
++ (NSUInteger)indexForSpherePointAtParallelIndex:(NSUInteger)parallelIndex meridianIndex:(NSUInteger)meridianIndex parallels:(NSUInteger)parallels meridians:(NSUInteger)meridians
 {
 	// pi 0 = top pole
 	// pi N + 1 = bottom pole
@@ -185,89 +276,6 @@
 	else {
 		return 1 + ((parallelIndex - 1) * meridians) + moduloMeridianIndex;
 	}
-}
-
-
-- (void)makeBuffersWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians {
-	MBESafeArray vertices = [self createNormalizeSphereVerticesWithParallels:parallels meridians:meridians];
-	self.vertexBuffer = [self.device newBufferWithBytes:vertices.pointer length:vertices.count * vertices.size options:MTLResourceOptionCPUCacheModeDefault];
-	[self.vertexBuffer setLabel:@"Vertices"];
-	MBESafeArrayFree(vertices);
-
-	MBESafeArray indices = [self createNormalizeSphereIndicesWithParallels:parallels meridians:meridians];
-	self.indexBuffer = [self.device newBufferWithBytes:indices.pointer length:indices.count * indices.size options:MTLResourceOptionCPUCacheModeDefault];
-	[self.indexBuffer setLabel:@"Indices"];
-	MBESafeArrayFree(indices);
-
-
-	self.vertexObjectUniformsBuffer = [self.device newBufferWithLength:sizeof(MBEVertexObjectUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.vertexObjectUniformsBuffer setLabel:@"vertexObjectUniformsBuffer"];
-
-
-	// TODO(vivek): allow users to modify this.
-	MBEFragmentMaterialUniforms fragmentMaterialUniforms;
-	fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
-	fragmentMaterialUniforms.ambientStrength = 0.3;
-	fragmentMaterialUniforms.diffuseStrength = 0.7;
-	fragmentMaterialUniforms.specularStrength = 0.4;
-	fragmentMaterialUniforms.specularFactor = 32;
-
-	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
-}
-
-- (void)makePipeline
-{
-	id<MTLLibrary> library = [self.device newDefaultLibrary];
-
-	MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
-	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"lighting_vertex_project"];
-	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"lighting_fragment"];
-	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-
-	NSError *error = nil;
-	_renderPipelineState = [self.device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
-	if (!self.renderPipelineState)
-	{
-		NSLog(@"Error occurred when creating render pipeline state: %@", error);
-	}
-}
-
-
-#pragma mark <MBEObject>
-
-- (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder {
-	[renderCommandEncoder setVertexBuffer:self.vertexObjectUniformsBuffer offset:0 atIndex:1];
-	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:2];
-	[renderCommandEncoder setFragmentBuffer:self.fragmentMaterialUniformsBuffer offset:0 atIndex:1];
-	[renderCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-									 indexCount:[self.indexBuffer length] / sizeof(MBEIndex)
-									  indexType:MBEIndexType
-									indexBuffer:self.indexBuffer
-							  indexBufferOffset:0];
-}
-
-- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView
-{
-	vector_float3 position = {self.x, self.y, self.z};
-	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-    const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(self.scale);
-    const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
-
-	MBEVertexObjectUniforms uniforms;
-	uniforms.modelToWorld = modelToWorld;
-
-	matrix_float4x4 modelToView = matrix_multiply(worldToView, modelToWorld);
-
-	matrix_float3x3 initialNormalMatrix = {
-		.columns[0] = modelToView.columns[0].xyz,
-		.columns[1] = modelToView.columns[1].xyz,
-		.columns[2] = modelToView.columns[2].xyz,
-	};
-	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
-
-	memcpy([self.vertexObjectUniformsBuffer contents], &uniforms, sizeof(uniforms));
 }
 
 @end
