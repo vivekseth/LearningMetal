@@ -48,7 +48,7 @@
 		{.position = { 0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
 		{.position = { -0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
 		{.position = { 0.5f,  0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
-		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
+		{.position = { -0.5f,  -0.5f,  -0.5f, 1 }, .color = { 0, 0, 1, 0 }, .normal = {0.0f, 0.0f, -1.0f}},
 
 		{.position = { -0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
 		{.position = { 0.5f,  -0.5f,  0.5f, 1 }, .color = { 1, 1, 0, 0 }, .normal = {0.0f, 0.0f, 1.0f}},
@@ -131,11 +131,26 @@
 	[renderCommandEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
 }
 
+static float rotationX = 0;
+static float rotationY = 0;
+
 - (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView {
+
+
+	if (duration < 100) {
+	rotationX += duration * (M_PI / 2.0);
+	rotationY += duration * (M_PI / 3.0);
+	}
+	const vector_float3 xAxis = { 1, 0, 0 };
+	const vector_float3 yAxis = { 0, 1, 0 };
+	const matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, rotationX);
+	const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, rotationY);
+	const matrix_float4x4 rotMatrix = matrix_multiply(xRot, yRot);
+
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
 	const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(3.0);
-	const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
+	const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, matrix_multiply(scaleMatrix, rotMatrix));
 
 	MBEVertexObjectUniforms uniforms;
 	uniforms.modelToWorld = modelToWorld;
