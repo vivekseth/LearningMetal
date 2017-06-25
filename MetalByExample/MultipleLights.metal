@@ -30,11 +30,13 @@ float4 lightForPointLight(MBEFragmentPointLight pointLight,
 /// Definitions
 
 vertex MBEVertexOut multiple_lights_vertex_projection(constant MBEVertexSceneUniforms &sceneUniforms [[buffer(0)]],
-													  constant MBEVertexObjectUniforms &objectUniforms [[buffer(1)]],
+													  constant MBEVertexObjectUniforms *objectUniformsArray [[buffer(1)]],
 													  device MBEVertexIn *vertices [[buffer(2)]],
-													  uint vid [[vertex_id]])
+													  uint vid [[vertex_id]],
+													  ushort iid [[instance_id]])
 {
 	MBEVertexIn in = vertices[vid];
+	MBEVertexObjectUniforms objectUniforms = objectUniformsArray[iid];
 
 	MBEVertexOut out;
 	out.positionWorldSpace = objectUniforms.modelToWorld * in.position;
