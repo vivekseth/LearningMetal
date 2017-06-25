@@ -112,21 +112,29 @@
 	//self.camera.target = (vector_float3){0, 0, 0};
 
 	_objects = [NSMutableArray array];
-	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
-	sphere.scale = 10;
-	[self.objects addObject:sphere];
+//	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:3 meridians:3];
+//	sphere.scale = 10;
+//	sphere.z = 10;
+//	[self.objects addObject:sphere];
 
-	float radius = 10;
-	int numLights = 1;
-	for (int i=0; i<numLights; i++) {
+	MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
+	cube.scale = 10;
+	cube.z = 10;
+	[self.objects addObject:cube];
 
-		float angle = 2 * M_PI * ((float)i/(float)numLights);
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
+
+
+	//float radius = 10;
+	//int numLights = 1;
+	//for (int i=0; i<numLights; i++) {
+
+		//float angle = 2 * M_PI * ((float)i/(float)numLights);
+	MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+	light.x = 0; //radius*cos(angle);
+	light.y = 0;
+	light.z = -10; // radius*sin(angle);
 		[self.lightSources addObject:light];
-	}
+	//}
 }
 
 - (void)createSingleCube
@@ -336,6 +344,9 @@ TODO
 									  @"up": @"rotate_up",
 									  @"down": @"rotate_down",
 
+									  @"t": @"move_up",
+									  @"g": @"move_down",
+
 									  @"r": @"RESET",
 									  };
 		return actionTable[key];
@@ -362,6 +373,8 @@ TODO
 			[self resetScene];
 			cameraFront = self.camera.front;
 			cameraPos = self.camera.position;
+			yaw = self.camera.yaw;
+			pitch = self.camera.pitch;
 		}
 		else if ([action isEqualToString:@"move_forward"]) {
 			cameraPos += cameraSpeed * cameraFront;
@@ -375,6 +388,14 @@ TODO
 		else if ([action isEqualToString:@"move_right"]) {
 			cameraPos += simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
 		}
+
+		else if ([action isEqualToString:@"move_up"]) {
+			cameraPos += ((vector_float3){0, 1, 0}) * cameraSpeed;
+		}
+		else if ([action isEqualToString:@"move_down"]) {
+			cameraPos -= ((vector_float3){0, 1, 0}) * cameraSpeed;
+		}
+
 		else if ([action isEqualToString:@"rotate_up"]) {
 			pitch += rotationSpeed;
 		}

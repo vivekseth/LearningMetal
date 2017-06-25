@@ -158,7 +158,7 @@
 	MBEVertexObjectUniforms uniforms;
 	uniforms.modelToWorld = modelToWorld;
 
-	matrix_float4x4 modelToView = matrix_multiply(worldToView, modelToWorld);
+	matrix_float4x4 modelToView = modelToWorld; // matrix_multiply(worldToView, modelToWorld);
 
 	matrix_float3x3 initialNormalMatrix = {
 		.columns[0] = modelToView.columns[0].xyz,
