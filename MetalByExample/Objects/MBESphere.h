@@ -16,6 +16,4 @@
 
 - (instancetype) initWithDevice:(id<MTLDevice>)device parallels:(NSUInteger)parallels meridians:(NSUInteger)meridians;
 
-+ (void)printSphereDotObjWithParallels:(NSUInteger)parallels meridians:(NSUInteger)meridians;
-
 @end

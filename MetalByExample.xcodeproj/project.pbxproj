@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		58029D591EF5AEF8005D5147 /* Simple.metal in Sources */ = {isa = PBXBuildFile; fileRef = 58029D581EF5AEF8005D5147 /* Simple.metal */; };
 		58029D5E1EF5B5B3005D5147 /* MBECubePointLight.m in Sources */ = {isa = PBXBuildFile; fileRef = 58029D5D1EF5B5B3005D5147 /* MBECubePointLight.m */; };
+		5803097F1F0013BE00590B66 /* MBESphereInstanceArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 5803097E1F0013BE00590B66 /* MBESphereInstanceArray.m */; };
+		580309821F001B5500590B66 /* MBESphereUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 580309811F001B5500590B66 /* MBESphereUtility.m */; };
 		582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AB1EEBAE2800C2F815 /* MBECube.m */; };
 		582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AF1EEBAF4400C2F815 /* MBERenderer.m */; };
 		583993DF1EE9220C009142CF /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 583993DE1EE9220C009142CF /* Shaders.metal */; };
@@ -34,6 +36,10 @@
 		58029D581EF5AEF8005D5147 /* Simple.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Simple.metal; sourceTree = "<group>"; };
 		58029D5C1EF5B5B3005D5147 /* MBECubePointLight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECubePointLight.h; sourceTree = "<group>"; };
 		58029D5D1EF5B5B3005D5147 /* MBECubePointLight.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECubePointLight.m; sourceTree = "<group>"; };
+		5803097D1F0013BE00590B66 /* MBESphereInstanceArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBESphereInstanceArray.h; sourceTree = "<group>"; };
+		5803097E1F0013BE00590B66 /* MBESphereInstanceArray.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESphereInstanceArray.m; sourceTree = "<group>"; };
+		580309801F001B5500590B66 /* MBESphereUtility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBESphereUtility.h; sourceTree = "<group>"; };
+		580309811F001B5500590B66 /* MBESphereUtility.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESphereUtility.m; sourceTree = "<group>"; };
 		582C55AA1EEBAE2800C2F815 /* MBECube.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECube.h; sourceTree = "<group>"; };
 		582C55AB1EEBAE2800C2F815 /* MBECube.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECube.m; sourceTree = "<group>"; };
 		582C55AE1EEBAF4400C2F815 /* MBERenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBERenderer.h; sourceTree = "<group>"; };
@@ -155,6 +161,8 @@
 				58838AFD1EF256A800858BB0 /* MBESphere.m */,
 				58029D5C1EF5B5B3005D5147 /* MBECubePointLight.h */,
 				58029D5D1EF5B5B3005D5147 /* MBECubePointLight.m */,
+				5803097D1F0013BE00590B66 /* MBESphereInstanceArray.h */,
+				5803097E1F0013BE00590B66 /* MBESphereInstanceArray.m */,
 			);
 			path = Objects;
 			sourceTree = "<group>";
@@ -181,6 +189,8 @@
 				585213071EEBB3520026F4B9 /* Storyboard.storyboard */,
 				58838AFF1EF2578400858BB0 /* MBESafeArray.h */,
 				58838B001EF2578400858BB0 /* MBESafeArray.m */,
+				580309801F001B5500590B66 /* MBESphereUtility.h */,
+				580309811F001B5500590B66 /* MBESphereUtility.m */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -255,6 +265,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5803097F1F0013BE00590B66 /* MBESphereInstanceArray.m in Sources */,
 				583993DF1EE9220C009142CF /* Shaders.metal in Sources */,
 				585BB6501EE918F500AEBDA1 /* main.m in Sources */,
 				58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */,
@@ -268,6 +279,7 @@
 				58ECB6D81EEDA5A8006B88AB /* MBEKeyboardUtilities.m in Sources */,
 				58838B011EF2578400858BB0 /* MBESafeArray.m in Sources */,
 				58029D591EF5AEF8005D5147 /* Simple.metal in Sources */,
+				580309821F001B5500590B66 /* MBESphereUtility.m in Sources */,
 				58ECB6D11EEBC436006B88AB /* MBEGameEngine.m in Sources */,
 				58838AFC1EF2528900858BB0 /* Lighting.metal in Sources */,
 				582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */,
