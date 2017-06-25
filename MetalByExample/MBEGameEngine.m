@@ -66,15 +66,12 @@
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 	_activeActions = [NSMutableSet set];
-	[self createSingleSphere];
+	[self createScene2];
 }
 
 - (void)createScene
 {
 	self.camera.position = (vector_float3){5, 5, 5};
-
-	// TODO(vivek)
-	// self.camera.front = (vector_float3){0.0f, 0.0f, -1.0f};
 
 	_objects = [NSMutableArray array];
 
@@ -84,11 +81,20 @@
 
 	for (int i=low; i<high; i++) {
 		for (int j=low; j<high; j++) {
-			MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
-			sphere.x = i*2;
-			sphere.y = 0.1 * i * j;
-			sphere.z = j*2;
-			[self.objects addObject:sphere];
+			MBESphere *obj = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+			obj.x = i*2;
+			obj.y = 0.1 * i * j;
+			obj.z = j*2;
+			obj.scale = 1.0;
+			[self.objects addObject:obj];
+
+//			MBECube *obj = [[MBECube alloc] initWithDevice:self.device];
+//			obj.x = i*2;
+//			obj.y = 0.1 * i * j;
+//			obj.z = j*2;
+//			obj.scale = 2.0;
+//			[self.objects addObject:obj];
+
 		}
 	}
 
@@ -105,55 +111,89 @@
 	}
 }
 
+- (void)createScene2
+{
+	self.camera.position = (vector_float3){5, 5, 5};
+
+	_objects = [NSMutableArray array];
+
+	int N = 24;
+	int low = -1*N/2;
+	int high = N/2+1;
+
+	for (int i=low; i<high; i++) {
+		for (int j=low; j<high; j++) {
+			MBESphere *obj = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+			obj.x = i*2;
+			obj.y = 0.1 * ((i * i) + (j * j));
+			obj.z = j*2;
+			obj.scale = 1.0;
+			[self.objects addObject:obj];
+
+//			MBECube *obj = [[MBECube alloc] initWithDevice:self.device];
+//			obj.x = i*2;
+//			obj.y = 0.1 * ((i * i) + (j * j));
+//			obj.z = j*2;
+//			obj.scale = 2.0;
+//			[self.objects addObject:obj];
+
+		}
+	}
+
+	float radius = 10;
+	int numLights = 8;
+	for (int i=0; i<numLights; i++) {
+		float angle = 2 * M_PI * ((float)i/(float)numLights);
+		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+		light.x = radius*cos(angle);
+		light.y = 15;
+		light.z = radius*sin(angle);
+		[self.lightSources addObject:light];
+	}
+}
+
+
+
+
+
 - (void)createSingleSphere
 {
 	self.camera.position = (vector_float3){0, 0, -30};
 
-	//self.camera.target = (vector_float3){0, 0, 0};
-
 	_objects = [NSMutableArray array];
-//	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:3 meridians:3];
-//	sphere.scale = 10;
-//	sphere.z = 10;
-//	[self.objects addObject:sphere];
+	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+	sphere.scale = 10;
+	[self.objects addObject:sphere];
+
+	float radius = 10;
+	int numLights = 5;
+	for (int i=0; i<numLights; i++) {
+		float angle = 2 * M_PI * ((float)i/(float)numLights);
+		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+		light.x = radius*cos(angle);
+		light.y = 15;
+		light.z = radius*sin(angle);
+		[self.lightSources addObject:light];
+	}
+}
+
+- (void)createSingleCube
+{
+	self.camera.position = (vector_float3){0, 0, -30};
+	_objects = [NSMutableArray array];
 
 	MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
 	cube.scale = 10;
 	cube.z = 10;
 	[self.objects addObject:cube];
 
-
-
-	//float radius = 10;
-	//int numLights = 1;
-	//for (int i=0; i<numLights; i++) {
-
-		//float angle = 2 * M_PI * ((float)i/(float)numLights);
-	MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	light.x = 0; //radius*cos(angle);
-	light.y = 0;
-	light.z = -10; // radius*sin(angle);
-		[self.lightSources addObject:light];
-	//}
-}
-
-- (void)createSingleCube
-{
-	self.camera.position = (vector_float3){5, 5, 5};
-	// self.camera.target = (vector_float3){0, 0, 0};
-
-	_objects = [NSMutableArray array];
-	MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
-	[self.objects addObject:cube];
-
 	float radius = 10;
-	int numLights = 3;
+	int numLights = 5;
 	for (int i=0; i<numLights; i++) {
-
 		float angle = 2 * M_PI * ((float)i/(float)numLights);
 		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 		light.x = radius*cos(angle);
-		light.y = 5;
+		light.y = 15;
 		light.z = radius*sin(angle);
 		[self.lightSources addObject:light];
 	}
@@ -357,8 +397,8 @@ TODO
 // TODO(vivek): create action object that can execute block when in activeActions set. That way I can avoid creating a huge if-else list. The block will capture references to objects it needs to mutate.
 - (void)applyAction:(id)action duration:(NSTimeInterval)duration
 {
-	float rotationSpeed = 2.0 * duration;
-	float cameraSpeed = 45 * duration;
+	float rotationSpeed = 0.25 * 2.0 * duration;
+	float cameraSpeed = 0.25 * 45 * duration;
 	vector_float3 cameraFront = self.camera.front;
 	vector_float3 cameraPos = self.camera.position;
 
