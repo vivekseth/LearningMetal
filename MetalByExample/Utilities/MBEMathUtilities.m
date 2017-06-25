@@ -30,6 +30,17 @@ matrix_float4x4 matrix_float4x4_uniform_scale(float scale)
 	return mat;
 }
 
+matrix_float4x4 matrix_float4x4_scale(vector_float3 t)
+{
+	vector_float4 X = { t.x, 0, 0, 0 };
+	vector_float4 Y = { 0, t.y, 0, 0 };
+	vector_float4 Z = { 0, 0, t.z, 0 };
+	vector_float4 W = { 0, 0, 0, 1 };
+
+	matrix_float4x4 mat = { X, Y, Z, W };
+	return mat;
+}
+
 matrix_float4x4 matrix_float4x4_rotation(vector_float3 axis, float angle)
 {
 	float c = cos(angle);

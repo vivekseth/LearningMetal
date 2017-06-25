@@ -14,6 +14,9 @@ matrix_float4x4 matrix_float4x4_translation(vector_float3 t);
 /// Builds a scale matrix that uniformly scales all axes by the supplied factor
 matrix_float4x4 matrix_float4x4_uniform_scale(float scale);
 
+/// Builds a scale matrix that scales all axes by the supplied factors
+matrix_float4x4 matrix_float4x4_scale(vector_float3 t);
+
 /// Builds a rotation matrix that rotates about the supplied axis by an
 /// angle (given in radians). The axis should be normalized.
 matrix_float4x4 matrix_float4x4_rotation(vector_float3 axis, float angle);

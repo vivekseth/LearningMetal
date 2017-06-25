@@ -38,7 +38,7 @@ typedef struct {
 //	float strength;
 //} MBEFragmentDirectionalLight;
 
-#define MBE_MAX_POINT_LIGHTS 20
+#define MBE_MAX_POINT_LIGHTS 100
 
 typedef struct {
 	vector_float4 position;

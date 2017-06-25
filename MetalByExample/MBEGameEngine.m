@@ -66,16 +66,20 @@
 {
 	_camera = [[MBECamera alloc] init];
 	_objects = [NSMutableArray array];
+	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 	_activeActions = [NSMutableSet set];
-	[self createScene3];
+	[self createSingleCube];
+	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+	sphere.scale = 5;
+	sphere.y = 6;
+	[self.objects addObject:sphere];
+	[self createRandomColoredLightGrid];
 }
 
 - (void)createScene
 {
 	self.camera.position = (vector_float3){5, 5, 5};
-
-	_objects = [NSMutableArray array];
 
 	int N = 24;
 	int low = -1*N/2;
@@ -89,35 +93,13 @@
 			obj.z = j*2;
 			obj.scale = 1.0;
 			[self.objects addObject:obj];
-
-//			MBECube *obj = [[MBECube alloc] initWithDevice:self.device];
-//			obj.x = i*2;
-//			obj.y = 0.1 * i * j;
-//			obj.z = j*2;
-//			obj.scale = 2.0;
-//			[self.objects addObject:obj];
-
 		}
-	}
-
-	float radius = 10;
-	int numLights = 8;
-	for (int i=0; i<numLights; i++) {
-
-		float angle = 2 * M_PI * ((float)i/(float)numLights);
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
 	}
 }
 
 - (void)createScene2
 {
 	self.camera.position = (vector_float3){5, 5, 5};
-
-	_objects = [NSMutableArray array];
 
 	int N = 50;
 	int low = -1*N/2;
@@ -138,32 +120,12 @@
 	}
 
 	[self.objects addObject:sphereInstanceArray];
-
-	float radius = 10;
-	int numLights = 8;
-	for (int i=0; i<numLights; i++) {
-		float percentage = ((float)i/(float)numLights);
-		float angle = 2 * M_PI * percentage;
-
-		NSColor *c = [NSColor colorWithHue:percentage saturation:1.0 brightness:1.0 alpha:1.0];
-		CGFloat r, g, b;
-		[c getRed:&r green:&g blue:&b alpha:NULL];
-
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){r, g, b, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
-	}
-
 }
 
 - (void)createScene3
 {
 	self.camera.position = (vector_float3){0, 5, 5};
 	self.camera.front = (vector_float3){0, 0, 1};
-
-	_objects = [NSMutableArray array];
 
 	int N = 150;
 	int low = -1*N/2;
@@ -184,9 +146,46 @@
 	}
 
 	[self.objects addObject:objInstanceArray];
+}
 
+- (void)createSingleSphere
+{
+	self.camera.position = (vector_float3){0, 0, -30};
+
+	_objects = [NSMutableArray array];
+	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+	sphere.scale = 10;
+	[self.objects addObject:sphere];
+}
+
+- (void)createSingleCube
+{
+	self.camera.position = (vector_float3){0, 0, -30};
+
+	MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
+	cube.scale = 10;
+	cube.z = 10;
+	[self.objects addObject:cube];
+}
+
+- (void)createWhiteLightRing
+{
 	float radius = 10;
-	int numLights = 10;
+	int numLights = 5;
+	for (int i=0; i<numLights; i++) {
+		float angle = 2 * M_PI * ((float)i/(float)numLights);
+		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+		light.x = radius*cos(angle);
+		light.y = 15;
+		light.z = radius*sin(angle);
+		[self.lightSources addObject:light];
+	}
+}
+
+- (void)createColoredLightRing
+{
+	float radius = 15;
+	int numLights = 20;
 	for (int i=0; i<numLights; i++) {
 		float percentage = ((float)i/(float)numLights);
 		float angle = 2 * M_PI * percentage;
@@ -201,55 +200,28 @@
 		light.z = radius*sin(angle);
 		[self.lightSources addObject:light];
 	}
-
 }
 
-
-
-
-
-- (void)createSingleSphere
+- (void)createRandomColoredLightGrid
 {
-	self.camera.position = (vector_float3){0, 0, -30};
-
-	_objects = [NSMutableArray array];
-	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
-	sphere.scale = 10;
-	[self.objects addObject:sphere];
-
-	float radius = 10;
-	int numLights = 5;
-	for (int i=0; i<numLights; i++) {
-		float angle = 2 * M_PI * ((float)i/(float)numLights);
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
+	int N = 4;
+	int low = -1*N/2;
+	int high = N/2+1;
+	for (int i=low; i<high; i++) {
+		for (int j=low; j<high; j++) {
+			CGFloat r, g, b;
+			r = 1;
+			g = 1;
+			b = 1;
+			MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){r, g, b, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+			light.x = i * 20;
+			light.y = 15;
+			light.z = j * 20;
+			[self.lightSources addObject:light];
+		}
 	}
 }
 
-- (void)createSingleCube
-{
-	self.camera.position = (vector_float3){0, 0, -30};
-	_objects = [NSMutableArray array];
-
-	MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
-	cube.scale = 10;
-	cube.z = 10;
-	[self.objects addObject:cube];
-
-	float radius = 10;
-	int numLights = 5;
-	for (int i=0; i<numLights; i++) {
-		float angle = 2 * M_PI * ((float)i/(float)numLights);
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
-	}
-}
 
 - (void)mutliPointLightDemo
 {

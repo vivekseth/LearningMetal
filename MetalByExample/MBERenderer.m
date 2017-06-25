@@ -175,6 +175,7 @@
 		  worldToView:(matrix_float4x4)worldToView
 			  MTKView:(MTKView *)view
 {
+	double startTimeCPU = CACurrentMediaTime();
 
 	// Update state
 	[self updateVertexSceneUniformsBufferWithWorldToView:worldToView viewToProjection:self.viewToProjectionMatrix];
@@ -220,8 +221,15 @@
 	// End Rendering and send draw command(s)
 	[renderCommandEncoder endEncoding];
 	[commandBuffer presentDrawable:drawable];
+
+	double endTimeCPU = CACurrentMediaTime();
+
+	double startTimeGPU = CACurrentMediaTime();
+
 	[commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
 		dispatch_semaphore_signal(self.displaySemaphore);
+		double endTimeGPU = CACurrentMediaTime();
+		printf("FRAME -> CPU: %lfms, GPU: %lfms\n", (endTimeCPU - startTimeCPU) * 1000, (endTimeGPU - startTimeGPU) * 1000);
 	}];
 	[commandBuffer commit];
 }
