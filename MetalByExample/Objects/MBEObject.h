@@ -21,6 +21,8 @@ static const MTLIndexType MBEIndexType = MTLIndexTypeUInt16;
 
 @property (nonatomic) id<MTLDevice> device;
 
+@property (nonatomic) float scale;
+
 @property (nonatomic) float x;
 @property (nonatomic) float y;
 @property (nonatomic) float z;

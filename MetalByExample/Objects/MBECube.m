@@ -26,13 +26,14 @@
 
 @synthesize device;
 
-@synthesize x, y, z;
+@synthesize x, y, z, scale;
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
 	self = [super init];
 
 	self.device = device;
+	self.scale = 1.0;
 
 	[self makePipeline];
 	[self makeBuffers];
@@ -131,12 +132,11 @@
 	[renderCommandEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:36];
 }
 
-static float rotationX = 0;
-static float rotationY = 0;
-
 - (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView {
 
-
+#if 0
+	static float rotationX = 0;
+	static float rotationY = 0;
 	if (duration < 100) {
 	rotationX += duration * (M_PI / 2.0);
 	rotationY += duration * (M_PI / 3.0);
@@ -146,10 +146,13 @@ static float rotationY = 0;
 	const matrix_float4x4 xRot = matrix_float4x4_rotation(xAxis, rotationX);
 	const matrix_float4x4 yRot = matrix_float4x4_rotation(yAxis, rotationY);
 	const matrix_float4x4 rotMatrix = matrix_multiply(xRot, yRot);
+#else
+	const matrix_float4x4 rotMatrix = matrix_float4x4_uniform_scale(1.0);
+#endif
 
 	vector_float3 position = {self.x, self.y, self.z};
 	const matrix_float4x4 positionMatrix = matrix_float4x4_translation(position);
-	const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(3.0);
+	const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(self.scale);
 	const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, matrix_multiply(scaleMatrix, rotMatrix));
 
 	MBEVertexObjectUniforms uniforms;

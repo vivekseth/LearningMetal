@@ -113,6 +113,7 @@
 
 	_objects = [NSMutableArray array];
 	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
+	sphere.scale = 10;
 	[self.objects addObject:sphere];
 
 	float radius = 10;
@@ -122,7 +123,7 @@
 		float angle = 2 * M_PI * ((float)i/(float)numLights);
 		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
 		light.x = radius*cos(angle);
-		light.y = 5;
+		light.y = 15;
 		light.z = radius*sin(angle);
 		[self.lightSources addObject:light];
 	}
@@ -220,7 +221,6 @@ TODO
 	double duration = currentTime - self.time;
 	self.time = currentTime;
 
-	NSLog(@"actions: %@", self.activeActions);
 	for (id action in self.activeActions) {
 		[self applyAction:action duration:duration];
 	}
@@ -241,8 +241,6 @@ TODO
 	viewPosition.xyz = self.camera.position;
 	viewPosition.w = 1.0;
 	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:viewPosition worldToView:worldToViewMatrix MTKView:view];
-
-	NSLog(@"%f, %f, %f", self.camera.position.x, self.camera.position.y, self.camera.position.z);
 }
 
 #pragma mark - Input Handlers
