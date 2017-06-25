@@ -10,7 +10,7 @@
 #import "MBEShaderStructs.h"
 #import <simd/simd.h>
 
-@protocol MBEPointLightSource <MBEObject>
+@protocol MBEPointLightSource <MBEObject, MBERenderable>
 
 @property (nonatomic) vector_float4 color;
 @property (nonatomic) float strength;

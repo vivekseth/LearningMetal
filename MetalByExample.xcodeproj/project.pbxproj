@@ -11,6 +11,8 @@
 		58029D5E1EF5B5B3005D5147 /* MBECubePointLight.m in Sources */ = {isa = PBXBuildFile; fileRef = 58029D5D1EF5B5B3005D5147 /* MBECubePointLight.m */; };
 		5803097F1F0013BE00590B66 /* MBESphereInstanceArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 5803097E1F0013BE00590B66 /* MBESphereInstanceArray.m */; };
 		580309821F001B5500590B66 /* MBESphereUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 580309811F001B5500590B66 /* MBESphereUtility.m */; };
+		580309881F002B1400590B66 /* MBECubeInstanceArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 580309871F002B1400590B66 /* MBECubeInstanceArray.m */; };
+		5803098B1F002C8400590B66 /* _MBEObjectInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 5803098A1F002C8400590B66 /* _MBEObjectInstance.m */; };
 		582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AB1EEBAE2800C2F815 /* MBECube.m */; };
 		582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AF1EEBAF4400C2F815 /* MBERenderer.m */; };
 		583993DF1EE9220C009142CF /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 583993DE1EE9220C009142CF /* Shaders.metal */; };
@@ -40,6 +42,10 @@
 		5803097E1F0013BE00590B66 /* MBESphereInstanceArray.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESphereInstanceArray.m; sourceTree = "<group>"; };
 		580309801F001B5500590B66 /* MBESphereUtility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBESphereUtility.h; sourceTree = "<group>"; };
 		580309811F001B5500590B66 /* MBESphereUtility.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBESphereUtility.m; sourceTree = "<group>"; };
+		580309861F002B1400590B66 /* MBECubeInstanceArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECubeInstanceArray.h; sourceTree = "<group>"; };
+		580309871F002B1400590B66 /* MBECubeInstanceArray.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECubeInstanceArray.m; sourceTree = "<group>"; };
+		580309891F002C8400590B66 /* _MBEObjectInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = _MBEObjectInstance.h; sourceTree = "<group>"; };
+		5803098A1F002C8400590B66 /* _MBEObjectInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = _MBEObjectInstance.m; sourceTree = "<group>"; };
 		582C55AA1EEBAE2800C2F815 /* MBECube.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECube.h; sourceTree = "<group>"; };
 		582C55AB1EEBAE2800C2F815 /* MBECube.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECube.m; sourceTree = "<group>"; };
 		582C55AE1EEBAF4400C2F815 /* MBERenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBERenderer.h; sourceTree = "<group>"; };
@@ -163,6 +169,10 @@
 				58029D5D1EF5B5B3005D5147 /* MBECubePointLight.m */,
 				5803097D1F0013BE00590B66 /* MBESphereInstanceArray.h */,
 				5803097E1F0013BE00590B66 /* MBESphereInstanceArray.m */,
+				580309861F002B1400590B66 /* MBECubeInstanceArray.h */,
+				580309871F002B1400590B66 /* MBECubeInstanceArray.m */,
+				580309891F002C8400590B66 /* _MBEObjectInstance.h */,
+				5803098A1F002C8400590B66 /* _MBEObjectInstance.m */,
 			);
 			path = Objects;
 			sourceTree = "<group>";
@@ -271,12 +281,14 @@
 				58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */,
 				5870574F1EFF0FFC00036714 /* MBECamera.m in Sources */,
 				58029D5E1EF5B5B3005D5147 /* MBECubePointLight.m in Sources */,
+				5803098B1F002C8400590B66 /* _MBEObjectInstance.m in Sources */,
 				585BB6531EE918F500AEBDA1 /* GameViewController.m in Sources */,
 				584F3FA61EF5036800CC3BB4 /* MultipleLights.metal in Sources */,
 				58838B021EF258E600858BB0 /* MBESphere.m in Sources */,
 				582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */,
 				585BB64D1EE918F500AEBDA1 /* AppDelegate.m in Sources */,
 				58ECB6D81EEDA5A8006B88AB /* MBEKeyboardUtilities.m in Sources */,
+				580309881F002B1400590B66 /* MBECubeInstanceArray.m in Sources */,
 				58838B011EF2578400858BB0 /* MBESafeArray.m in Sources */,
 				58029D591EF5AEF8005D5147 /* Simple.metal in Sources */,
 				580309821F001B5500590B66 /* MBESphereUtility.m in Sources */,

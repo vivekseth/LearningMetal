@@ -10,7 +10,7 @@
 #import "MBEObject.h"
 #import "MBEPointLightSource.h"
 
-@interface MBECubePointLight : NSObject <MBEPointLightSource>
+@interface MBECubePointLight : NSObject <MBEPointLightSource, MBERenderable>
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device color:(vector_float4)color strength:(float)strength K:(float)K L:(float)L Q:(float)Q;
 

@@ -20,7 +20,7 @@
 
 - (void)blockUntilNextRender;
 
-- (void)renderObjects:(NSArray <id<MBEObject>> *)objects
+- (void)renderObjects:(NSArray <id<MBERenderable>> *)objects
 		 lightSources:(NSArray <id<MBEPointLightSource>> *)lightSources
 		 viewPosition:(vector_float4)viewPosition
 		  worldToView:(matrix_float4x4)worldToView

@@ -19,8 +19,6 @@ static const MTLIndexType MBEIndexType = MTLIndexTypeUInt16;
 
 @required;
 
-@property (nonatomic) id<MTLDevice> device;
-
 @property (nonatomic) float scale;
 
 @property (nonatomic) float x;
@@ -28,6 +26,15 @@ static const MTLIndexType MBEIndexType = MTLIndexTypeUInt16;
 @property (nonatomic) float z;
 
 - (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView;
+
+@end
+
+
+@protocol MBERenderable
+
+@required;
+
+@property (nonatomic) id<MTLDevice> device;
 
 - (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder;
 

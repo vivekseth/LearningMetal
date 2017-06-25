@@ -11,7 +11,7 @@
 #import <MetalKit/MetalKit.h>
 #import "MBEObject.h"
 
-@interface MBECube : NSObject<MBEObject>
+@interface MBECube : NSObject<MBEObject, MBERenderable>
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 

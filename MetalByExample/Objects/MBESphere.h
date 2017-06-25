@@ -12,7 +12,7 @@
 #import "MBEObject.h"
 #import "MBEShaderStructs.h"
 
-@interface MBESphere : NSObject<MBEObject>
+@interface MBESphere : NSObject<MBEObject, MBERenderable>
 
 - (instancetype) initWithDevice:(id<MTLDevice>)device parallels:(NSUInteger)parallels meridians:(NSUInteger)meridians;
 

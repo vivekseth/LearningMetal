@@ -28,7 +28,7 @@
 @property (assign) double time;
 
 @property (nonatomic, strong) NSMutableArray <id<MBEPointLightSource>> *lightSources;
-@property (nonatomic, strong) NSMutableArray <id<MBEObject>> *objects;
+@property (nonatomic, strong) NSMutableArray <id<MBEObject, MBERenderable>> *objects;
 
 //@property (nonatomic, strong) NSMutableSet *pressedKeys;
 //@property (nonatomic, strong) NSSet *modifierFlags;
@@ -67,7 +67,7 @@
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 	_activeActions = [NSMutableSet set];
-	[self createScene2];
+	[self createScene3];
 }
 
 - (void)createScene
@@ -140,6 +140,52 @@
 
 	float radius = 10;
 	int numLights = 8;
+	for (int i=0; i<numLights; i++) {
+		float percentage = ((float)i/(float)numLights);
+		float angle = 2 * M_PI * percentage;
+
+		NSColor *c = [NSColor colorWithHue:percentage saturation:1.0 brightness:1.0 alpha:1.0];
+		CGFloat r, g, b;
+		[c getRed:&r green:&g blue:&b alpha:NULL];
+
+		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){r, g, b, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
+		light.x = radius*cos(angle);
+		light.y = 15;
+		light.z = radius*sin(angle);
+		[self.lightSources addObject:light];
+	}
+
+}
+
+- (void)createScene3
+{
+	self.camera.position = (vector_float3){0, 5, 5};
+	self.camera.front = (vector_float3){0, 0, 1};
+
+	_objects = [NSMutableArray array];
+
+	int N = 50;
+	int low = -1*N/2;
+	int high = N/2+1;
+
+	int instanceCount = (high - low) * (high - low);
+	MBESphereInstanceArray *sphereInstanceArray = [[MBESphereInstanceArray alloc] initWithDevice:self.device instanceCount:instanceCount parallels:20 meridians:20];
+
+	int index = 0;
+	for (int i=low; i<high; i++) {
+		for (int j=low; j<high; j++) {
+			id<MBEObject> obj = sphereInstanceArray[index++];
+			obj.x = i*2;
+			obj.y = 0;
+			obj.z = j*2;
+			obj.scale = 1.0;
+		}
+	}
+
+	[self.objects addObject:sphereInstanceArray];
+
+	float radius = 10;
+	int numLights = 10;
 	for (int i=0; i<numLights; i++) {
 		float percentage = ((float)i/(float)numLights);
 		float angle = 2 * M_PI * percentage;

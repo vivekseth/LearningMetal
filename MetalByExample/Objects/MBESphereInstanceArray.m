@@ -10,47 +10,8 @@
 #import "MBESphere.h"
 #import "MBEObject.h"
 #import "MBESphereUtility.h"
+#import "_MBEObjectInstance.h"
 
-@interface _MBEObjectInstance : NSObject <MBEObject>
-@property (nonatomic) void *vertexObjectUniformsBufferPointer;
-- (instancetype)initWithVertexObjectUniformsBufferPointer:(void *)vertexObjectUniformsBufferPointer;
-@end
-
-@implementation _MBEObjectInstance
-@synthesize device, x, y, z, scale;
-- (instancetype)initWithVertexObjectUniformsBufferPointer:(void *)vertexObjectUniformsBufferPointer
-{
-	self = [super init];
-
-	_vertexObjectUniformsBufferPointer = vertexObjectUniformsBufferPointer;
-
-	return self;
-}
-- (void)encodeRenderCommand:(id<MTLRenderCommandEncoder>)renderCommandEncoder
-{
-	// Not Needed for instance. 
-}
-- (void)updateWithTime:(CGFloat)time duration:(CGFloat)duration worldToView:(matrix_float4x4)worldToView
-{
-	const matrix_float4x4 positionMatrix = matrix_float4x4_translation((vector_float3){self.x, self.y, self.z});
-	const matrix_float4x4 scaleMatrix = matrix_float4x4_uniform_scale(self.scale);
-	const matrix_float4x4 modelToWorld = matrix_multiply(positionMatrix, scaleMatrix);
-
-	MBEVertexObjectUniforms uniforms;
-	uniforms.modelToWorld = modelToWorld;
-
-	matrix_float4x4 modelToView = modelToWorld;
-
-	matrix_float3x3 initialNormalMatrix = {
-		.columns[0] = modelToView.columns[0].xyz,
-		.columns[1] = modelToView.columns[1].xyz,
-		.columns[2] = modelToView.columns[2].xyz,
-	};
-	uniforms.normalMatrix = simd_transpose(simd_inverse(initialNormalMatrix));
-
-	memcpy(self.vertexObjectUniformsBufferPointer, &uniforms, sizeof(uniforms));
-}
-@end
 
 @interface MBESphereInstanceArray ()
 

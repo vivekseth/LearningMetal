@@ -1,5 +1,5 @@
 //
-//  MBESphereInstanceArray.h
+//  MBECubeInstanceArray.h
 //  MetalByExample
 //
 //  Created by Vivek Seth on 6/25/17.
@@ -13,11 +13,11 @@
 #import "MBEObject.h"
 #import "MBEShaderStructs.h"
 
-@interface MBESphereInstanceArray : NSObject<MBEObject, MBERenderable>
+@interface MBECubeInstanceArray : NSObject <MBEObject, MBERenderable>
 
 @property (nonatomic) NSUInteger instanceCount;
 
-- (instancetype)initWithDevice:(id<MTLDevice>)device instanceCount:(NSUInteger)instanceCount parallels:(NSUInteger)parallels meridians:(NSUInteger)meridians;
+- (instancetype)initWithDevice:(id<MTLDevice>)device instanceCount:(NSUInteger)instanceCount;
 
 - (id<MBEObject>)objectAtIndexedSubscript:(NSUInteger)idx;
 
