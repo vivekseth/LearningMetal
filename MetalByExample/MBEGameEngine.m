@@ -301,28 +301,6 @@ TODO
 {
 }
 
-
-
-- (void)mouseMoved:(NSEvent *)event
-{
-//	CGPoint mouseLocationWindowSpace = [event locationInWindow];
-//	CGRect windowFrameScreenSpace = event.window.frame;
-//	CGRect mouseRectScreenSpace = [event.window convertRectToScreen:CGRectMake(mouseLocationWindowSpace.x, mouseLocationWindowSpace.y, 0, 0)];
-//	if (CGRectContainsRect(windowFrameScreenSpace, mouseRectScreenSpace)) {
-//		CGFloat xPercentage = mouseLocationWindowSpace.x / CGRectGetWidth(event.window.frame);
-//		CGFloat yPercentage = mouseLocationWindowSpace.y / CGRectGetHeight(event.window.frame);
-//
-//		float maxYaw = (M_PI_2 - 0.05) + self.camera.yaw;
-//		float minYaw = (-1 * maxYaw) + self.camera.yaw;
-//		self.camera.yaw = linear_interpolate(minYaw, maxYaw, xPercentage);
-//
-//
-//		float maxPitch = M_PI_2 - 0.05;
-//		float minPitch = -1 * maxPitch;
-//		self.camera.pitch = linear_interpolate(minPitch, maxPitch, yPercentage);
-//	}
-}
-
 - (void)keyUp:(NSEvent*)event
 {
 	id action = [self actionForEvent:event];

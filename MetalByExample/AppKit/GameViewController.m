@@ -36,7 +36,6 @@
 
 - (void)viewDidAppear
 {
-	[[[NSApplication sharedApplication] mainWindow] setAcceptsMouseMovedEvents:YES];
 	[self.view.window makeFirstResponder:self.engine];
 }
 
