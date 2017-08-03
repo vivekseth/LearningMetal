@@ -13,8 +13,6 @@
 
 @interface MBECube ()
 
-@property (readonly) id <MTLRenderPipelineState> renderPipelineState;
-
 @property id<MTLBuffer> vertexBuffer;
 
 @property id<MTLBuffer> vertexObjectUniformsBuffer;
@@ -35,7 +33,6 @@
 	self.device = device;
 	self.scale = 1.0;
 
-	[self makePipeline];
 	[self makeBuffers];
 
 	return self;
@@ -103,23 +100,6 @@
 
 	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
-}
-
-- (void)makePipeline
-{
-	id<MTLLibrary> library = [self.device newDefaultLibrary];
-
-	MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
-	pipelineDescriptor.vertexFunction = [library newFunctionWithName:@"vertex_project"];
-	pipelineDescriptor.fragmentFunction = [library newFunctionWithName:@"fragment_flatcolor"];
-	pipelineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-	pipelineDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
-
-	NSError *error = nil;
-	_renderPipelineState = [self.device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
-	if (!self.renderPipelineState) {
-		NSLog(@"Error occurred when creating render pipeline state: %@", error);
-	}
 }
 
 #pragma mark <MBEObject>

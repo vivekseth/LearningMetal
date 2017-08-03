@@ -13,6 +13,7 @@
 		580309821F001B5500590B66 /* MBESphereUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 580309811F001B5500590B66 /* MBESphereUtility.m */; };
 		580309881F002B1400590B66 /* MBECubeInstanceArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 580309871F002B1400590B66 /* MBECubeInstanceArray.m */; };
 		5803098B1F002C8400590B66 /* _MBEObjectInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 5803098A1F002C8400590B66 /* _MBEObjectInstance.m */; };
+		5803098E1F0CA5D400590B66 /* MBEPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 5803098D1F0CA5D400590B66 /* MBEPlane.m */; };
 		582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AB1EEBAE2800C2F815 /* MBECube.m */; };
 		582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AF1EEBAF4400C2F815 /* MBERenderer.m */; };
 		583993DF1EE9220C009142CF /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 583993DE1EE9220C009142CF /* Shaders.metal */; };
@@ -46,6 +47,8 @@
 		580309871F002B1400590B66 /* MBECubeInstanceArray.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECubeInstanceArray.m; sourceTree = "<group>"; };
 		580309891F002C8400590B66 /* _MBEObjectInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = _MBEObjectInstance.h; sourceTree = "<group>"; };
 		5803098A1F002C8400590B66 /* _MBEObjectInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = _MBEObjectInstance.m; sourceTree = "<group>"; };
+		5803098C1F0CA5D400590B66 /* MBEPlane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBEPlane.h; sourceTree = "<group>"; };
+		5803098D1F0CA5D400590B66 /* MBEPlane.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBEPlane.m; sourceTree = "<group>"; };
 		582C55AA1EEBAE2800C2F815 /* MBECube.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBECube.h; sourceTree = "<group>"; };
 		582C55AB1EEBAE2800C2F815 /* MBECube.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBECube.m; sourceTree = "<group>"; };
 		582C55AE1EEBAF4400C2F815 /* MBERenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBERenderer.h; sourceTree = "<group>"; };
@@ -161,6 +164,8 @@
 			children = (
 				58ECB6D51EECADAC006B88AB /* MBEObject.h */,
 				58830D951EF4FD5200BF11CF /* MBEPointLightSource.h */,
+				5803098C1F0CA5D400590B66 /* MBEPlane.h */,
+				5803098D1F0CA5D400590B66 /* MBEPlane.m */,
 				582C55AA1EEBAE2800C2F815 /* MBECube.h */,
 				582C55AB1EEBAE2800C2F815 /* MBECube.m */,
 				58838AFE1EF256A800858BB0 /* MBESphere.h */,
@@ -279,6 +284,7 @@
 				583993DF1EE9220C009142CF /* Shaders.metal in Sources */,
 				585BB6501EE918F500AEBDA1 /* main.m in Sources */,
 				58C486361EEA712400DC906C /* MBEMathUtilities.m in Sources */,
+				5803098E1F0CA5D400590B66 /* MBEPlane.m in Sources */,
 				5870574F1EFF0FFC00036714 /* MBECamera.m in Sources */,
 				58029D5E1EF5B5B3005D5147 /* MBECubePointLight.m in Sources */,
 				5803098B1F002C8400590B66 /* _MBEObjectInstance.m in Sources */,

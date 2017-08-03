@@ -176,6 +176,7 @@
 			  MTKView:(MTKView *)view
 {
 	double startTimeCPU = CACurrentMediaTime();
+	double endTimeCPU = 0;
 
 	// Update state
 	[self updateVertexSceneUniformsBufferWithWorldToView:worldToView viewToProjection:self.viewToProjectionMatrix];
@@ -188,7 +189,7 @@
 	MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
 
 	passDescriptor.colorAttachments[0].texture = [drawable texture];
-	passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.35, 0.35, 0.35, 1);
+	passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1);
 	passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
 	passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
 
@@ -220,18 +221,19 @@
 
 	// End Rendering and send draw command(s)
 	[renderCommandEncoder endEncoding];
-	[commandBuffer presentDrawable:drawable];
-
-	double endTimeCPU = CACurrentMediaTime();
 
 	double startTimeGPU = CACurrentMediaTime();
-
 	[commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
 		dispatch_semaphore_signal(self.displaySemaphore);
 		double endTimeGPU = CACurrentMediaTime();
 		printf("FRAME -> CPU: %lfms, GPU: %lfms\n", (endTimeCPU - startTimeCPU) * 1000, (endTimeGPU - startTimeGPU) * 1000);
 	}];
+
+	// schedule a present once the framebuffer is complete
+	[commandBuffer presentDrawable:drawable];
 	[commandBuffer commit];
+	
+	endTimeCPU = CACurrentMediaTime();
 }
 
 @end

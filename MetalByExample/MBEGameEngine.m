@@ -17,6 +17,7 @@
 #import "MBECamera.h"
 #import "MBESphereInstanceArray.h"
 #import "MBECubeInstanceArray.h"
+#import "MBEPlane.h"
 
 @interface MBEGameEngine ()
 
@@ -69,13 +70,139 @@
 	_objects = [NSMutableArray array];
 	_lightSources = [NSMutableArray array];
 	_activeActions = [NSMutableSet set];
-	[self createSingleCube];
-	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
-	sphere.scale = 5;
-	sphere.y = 6;
-	[self.objects addObject:sphere];
-	[self createRandomColoredLightGrid];
+	[self createGameLevel];
+	[self createWhiteLightRing];
 }
+
+- (void)createSceneWithPlane
+{
+	self.camera.position = (vector_float3){0, 5, 5};
+	self.camera.front = (vector_float3){0, 0, 1};
+
+	MBEPlane *plane = [[MBEPlane alloc] initWithDevice:self.device];
+	plane.width = 20;
+	plane.height = 20;
+	plane.rotationMatrix = matrix_float4x4_rotation((vector_float3){0, 0, 1}, -1 * M_PI / 2.0);
+	[self.objects addObject:plane];
+}
+
+- (void)createGameLevel
+{
+	self.camera.position = (vector_float3){0, 5, 5};
+	self.camera.front = (vector_float3){0, 0, 1};
+
+	NSUInteger level[8][8] = {
+		{0, 0, 0, 0, 0, 0, 1, 1},
+		{0, 1, 1, 1, 0, 0, 1, 1},
+		{0, 1, 0, 1, 0, 0, 1, 1},
+		{0, 1, 1, 1, 0, 0, 1, 1},
+		{0, 0, 1, 0, 0, 0, 0, 1},
+		{0, 0, 1, 1, 0, 0, 0, 1},
+		{0, 1, 0, 1, 1, 1, 1, 1},
+		{0, 1, 1, 1, 1, 0, 0, 0},
+	};
+	NSUInteger *levelPointer = (NSUInteger *)level;
+
+	BOOL (^checkLevel)(int i, int j) = ^BOOL(int i, int j) {
+		if (i < 0 || j < 0) {
+			return NO;
+		}
+		else if (i >= 8 || j >= 8) {
+			return NO;
+		}
+		else {
+			return levelPointer[i * 8 + j];
+		}
+	};
+
+	for (int i=0; i<8; i++) {
+		for (int j=0; j<8; j++) {
+			if (checkLevel(i, j)) {
+				[self addGameTileWithX:i y:0 z:j];
+				if (!checkLevel(i + 1, j)) {
+					[self addWallWithX:i z:j option:0];
+				}
+				if (!checkLevel(i - 1, j)) {
+					[self addWallWithX:i z:j option:1];
+				}
+				if (!checkLevel(i, j + 1)) {
+					[self addWallWithX:i z:j option:2];
+				}
+				if (!checkLevel(i, j - 1)) {
+					[self addWallWithX:i z:j option:3];
+				}
+			}
+		}
+	}
+}
+
+- (void)addWallWithX:(NSInteger)x z:(NSUInteger)z option:(NSUInteger)option
+{
+	if (option == 0) {
+		MBEPlane *plane = [[MBEPlane alloc] initWithDevice:self.device];
+		plane.x = (x + 0.5) * 20;
+		plane.y = 10;
+		plane.z = z * 20;
+
+		plane.width = 20;
+		plane.height = 20;
+		plane.rotationMatrix = matrix_float4x4_rotation((vector_float3){0, 0, 1}, M_PI / -2.0);
+		[self.objects addObject:plane];
+	}
+
+	else if (option == 1) {
+		MBEPlane *plane = [[MBEPlane alloc] initWithDevice:self.device];
+		plane.x = (x - 0.5) * 20;
+		plane.y = 10;
+		plane.z = z * 20;
+
+		plane.width = 20;
+		plane.height = 20;
+		plane.rotationMatrix = matrix_float4x4_rotation((vector_float3){0, 0, 1}, M_PI / 2.0);
+		[self.objects addObject:plane];
+	}
+
+
+	else if (option == 2) {
+		MBEPlane *plane = [[MBEPlane alloc] initWithDevice:self.device];
+		plane.x = x * 20;
+		plane.y = 10;
+		plane.z = (z + 0.5) * 20;
+
+		plane.width = 20;
+		plane.height = 20;
+		plane.rotationMatrix = matrix_float4x4_rotation((vector_float3){1, 0, 0}, M_PI / 2.0);
+		[self.objects addObject:plane];
+	}
+
+	else if (option == 3) {
+		MBEPlane *plane = [[MBEPlane alloc] initWithDevice:self.device];
+		plane.x = x * 20;
+		plane.y = 10;
+		plane.z = (z - 0.5) * 20;
+
+		plane.width = 20;
+		plane.height = 20;
+		plane.rotationMatrix = matrix_float4x4_rotation((vector_float3){1, 0, 0}, M_PI / -2.0);
+		[self.objects addObject:plane];
+	}
+}
+
+
+- (void)addGameTileWithX:(NSInteger)x y:(NSUInteger)y z:(NSUInteger)z
+{
+	MBEPlane *plane = [[MBEPlane alloc] initWithDevice:self.device];
+
+	plane.x = x * 20;
+	plane.z = z * 20;
+
+	plane.width = 20;
+	plane.height = 20;
+	[self.objects addObject:plane];
+}
+
+
+
 
 - (void)createScene
 {
@@ -171,7 +298,7 @@
 - (void)createWhiteLightRing
 {
 	float radius = 10;
-	int numLights = 5;
+	int numLights = 1;
 	for (int i=0; i<numLights; i++) {
 		float angle = 2 * M_PI * ((float)i/(float)numLights);
 		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
@@ -312,6 +439,12 @@ TODO
 	vector_float4 viewPosition = {0};
 	viewPosition.xyz = self.camera.position;
 	viewPosition.w = 1.0;
+
+	// make one light track camera. 
+	self.lightSources[0].x = self.camera.position.x;
+	self.lightSources[0].y = self.camera.position.y;
+	self.lightSources[0].z = self.camera.position.z;
+
 	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:viewPosition worldToView:worldToViewMatrix MTKView:view];
 }
 
