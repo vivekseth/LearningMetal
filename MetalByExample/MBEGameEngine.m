@@ -17,6 +17,7 @@
 #import "MBECamera.h"
 #import "MBESphereInstanceArray.h"
 #import "MBECubeInstanceArray.h"
+#import "CSCurvedPlane.h"
 
 @interface MBEGameEngine ()
 

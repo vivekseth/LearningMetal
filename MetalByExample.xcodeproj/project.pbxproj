@@ -16,6 +16,7 @@
 		582C55AC1EEBAE2800C2F815 /* MBECube.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AB1EEBAE2800C2F815 /* MBECube.m */; };
 		582C55B01EEBAF4400C2F815 /* MBERenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 582C55AF1EEBAF4400C2F815 /* MBERenderer.m */; };
 		583993DF1EE9220C009142CF /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 583993DE1EE9220C009142CF /* Shaders.metal */; };
+		584902291F36492600021570 /* CSCurvedPlane.m in Sources */ = {isa = PBXBuildFile; fileRef = 584902271F36484E00021570 /* CSCurvedPlane.m */; };
 		584F3FA61EF5036800CC3BB4 /* MultipleLights.metal in Sources */ = {isa = PBXBuildFile; fileRef = 584F3FA51EF5036800CC3BB4 /* MultipleLights.metal */; };
 		585213081EEBB3520026F4B9 /* Storyboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 585213071EEBB3520026F4B9 /* Storyboard.storyboard */; };
 		585BB6451EE918F500AEBDA1 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 585BB6441EE918F500AEBDA1 /* Metal.framework */; };
@@ -51,6 +52,9 @@
 		582C55AE1EEBAF4400C2F815 /* MBERenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBERenderer.h; sourceTree = "<group>"; };
 		582C55AF1EEBAF4400C2F815 /* MBERenderer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MBERenderer.m; sourceTree = "<group>"; };
 		583993DE1EE9220C009142CF /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		584902271F36484E00021570 /* CSCurvedPlane.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = CSCurvedPlane.m; path = MetalByExample/CSCurvedPlane.m; sourceTree = SOURCE_ROOT; };
+		584902281F36484E00021570 /* CSCurvedPlane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CSCurvedPlane.h; path = MetalByExample/CSCurvedPlane.h; sourceTree = SOURCE_ROOT; };
+		5849022A1F364A1300021570 /* CurvedSurface.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = CurvedSurface.metal; sourceTree = "<group>"; };
 		584F3FA51EF5036800CC3BB4 /* MultipleLights.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = MultipleLights.metal; sourceTree = "<group>"; };
 		585213071EEBB3520026F4B9 /* Storyboard.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Storyboard.storyboard; sourceTree = "<group>"; };
 		585BB6411EE918F500AEBDA1 /* MetalByExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalByExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -131,6 +135,7 @@
 				583993DE1EE9220C009142CF /* Shaders.metal */,
 				58838AFB1EF2528900858BB0 /* Lighting.metal */,
 				584F3FA51EF5036800CC3BB4 /* MultipleLights.metal */,
+				5849022A1F364A1300021570 /* CurvedSurface.metal */,
 				58029D581EF5AEF8005D5147 /* Simple.metal */,
 				582C55AE1EEBAF4400C2F815 /* MBERenderer.h */,
 				582C55AF1EEBAF4400C2F815 /* MBERenderer.m */,
@@ -159,6 +164,8 @@
 		58A2DD6D1EF248F700A9592D /* Objects */ = {
 			isa = PBXGroup;
 			children = (
+				584902281F36484E00021570 /* CSCurvedPlane.h */,
+				584902271F36484E00021570 /* CSCurvedPlane.m */,
 				58ECB6D51EECADAC006B88AB /* MBEObject.h */,
 				58830D951EF4FD5200BF11CF /* MBEPointLightSource.h */,
 				582C55AA1EEBAE2800C2F815 /* MBECube.h */,
@@ -289,6 +296,7 @@
 				585BB64D1EE918F500AEBDA1 /* AppDelegate.m in Sources */,
 				58ECB6D81EEDA5A8006B88AB /* MBEKeyboardUtilities.m in Sources */,
 				580309881F002B1400590B66 /* MBECubeInstanceArray.m in Sources */,
+				584902291F36492600021570 /* CSCurvedPlane.m in Sources */,
 				58838B011EF2578400858BB0 /* MBESafeArray.m in Sources */,
 				58029D591EF5AEF8005D5147 /* Simple.metal in Sources */,
 				580309821F001B5500590B66 /* MBESphereUtility.m in Sources */,

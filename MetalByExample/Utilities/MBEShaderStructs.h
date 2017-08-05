@@ -12,6 +12,7 @@ typedef struct {
 	vector_float4 position;
 	vector_float4 color;
 	vector_float3 normal;
+	vector_float2 texCoord;
 } MBEVertexIn;
 
 typedef struct {
@@ -59,3 +60,8 @@ typedef struct {
 	MBEFragmentPointLight pointLights[MBE_MAX_POINT_LIGHTS];
 } MBEFragmentLightUniforms;
 
+/*typedef struct
+ {
+ vector_float4 position;
+ vector_float2 texCoord;
+ } CSVertexIn;*/
