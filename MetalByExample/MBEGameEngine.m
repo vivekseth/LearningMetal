@@ -89,7 +89,7 @@
 			obj.y = 0.1 * i * j;
 			obj.z = j*2;
 			obj.scale = 1.0;
-			[self.objects addObject:obj];
+			//[self.objects addObject:obj];
 
 //			MBECube *obj = [[MBECube alloc] initWithDevice:self.device];
 //			obj.x = i*2;
@@ -100,6 +100,9 @@
 
 		}
 	}
+
+	CSCurvedPlane *plane = [[CSCurvedPlane alloc] initWithDevice:self.device];
+	[self.objects addObject:plane];
 
 	float radius = 10;
 	int numLights = 8;
@@ -161,7 +164,7 @@
 
 - (void)createScene3
 {
-	self.camera.position = (vector_float3){0, 5, 5};
+	self.camera.position = (vector_float3){0, 0, 0};
 	self.camera.front = (vector_float3){0, 0, 1};
 
 	_objects = [NSMutableArray array];
@@ -184,7 +187,10 @@
 		}
 	}
 
-	[self.objects addObject:objInstanceArray];
+	//[self.objects addObject:objInstanceArray];
+
+	CSCurvedPlane *plane = [[CSCurvedPlane alloc] initWithDevice:self.device];
+	[self.objects addObject:plane];
 
 	float radius = 10;
 	int numLights = 10;

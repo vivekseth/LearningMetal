@@ -67,6 +67,8 @@ fragment float4 lighting_fragment(VertexOut vertexIn [[stage_in]],
 								  constant FragmentMaterialUniforms &materialUniforms [[buffer(0)]],
 								  constant FragmentLightUniforms &lightUniforms [[buffer(1)]])
 {
+	return float4(1, 0, 0, 0);
+
 	// ambient
 	float3 ambient = materialUniforms.ambientStrength * float3(lightUniforms.lightColor);
 

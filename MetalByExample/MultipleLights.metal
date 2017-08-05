@@ -50,8 +50,7 @@ fragment float4 multiple_lights_fragment(constant MBEFragmentLightUniforms &ligh
 										 constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(1)]],
 										 MBEVertexOut vertexIn [[stage_in]])
 {
-//	float3 norm = normalize(vertexIn.normal);
-//	return float4(norm, 1.0);
+	return float4(1, 0, 0, 0);
 
 	float4 light = float4(0);
 
