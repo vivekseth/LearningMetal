@@ -9,6 +9,7 @@
 #import "CSCurvedPlane.h"
 #import "MBEShaderStructs.h"
 #import <CoreGraphics/CoreGraphics.h>
+//#import "MBETextureLoader.h"
 
 @interface CSCurvedPlane ()
 
@@ -16,6 +17,9 @@
 
 @property id<MTLBuffer> vertexObjectUniformsBuffer;
 @property id<MTLBuffer> fragmentMaterialUniformsBuffer;
+
+@property (strong) id<MTLSamplerState> samplerState;
+@property (strong) id<MTLTexture> diffuseTexture;
 
 @end
 
@@ -30,14 +34,17 @@
 
 	self.device = device;
 
+	CGFloat radius = 5;
 	_uSegments = 30;
 	_vSegments = 10;
 
-	_uRange = (vector_float2){-M_PI_4, M_PI_4};
-	_vRange = (vector_float2){0, 2};
+	CGFloat arcLength = (M_PI_2 / (2 * M_PI)) * (radius * 2) * M_PI;
+
+	_uRange = (vector_float2){-3, 3};
+	_vRange = (vector_float2){0, arcLength};
 
 	_fx = ^CGFloat(CGFloat u, CGFloat v) {
-		return 2 * sin(u);
+		return u; // radius * sin(u);
 	};
 
 	_fy = ^CGFloat(CGFloat u, CGFloat v) {
@@ -45,7 +52,7 @@
 	};
 
 	_fz = ^CGFloat(CGFloat u, CGFloat v) {
-		return 6 - 2 * cos(u);
+		return 18 - radius * cos(u) + 0.2 * sin(0.2 * u);
 	};
 
 	CGFloat numTriangles = _uSegments * _vSegments * 2;
@@ -77,6 +84,29 @@
 	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
 	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
 
+
+	// create sampler state
+	MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
+	samplerDesc.sAddressMode = MTLSamplerAddressModeClampToEdge;
+	samplerDesc.tAddressMode = MTLSamplerAddressModeClampToEdge;
+	samplerDesc.minFilter = MTLSamplerMinMagFilterNearest;
+	samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
+	samplerDesc.mipFilter = MTLSamplerMipFilterLinear;
+	_samplerState = [self.device newSamplerStateWithDescriptor:samplerDesc];
+
+	NSImage *checkerboardImage = [NSImage imageNamed:@"checkerboard"];
+	MTKTextureLoader *textureLoader2 = [[MTKTextureLoader alloc] initWithDevice:self.device];
+	CGImageRef cgCheckerboardImage = [checkerboardImage CGImageForProposedRect:nil context:nil hints:nil];
+	NSError *error = nil;
+	NSDictionary *options = @{
+							  MTKTextureLoaderOptionGenerateMipmaps: @(YES),
+							  MTKTextureLoaderOptionSRGB: @(NO)
+							  };
+	_diffuseTexture = [textureLoader2 newTextureWithCGImage:cgCheckerboardImage options:options error:&error];
+	if (!_diffuseTexture) {
+		NSLog(@"%@", error);
+	}
+	
 	return self;
 }
 
@@ -135,7 +165,7 @@
 {
 	CGFloat tu = (u - _uRange.x) / (_uRange.y - _uRange.x);
 	CGFloat tv = (v - _vRange.x) / (_vRange.y - _vRange.x);
-	return (vector_float2){tu, tv};
+	return (vector_float2){1 - tu, 1 - tv};
 }
 
 #pragma mark <MBEObject>
@@ -145,6 +175,10 @@
 	[renderCommandEncoder setVertexBuffer:self.vertexObjectUniformsBuffer offset:0 atIndex:1];
 	[renderCommandEncoder setVertexBuffer:self.vertexBuffer offset:0 atIndex:2];
 	[renderCommandEncoder setFragmentBuffer:self.fragmentMaterialUniformsBuffer offset:0 atIndex:1];
+
+	[renderCommandEncoder setFragmentTexture:self.diffuseTexture atIndex:0];
+	[renderCommandEncoder setFragmentSamplerState:self.samplerState atIndex:0];
+
 	[renderCommandEncoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:self.numPoints];
 }
 

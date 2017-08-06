@@ -9,6 +9,7 @@
 #import "MBERenderer.h"
 #import "MBEMathUtilities.h"
 #import "MBEShaderStructs.h"
+#import <MetalKit/MetalKit.h>
 
 @interface MBERenderer ()
 
@@ -187,7 +188,7 @@
 	MTLRenderPassDescriptor *passDescriptor = [MTLRenderPassDescriptor renderPassDescriptor];
 
 	passDescriptor.colorAttachments[0].texture = [drawable texture];
-	passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.35, 0.35, 0.35, 1);
+	passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1);
 	passDescriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
 	passDescriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
 
@@ -221,9 +222,38 @@
 	[renderCommandEncoder endEncoding];
 	[commandBuffer presentDrawable:drawable];
 	[commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
+		if (self.screenshotRequested) {
+			// capture image.
+			id<CAMetalDrawable> drawable = [view currentDrawable];
+			id<MTLTexture> texture = [drawable texture];
+			NSImage *image = [self.class imageFromTexture:texture];
+
+			// send image to delegate.
+			[self.delegate renderer:self didCaptureScreenshot:image];
+			self.screenshotRequested = NO;
+		}
 		dispatch_semaphore_signal(self.displaySemaphore);
 	}];
 	[commandBuffer commit];
+}
+
++ (NSImage *)imageFromTexture:(id<MTLTexture>)texture
+{
+	size_t width = texture.width;
+	size_t height   = texture.height;
+	size_t rowBytes = texture.width * 4;
+	void *buffer = malloc(width * height * 4);
+	[texture getBytes:buffer bytesPerRow:rowBytes fromRegion:MTLRegionMake2D(0, 0, width, height) mipmapLevel:0];
+
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	CGBitmapInfo bitmapInfo = kCGImageAlphaNoneSkipFirst | kCGImageByteOrder32Little; // kCGImageAlphaNoneSkipLast | kCGImageByteOrder32Little;
+	size_t bufferSize = width * height * 4;
+	CGDataProviderRef dataProvider = CGDataProviderCreateWithData(nil, buffer, bufferSize, nil);
+	CGImageRef cgImage = CGImageCreate(width, height, 8, 32, rowBytes, colorSpace, bitmapInfo, dataProvider, nil, YES, kCGRenderingIntentDefault);
+	NSImage *image = [[NSImage alloc] initWithCGImage:cgImage size:CGSizeMake(width, height)];
+	free(buffer);
+
+	return image;
 }
 
 @end

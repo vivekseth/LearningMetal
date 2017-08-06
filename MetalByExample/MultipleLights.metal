@@ -20,6 +20,7 @@ struct MBEVertexOut
 	float4 color;
 	float3 normal;
 	float4 positionWorldSpace;
+	float2 texCoord;
 };
 
 float4 lightForPointLight(MBEFragmentPointLight pointLight,
@@ -43,14 +44,18 @@ vertex MBEVertexOut multiple_lights_vertex_projection(constant MBEVertexSceneUni
 	out.position = sceneUniforms.viewToProjection * sceneUniforms.worldToView * objectUniforms.modelToWorld * in.position;
 	out.normal = objectUniforms.normalMatrix * in.normal;
 	out.color = in.color;
+	out.texCoord = in.texCoord;
 	return out;
 }
 
 fragment float4 multiple_lights_fragment(constant MBEFragmentLightUniforms &lightUniforms [[buffer(0)]],
 										 constant MBEFragmentMaterialUniforms &materialUniforms [[buffer(1)]],
+										 texture2d<float> diffuseTexture [[texture(0)]],
+										 sampler samplr [[sampler(0)]],
 										 MBEVertexOut vertexIn [[stage_in]])
 {
-	return float4(1, 0, 0, 0);
+	float3 diffuseColor = diffuseTexture.sample(samplr, vertexIn.texCoord).rgb;
+	return float4(diffuseColor, 1);
 
 	float4 light = float4(0);
 

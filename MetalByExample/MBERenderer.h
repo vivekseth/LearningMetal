@@ -12,7 +12,18 @@
 #import "MBEObject.h"
 #import "MBEPointLightSource.h"
 
+@class MBERenderer;
+@protocol MBERendererDelegate
+
+- (void)renderer:(MBERenderer *)renderer didCaptureScreenshot:(NSImage *)screenshot;
+
+@end
+
 @interface MBERenderer : NSObject
+
+@property (nonatomic) id<MBERendererDelegate> delegate;
+
+@property (nonatomic) BOOL screenshotRequested;
 
 - (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device;
 

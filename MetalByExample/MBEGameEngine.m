@@ -19,7 +19,7 @@
 #import "MBECubeInstanceArray.h"
 #import "CSCurvedPlane.h"
 
-@interface MBEGameEngine ()
+@interface MBEGameEngine () <MBERendererDelegate>
 
 @property (nonatomic, strong) MTKView *view;
 
@@ -47,6 +47,7 @@
 	self = [super init];
 
 	_view = view;
+	_view.framebufferOnly = NO;
 	_device = MTLCreateSystemDefaultDevice();
 	_renderer = [[MBERenderer alloc] initWithSize:view.drawableSize device:self.device];
 	_camera = [[MBECamera alloc] init];
@@ -56,6 +57,8 @@
 	_activeActions = [NSMutableSet set];
 
 	_time = CACurrentMediaTime();
+
+	self.renderer.delegate = self;
 
 	// Create scene
 	[self resetScene];
@@ -72,96 +75,6 @@
 	[self createScene3];
 }
 
-- (void)createScene
-{
-	self.camera.position = (vector_float3){5, 5, 5};
-
-	_objects = [NSMutableArray array];
-
-	int N = 24;
-	int low = -1*N/2;
-	int high = N/2+1;
-
-	for (int i=low; i<high; i++) {
-		for (int j=low; j<high; j++) {
-			MBESphere *obj = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
-			obj.x = i*2;
-			obj.y = 0.1 * i * j;
-			obj.z = j*2;
-			obj.scale = 1.0;
-			//[self.objects addObject:obj];
-
-//			MBECube *obj = [[MBECube alloc] initWithDevice:self.device];
-//			obj.x = i*2;
-//			obj.y = 0.1 * i * j;
-//			obj.z = j*2;
-//			obj.scale = 2.0;
-//			[self.objects addObject:obj];
-
-		}
-	}
-
-	CSCurvedPlane *plane = [[CSCurvedPlane alloc] initWithDevice:self.device];
-	[self.objects addObject:plane];
-
-	float radius = 10;
-	int numLights = 8;
-	for (int i=0; i<numLights; i++) {
-
-		float angle = 2 * M_PI * ((float)i/(float)numLights);
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
-	}
-}
-
-- (void)createScene2
-{
-	self.camera.position = (vector_float3){5, 5, 5};
-
-	_objects = [NSMutableArray array];
-
-	int N = 50;
-	int low = -1*N/2;
-	int high = N/2+1;
-
-	int instanceCount = (high - low) * (high - low);
-	MBECubeInstanceArray *sphereInstanceArray = [[MBECubeInstanceArray alloc] initWithDevice:self.device instanceCount:instanceCount];
-
-	int index = 0;
-	for (int i=low; i<high; i++) {
-		for (int j=low; j<high; j++) {
-			id<MBEObject> obj = sphereInstanceArray[index++];
-			obj.x = i;
-			obj.y = 0.05 * ((i * i) + (j * j));
-			obj.z = j;
-			obj.scale = 1.0;
-		}
-	}
-
-	[self.objects addObject:sphereInstanceArray];
-
-	float radius = 10;
-	int numLights = 8;
-	for (int i=0; i<numLights; i++) {
-		float percentage = ((float)i/(float)numLights);
-		float angle = 2 * M_PI * percentage;
-
-		NSColor *c = [NSColor colorWithHue:percentage saturation:1.0 brightness:1.0 alpha:1.0];
-		CGFloat r, g, b;
-		[c getRed:&r green:&g blue:&b alpha:NULL];
-
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){r, g, b, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
-	}
-
-}
-
 - (void)createScene3
 {
 	self.camera.position = (vector_float3){0, 0, 0};
@@ -169,46 +82,8 @@
 
 	_objects = [NSMutableArray array];
 
-	int N = 150;
-	int low = -1*N/2;
-	int high = N/2+1;
-
-	int instanceCount = (high - low) * (high - low);
-	MBECubeInstanceArray *objInstanceArray = [[MBECubeInstanceArray alloc] initWithDevice:self.device instanceCount:instanceCount];
-
-	int index = 0;
-	for (int i=low; i<high; i++) {
-		for (int j=low; j<high; j++) {
-			id<MBEObject> obj = objInstanceArray[index++];
-			obj.x = i;
-			obj.y = 0;
-			obj.z = j;
-			obj.scale = 1.0;
-		}
-	}
-
-	//[self.objects addObject:objInstanceArray];
-
 	CSCurvedPlane *plane = [[CSCurvedPlane alloc] initWithDevice:self.device];
 	[self.objects addObject:plane];
-
-	float radius = 10;
-	int numLights = 10;
-	for (int i=0; i<numLights; i++) {
-		float percentage = ((float)i/(float)numLights);
-		float angle = 2 * M_PI * percentage;
-
-		NSColor *c = [NSColor colorWithHue:percentage saturation:1.0 brightness:1.0 alpha:1.0];
-		CGFloat r, g, b;
-		[c getRed:&r green:&g blue:&b alpha:NULL];
-
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){r, g, b, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
-	}
-
 }
 
 
@@ -299,6 +174,24 @@
 	self.camera.position = pos;
 }
 
+#pragma mark <MBERendererDelegate>
+
+- (void)renderer:(MBERenderer *)renderer didCaptureScreenshot:(NSImage *)screenshot
+{
+	CGImageRef cgImage = [screenshot CGImageForProposedRect:nil context:nil hints:nil];
+
+	NSBitmapImageRep *imgRep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
+	NSData *data = [imgRep representationUsingType:NSPNGFileType properties:@{}];
+	// BOOL success = [data writeToFile: @"~/Desktop/screenshot.png" atomically: NO];
+
+	NSError *error = nil;
+	BOOL success = [data writeToURL:[NSURL fileURLWithPath:@"screenshot.png"] options:NSDataWritingAtomic error:&error];
+
+	if (!success) {
+		NSLog(@"fail");
+	}
+}
+
 #pragma mark <MTKViewDelegate>
 
 - (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size
@@ -350,6 +243,11 @@ TODO
 	[self.renderer renderObjects:self.objects lightSources:self.lightSources viewPosition:viewPosition worldToView:worldToViewMatrix MTKView:view];
 }
 
+- (void)captureFrame
+{
+	self.renderer.screenshotRequested = YES;
+}
+
 #pragma mark - Input Handlers
 
 - (NSString *)normalizedStringFromKeyCode:(NSUInteger)keyCode
@@ -370,6 +268,7 @@ TODO
 		case kVK_DownArrow: return @"down";
 		case kVK_UpArrow: return @"up";
 		case kVK_Escape: return @"escape";
+		case kVK_Space: return @"space";
 
 
 		default: return MBECreateStringForKey(keyCode);
@@ -412,6 +311,11 @@ TODO
 	if (action) {
 		[self.activeActions removeObject:action];
 	}
+
+	if ([action isEqualToString:@"capture"]) {
+		// CAPTURE FRAME
+		[self captureFrame];
+	}
 }
 
 - (void)keyDown:(NSEvent*)event
@@ -447,6 +351,7 @@ TODO
 									  @"g": @"move_down",
 
 									  @"r": @"RESET",
+									  @"space": @"capture",
 									  };
 		return actionTable[key];
 	}
@@ -456,64 +361,64 @@ TODO
 // TODO(vivek): create action object that can execute block when in activeActions set. That way I can avoid creating a huge if-else list. The block will capture references to objects it needs to mutate.
 - (void)applyAction:(id)action duration:(NSTimeInterval)duration
 {
-	float rotationSpeed = 2.0 * duration;
-	float cameraSpeed = 12.0 * duration;
-	vector_float3 cameraFront = self.camera.front;
-	vector_float3 cameraPos = self.camera.position;
-
-	float yaw = self.camera.yaw;
-	float pitch = self.camera.pitch;
-
-	if ([action isKindOfClass:[NSString class]]) {
-		if ([action isEqualToString:@"QUIT"]) {
-			[NSApp terminate:self];
-		}
-		else if ([action isEqualToString:@"RESET"]) {
-			[self resetScene];
-			cameraFront = self.camera.front;
-			cameraPos = self.camera.position;
-			yaw = self.camera.yaw;
-			pitch = self.camera.pitch;
-		}
-		else if ([action isEqualToString:@"move_forward"]) {
-			cameraPos += cameraSpeed * cameraFront;
-		}
-		else if ([action isEqualToString:@"move_backward"]) {
-			cameraPos -= cameraSpeed * cameraFront;
-		}
-		else if ([action isEqualToString:@"move_left"]) {
-			cameraPos -= simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
-		}
-		else if ([action isEqualToString:@"move_right"]) {
-			cameraPos += simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
-		}
-
-		else if ([action isEqualToString:@"move_up"]) {
-			cameraPos += ((vector_float3){0, 1, 0}) * cameraSpeed;
-		}
-		else if ([action isEqualToString:@"move_down"]) {
-			cameraPos -= ((vector_float3){0, 1, 0}) * cameraSpeed;
-		}
-
-		else if ([action isEqualToString:@"rotate_up"]) {
-			pitch += rotationSpeed;
-		}
-		else if ([action isEqualToString:@"rotate_down"]) {
-			pitch -= rotationSpeed;
-		}
-		else if ([action isEqualToString:@"rotate_left"]) {
-			yaw -= rotationSpeed;
-		}
-		else if ([action isEqualToString:@"rotate_right"]) {
-			yaw += rotationSpeed;
-		}
-	}
-
-	self.camera.position = cameraPos;
-	float maxPitch = M_PI_2 - 0.05;
-	float minPitch = -1 * maxPitch;
-	self.camera.pitch = MAX(minPitch, MIN(maxPitch, pitch));
-	self.camera.yaw = yaw;
+//	float rotationSpeed = 2.0 * duration;
+//	float cameraSpeed = 12.0 * duration;
+//	vector_float3 cameraFront = self.camera.front;
+//	vector_float3 cameraPos = self.camera.position;
+//
+//	float yaw = self.camera.yaw;
+//	float pitch = self.camera.pitch;
+//
+//	if ([action isKindOfClass:[NSString class]]) {
+//		if ([action isEqualToString:@"QUIT"]) {
+//			[NSApp terminate:self];
+//		}
+//		else if ([action isEqualToString:@"RESET"]) {
+//			[self resetScene];
+//			cameraFront = self.camera.front;
+//			cameraPos = self.camera.position;
+//			yaw = self.camera.yaw;
+//			pitch = self.camera.pitch;
+//		}
+//		else if ([action isEqualToString:@"move_forward"]) {
+//			cameraPos += cameraSpeed * cameraFront;
+//		}
+//		else if ([action isEqualToString:@"move_backward"]) {
+//			cameraPos -= cameraSpeed * cameraFront;
+//		}
+//		else if ([action isEqualToString:@"move_left"]) {
+//			cameraPos -= simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
+//		}
+//		else if ([action isEqualToString:@"move_right"]) {
+//			cameraPos += simd_normalize(simd_cross(cameraFront, self.camera.up)) * cameraSpeed;
+//		}
+//
+//		else if ([action isEqualToString:@"move_up"]) {
+//			cameraPos += ((vector_float3){0, 1, 0}) * cameraSpeed;
+//		}
+//		else if ([action isEqualToString:@"move_down"]) {
+//			cameraPos -= ((vector_float3){0, 1, 0}) * cameraSpeed;
+//		}
+//
+//		else if ([action isEqualToString:@"rotate_up"]) {
+//			pitch += rotationSpeed;
+//		}
+//		else if ([action isEqualToString:@"rotate_down"]) {
+//			pitch -= rotationSpeed;
+//		}
+//		else if ([action isEqualToString:@"rotate_left"]) {
+//			yaw -= rotationSpeed;
+//		}
+//		else if ([action isEqualToString:@"rotate_right"]) {
+//			yaw += rotationSpeed;
+//		}
+//	}
+//
+//	self.camera.position = cameraPos;
+//	float maxPitch = M_PI_2 - 0.05;
+//	float minPitch = -1 * maxPitch;
+//	self.camera.pitch = MAX(minPitch, MIN(maxPitch, pitch));
+//	self.camera.yaw = yaw;
 }
 
 @end
