@@ -86,7 +86,7 @@
     [plane createBuffers];
     [self.objects addObject:plane];
 
-    // This can be used to find the focal length in pixels. 
+    // This can be used to find the focal length in pixels.
     CSCurvedPlane *plane2 = [[CSCurvedPlane alloc] initWithDevice:self.device];
     plane2.fx = ^CGFloat(CGFloat u, CGFloat v) {
         return u;
@@ -101,7 +101,6 @@
     plane2.vRange = (vector_float2){-1, 0};
     [plane2 createBuffers];
     [self.objects addObject:plane2];
-
 }
 
 
