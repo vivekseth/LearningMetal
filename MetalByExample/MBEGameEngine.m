@@ -82,97 +82,28 @@
 
 	_objects = [NSMutableArray array];
 
-	CSCurvedPlane *plane = [[CSCurvedPlane alloc] initWithDevice:self.device];
-	[self.objects addObject:plane];
+    CSCurvedPlane *plane = [[CSCurvedPlane alloc] initWithDevice:self.device];
+    [plane createBuffers];
+    [self.objects addObject:plane];
+
+    // This can be used to find the focal length in pixels. 
+    CSCurvedPlane *plane2 = [[CSCurvedPlane alloc] initWithDevice:self.device];
+    plane2.fx = ^CGFloat(CGFloat u, CGFloat v) {
+        return u;
+    };
+    plane2.fy = ^CGFloat(CGFloat u, CGFloat v) {
+        return v;
+    };
+    plane2.fz = ^CGFloat(CGFloat u, CGFloat v) {
+        return 10;
+    };
+    plane2.uRange = (vector_float2){-0.5, 0.5};
+    plane2.vRange = (vector_float2){-1, 0};
+    [plane2 createBuffers];
+    [self.objects addObject:plane2];
+
 }
 
-
-
-
-
-- (void)createSingleSphere
-{
-	self.camera.position = (vector_float3){0, 0, -30};
-
-	_objects = [NSMutableArray array];
-	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:20 meridians:20];
-	sphere.scale = 10;
-	[self.objects addObject:sphere];
-
-	float radius = 10;
-	int numLights = 5;
-	for (int i=0; i<numLights; i++) {
-		float angle = 2 * M_PI * ((float)i/(float)numLights);
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
-	}
-}
-
-- (void)createSingleCube
-{
-	self.camera.position = (vector_float3){0, 0, -30};
-	_objects = [NSMutableArray array];
-
-	MBECube *cube = [[MBECube alloc] initWithDevice:self.device];
-	cube.scale = 10;
-	cube.z = 10;
-	[self.objects addObject:cube];
-
-	float radius = 10;
-	int numLights = 5;
-	for (int i=0; i<numLights; i++) {
-		float angle = 2 * M_PI * ((float)i/(float)numLights);
-		MBECubePointLight *light = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-		light.x = radius*cos(angle);
-		light.y = 15;
-		light.z = radius*sin(angle);
-		[self.lightSources addObject:light];
-	}
-}
-
-- (void)mutliPointLightDemo
-{
-	self.camera.position = (vector_float3){0, 0, -8};
-
-	MBECubePointLight *redLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	redLight.x = 5;
-	redLight.y = 5;
-	redLight.z = 0;
-	[self.lightSources addObject:redLight];
-
-	MBECubePointLight *blueLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	blueLight.x = -5;
-	blueLight.y = -5;
-	blueLight.z = 0;
-	[self.lightSources addObject:blueLight];
-
-	MBECubePointLight *greenLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	greenLight.x = 5;
-	greenLight.y = -5;
-	greenLight.z = 0;
-	[self.lightSources addObject:greenLight];
-
-	MBECubePointLight *yellowLight = [[MBECubePointLight alloc] initWithDevice:self.device color:(vector_float4){1, 1, 1, 1} strength:1.0 K:1.0 L:0.07 Q:0.017];
-	yellowLight.x = -5;
-	yellowLight.y = 5;
-	yellowLight.z = 0;
-	[self.lightSources addObject:yellowLight];
-
-	_objects = [NSMutableArray array];
-	MBESphere *sphere = [[MBESphere alloc] initWithDevice:self.device parallels:30 meridians:30];
-	[self.objects addObject:sphere];
-}
-
-- (void)constantRotation
-{
-	vector_float3 pos = self.camera.position;
-	pos.x = 5 * cos(self.time);
-	pos.z = 5 * sin(self.time);
-	self.camera.position = pos;
-}
 
 #pragma mark <MBERendererDelegate>
 

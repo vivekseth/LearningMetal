@@ -52,62 +52,65 @@
 	};
 
 	_fz = ^CGFloat(CGFloat u, CGFloat v) {
-		return 18 - radius * cos(u) + 0.2 * sin(0.2 * u);
+        return 18 - 0.5 * cos(u * 4);
 	};
 
-	CGFloat numTriangles = _uSegments * _vSegments * 2;
-
-	size_t bufferSize = (numTriangles * 3 * sizeof(MBEVertexIn));
-	MBEVertexIn *buffer = malloc(bufferSize);
-
-	NSInteger numPoints = [self populateBuffer:buffer];
-	_numPoints = numPoints;
-
-	self.vertexBuffer = [device newBufferWithBytes:buffer length:bufferSize options:MTLResourceOptionCPUCacheModeDefault];
-	[self.vertexBuffer setLabel:@"Vertices"];
-	free(buffer);
-
-	MBEVertexObjectUniforms vertexObjectUniforms;
-	vertexObjectUniforms.modelToWorld = matrix_float4x4_uniform_scale(1.0);
-
-	self.vertexObjectUniformsBuffer = [self.device newBufferWithBytes:&vertexObjectUniforms length:sizeof(vertexObjectUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.vertexObjectUniformsBuffer setLabel:@"vertexObjectUniformsBuffer"];
-
-	// TODO(vivek): allow users to modify this.
-	MBEFragmentMaterialUniforms fragmentMaterialUniforms;
-	fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
-	fragmentMaterialUniforms.ambientStrength = 0.3;
-	fragmentMaterialUniforms.diffuseStrength = 0.7;
-	fragmentMaterialUniforms.specularStrength = 0.4;
-	fragmentMaterialUniforms.specularFactor = 32;
-
-	self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
-	[self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
-
-
-	// create sampler state
-	MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
-	samplerDesc.sAddressMode = MTLSamplerAddressModeClampToEdge;
-	samplerDesc.tAddressMode = MTLSamplerAddressModeClampToEdge;
-	samplerDesc.minFilter = MTLSamplerMinMagFilterNearest;
-	samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
-	samplerDesc.mipFilter = MTLSamplerMipFilterLinear;
-	_samplerState = [self.device newSamplerStateWithDescriptor:samplerDesc];
-
-	NSImage *checkerboardImage = [NSImage imageNamed:@"checkerboard"];
-	MTKTextureLoader *textureLoader2 = [[MTKTextureLoader alloc] initWithDevice:self.device];
-	CGImageRef cgCheckerboardImage = [checkerboardImage CGImageForProposedRect:nil context:nil hints:nil];
-	NSError *error = nil;
-	NSDictionary *options = @{
-							  MTKTextureLoaderOptionGenerateMipmaps: @(YES),
-							  MTKTextureLoaderOptionSRGB: @(NO)
-							  };
-	_diffuseTexture = [textureLoader2 newTextureWithCGImage:cgCheckerboardImage options:options error:&error];
-	if (!_diffuseTexture) {
-		NSLog(@"%@", error);
-	}
-	
 	return self;
+}
+
+- (void)createBuffers
+{
+    CGFloat numTriangles = _uSegments * _vSegments * 2;
+
+    size_t bufferSize = (numTriangles * 3 * sizeof(MBEVertexIn));
+    MBEVertexIn *buffer = malloc(bufferSize);
+
+    NSInteger numPoints = [self populateBuffer:buffer];
+    _numPoints = numPoints;
+
+    self.vertexBuffer = [device newBufferWithBytes:buffer length:bufferSize options:MTLResourceOptionCPUCacheModeDefault];
+    [self.vertexBuffer setLabel:@"Vertices"];
+    free(buffer);
+
+    MBEVertexObjectUniforms vertexObjectUniforms;
+    vertexObjectUniforms.modelToWorld = matrix_float4x4_uniform_scale(1.0);
+
+    self.vertexObjectUniformsBuffer = [self.device newBufferWithBytes:&vertexObjectUniforms length:sizeof(vertexObjectUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+    [self.vertexObjectUniformsBuffer setLabel:@"vertexObjectUniformsBuffer"];
+
+    // TODO(vivek): allow users to modify this.
+    MBEFragmentMaterialUniforms fragmentMaterialUniforms;
+    fragmentMaterialUniforms.objectColor = (vector_float4){1, 1, 1, 1};
+    fragmentMaterialUniforms.ambientStrength = 0.3;
+    fragmentMaterialUniforms.diffuseStrength = 0.7;
+    fragmentMaterialUniforms.specularStrength = 0.4;
+    fragmentMaterialUniforms.specularFactor = 32;
+
+    self.fragmentMaterialUniformsBuffer = [self.device newBufferWithBytes:&fragmentMaterialUniforms length:sizeof(fragmentMaterialUniforms) options:MTLResourceOptionCPUCacheModeDefault];
+    [self.fragmentMaterialUniformsBuffer setLabel:@"fragmentMaterialUniformsBuffer"];
+
+
+    // create sampler state
+    MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
+    samplerDesc.sAddressMode = MTLSamplerAddressModeClampToEdge;
+    samplerDesc.tAddressMode = MTLSamplerAddressModeClampToEdge;
+    samplerDesc.minFilter = MTLSamplerMinMagFilterNearest;
+    samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
+    samplerDesc.mipFilter = MTLSamplerMipFilterLinear;
+    _samplerState = [self.device newSamplerStateWithDescriptor:samplerDesc];
+
+    NSImage *checkerboardImage = [NSImage imageNamed:@"text"];
+    MTKTextureLoader *textureLoader2 = [[MTKTextureLoader alloc] initWithDevice:self.device];
+    CGImageRef cgCheckerboardImage = [checkerboardImage CGImageForProposedRect:nil context:nil hints:nil];
+    NSError *error = nil;
+    NSDictionary *options = @{
+                              MTKTextureLoaderOptionGenerateMipmaps: @(YES),
+                              MTKTextureLoaderOptionSRGB: @(NO)
+                              };
+    _diffuseTexture = [textureLoader2 newTextureWithCGImage:cgCheckerboardImage options:options error:&error];
+    if (!_diffuseTexture) {
+        NSLog(@"%@", error);
+    }
 }
 
 - (NSUInteger)populateBuffer:(MBEVertexIn *)buffer

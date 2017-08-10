@@ -27,4 +27,6 @@
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 
+- (void)createBuffers;
+
 @end
